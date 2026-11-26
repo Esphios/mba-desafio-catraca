@@ -1,0 +1,758 @@
+{
+  "features": [
+    {
+      "id": "F01",
+      "path": "docs/features/F01-fundacao",
+      "wave": 1,
+      "dependsOn": [],
+      "provides": "Ambiente Compose, schema compartilhado, clock, runner, dados de demonstração e interfaces de registro de rotas.",
+      "consumes": "Nenhuma feature anterior."
+    },
+    {
+      "id": "F02",
+      "path": "docs/features/F02-identidade",
+      "wave": 2,
+      "dependsOn": [
+        "F01"
+      ],
+      "provides": "Cadastro/login/logout, sessão, funções require_participant e require_owner, identidade dos usuários da seed.",
+      "consumes": "F01: schema, seed e ambiente."
+    },
+    {
+      "id": "F03",
+      "path": "docs/features/F03-eventos",
+      "wave": 3,
+      "dependsOn": [
+        "F01",
+        "F02"
+      ],
+      "provides": "CRUD limitado de evento, publicação, página de gestão /organizer/events/{id}/, consulta pública, lock e leitura canônica de ocupação.",
+      "consumes": "F01: schema e clock; F02: identidade e autorização."
+    },
+    {
+      "id": "F04",
+      "path": "docs/features/F04-transacoes",
+      "wave": 4,
+      "dependsOn": [
+        "F01",
+        "F03"
+      ],
+      "provides": "Serviço reserve, finalize_payment, consulta de ingresso, job persistente e regras transacionais de venda.",
+      "consumes": "F01: DB/worker/clock; F03: evento bloqueável e ocupação."
+    },
+    {
+      "id": "F05",
+      "path": "docs/features/F05-participante",
+      "wave": 5,
+      "dependsOn": [
+        "F02",
+        "F03",
+        "F04"
+      ],
+      "provides": "Vitrine pública, compra autenticada e página de ingressos pessoais.",
+      "consumes": "F02: participante/sessão; F03: catálogo; F04: reserve e consulta."
+    },
+    {
+      "id": "F06",
+      "path": "docs/features/F06-parceiros",
+      "wave": 5,
+      "dependsOn": [
+        "F03",
+        "F04"
+      ],
+      "provides": "As três rotas /api/partner, autenticação por chave, tradução de DTOs e erros do domínio.",
+      "consumes": "F03: catálogo público; F04: compra/consulta."
+    },
+    {
+      "id": "F07",
+      "path": "docs/features/F07-operacao",
+      "wave": 5,
+      "dependsOn": [
+        "F02",
+        "F03",
+        "F04"
+      ],
+      "provides": "Ações de gestão, cancelamento atômico, check-in serializado, painel coerente com todos os estados e canais.",
+      "consumes": "F02: dono; F03: página/lock/estado; F04: ingressos, preço e job."
+    }
+  ],
+  "criteria": [
+    {
+      "id": "A01",
+      "feature": "F01",
+      "rules": [
+        "H01"
+      ],
+      "contract": "C-F01-A01",
+      "test": "TEST-A01",
+      "task": "T-F01-03",
+      "acceptance": "Clone limpo: ./bin/up constrói, migra, semeia e espera web/worker/DB prontos; /health/ready retorna 200 sem configuração manual.",
+      "evidence": "Clonar SHA em pasta temporária; executar up; verificar HTTP e compose ps."
+    },
+    {
+      "id": "A02",
+      "feature": "F01",
+      "rules": [
+        "H02"
+      ],
+      "contract": "C-F01-A02",
+      "test": "TEST-A02",
+      "task": "T-F01-03",
+      "acceptance": "./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.",
+      "evidence": "Executar up, seed duas vezes, down, provar porta fechada e ps vazio, up novamente; comparar IDs e autenticação após F02."
+    },
+    {
+      "id": "A03",
+      "feature": "F01",
+      "rules": [
+        "H03"
+      ],
+      "contract": "C-F01-A03",
+      "test": "TEST-A03",
+      "task": "T-F01-01",
+      "acceptance": "./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos.",
+      "evidence": "Executar gates e injetar falha em cópia descartável; capturar códigos de saída."
+    },
+    {
+      "id": "A04",
+      "feature": "F01",
+      "rules": [
+        "H04"
+      ],
+      "contract": "C-F01-A04",
+      "test": "TEST-A04",
+      "task": "T-F01-03",
+      "acceptance": "AGENTS.md e README contêm comandos, endereços, credenciais de seed, mapa; modo padrão não exige gateway real.",
+      "evidence": "Inspeção dos arquivos, ambiente sem .env e sem credenciais externas."
+    },
+    {
+      "id": "A05",
+      "feature": "F01",
+      "rules": [
+        "R05",
+        "R09"
+      ],
+      "contract": "C-F01-A05",
+      "test": "TEST-A05",
+      "task": "T-F01-02",
+      "acceptance": "Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.",
+      "evidence": "Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas."
+    },
+    {
+      "id": "A06",
+      "feature": "F02",
+      "rules": [
+        "R13"
+      ],
+      "contract": "C-F02-A06",
+      "test": "TEST-A06",
+      "task": "T-F02-01",
+      "acceptance": "Cadastro público cria somente participante, e-mail normalizado único; senha armazenada como hash; login válido e logout invalidam sessão; erro genérico em credenciais inválidas.",
+      "evidence": "Browser: cadastro/login/logout; POST com role=organizer; consulta DB somente para verificar hash e papel."
+    },
+    {
+      "id": "A07",
+      "feature": "F02",
+      "rules": [
+        "R13"
+      ],
+      "contract": "C-F02-A07",
+      "test": "TEST-A07",
+      "task": "T-F02-02",
+      "acceptance": "Visitante e participante não acessam rotas de gestão; B não lê nem modifica eventos de A, incluindo URL direta e POST forjado.",
+      "evidence": "Sessões independentes A/B/P/anônima; fixture de evento A; assert HTTP 404 para B, ausência de nome/dados e nenhuma mutação; 403 ou redirect para demais."
+    },
+    {
+      "id": "A08",
+      "feature": "F02",
+      "rules": [
+        "R09",
+        "R13"
+      ],
+      "contract": "C-F02-A08",
+      "test": "TEST-A08",
+      "task": "T-F02-02",
+      "acceptance": "Participante só tem acesso aos próprios recursos; parceiro não cria sessão web nem vincula conta pelo e-mail.",
+      "evidence": "Testar guarda de participante com duas contas e recurso fixture; tentar usar X-Api-Key em rota web; negar."
+    },
+    {
+      "id": "A09",
+      "feature": "F03",
+      "rules": [
+        "R01"
+      ],
+      "contract": "C-F03-A09",
+      "test": "TEST-A09",
+      "task": "T-F03-01",
+      "acceptance": "Nome/local não vazios; lotação inteira >=1; preço em centavos >0; início estritamente futuro em criar e editar, inclusive requisição direta.",
+      "evidence": "Tabela de casos com agora, passado, futuro, 0, -1, 1.5, preço zero e campos vazios; checar persistência."
+    },
+    {
+      "id": "A10",
+      "feature": "F03",
+      "rules": [
+        "R02",
+        "R04"
+      ],
+      "contract": "C-F03-A10",
+      "test": "TEST-A10",
+      "task": "T-F03-03",
+      "acceptance": "Evento nasce draft; publicar torna visível a consulta pública; gestão tem URL estável e lista apenas próprios eventos.",
+      "evidence": "Criar E1, consultar catálogo antes/depois e abrir URL de gestão com dono."
+    },
+    {
+      "id": "A11",
+      "feature": "F03",
+      "rules": [
+        "R03",
+        "R05"
+      ],
+      "contract": "C-F03-A11",
+      "test": "TEST-A11",
+      "task": "T-F03-02",
+      "acceptance": "Editar sob lock do evento; capacidade abaixo de pending+confirmed é rejeitada; igual/acima aceita; preço novo não altera snapshot de ingressos.",
+      "evidence": "Fixtures de dois ingressos ocupando; reduzir para 1 rejeita, 2/3 aceitam; snapshot histórico inalterado."
+    },
+    {
+      "id": "A12",
+      "feature": "F03",
+      "rules": [
+        "R11"
+      ],
+      "contract": "C-F03-A12",
+      "test": "TEST-A12",
+      "task": "T-F03-02",
+      "acceptance": "Evento cancelled não pode ser alterado/republicado; catálogo e disponibilidade pública o excluem.",
+      "evidence": "Fixture de estado cancelled; POST edição/publicação e leitura pública; negar sem mutação."
+    },
+    {
+      "id": "A13",
+      "feature": "F04",
+      "rules": [
+        "R05",
+        "R06",
+        "R09"
+      ],
+      "contract": "C-F04-A13",
+      "test": "TEST-A13",
+      "task": "T-F04-02",
+      "acceptance": "Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.",
+      "evidence": "Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada."
+    },
+    {
+      "id": "A14",
+      "feature": "F04",
+      "rules": [
+        "R07"
+      ],
+      "contract": "C-F04-A14",
+      "test": "TEST-A14",
+      "task": "T-F04-02",
+      "acceptance": "Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas.",
+      "evidence": "TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez."
+    },
+    {
+      "id": "A15",
+      "feature": "F04",
+      "rules": [
+        "R08"
+      ],
+      "contract": "C-F04-A15",
+      "test": "TEST-A15",
+      "task": "T-F04-03",
+      "acceptance": "Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga.",
+      "evidence": "Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo."
+    },
+    {
+      "id": "A16",
+      "feature": "F04",
+      "rules": [
+        "R03",
+        "R11"
+      ],
+      "contract": "C-F04-A16",
+      "test": "TEST-A16",
+      "task": "T-F04-03",
+      "acceptance": "Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício.",
+      "evidence": "Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único."
+    },
+    {
+      "id": "A17",
+      "feature": "F04",
+      "rules": [
+        "R06"
+      ],
+      "contract": "C-F04-A17",
+      "test": "TEST-A17",
+      "task": "T-F04-01",
+      "acceptance": "Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.",
+      "evidence": "Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs."
+    },
+    {
+      "id": "A18",
+      "feature": "F05",
+      "rules": [
+        "R02",
+        "R05",
+        "R07"
+      ],
+      "contract": "C-F05-A18",
+      "test": "TEST-A18",
+      "task": "T-F05-01",
+      "acceptance": "Vitrine exibe só publicados não cancelados, inclusive esgotados com texto exato Ingressos esgotados; tentativa concorrente recebe mesma mensagem.",
+      "evidence": "Browser: draft/publicado/cancelled, capacidade 1 pendente e tentativa direta sem vaga."
+    },
+    {
+      "id": "A19",
+      "feature": "F05",
+      "rules": [
+        "R06",
+        "R08",
+        "R09"
+      ],
+      "contract": "C-F05-A19",
+      "test": "TEST-A19",
+      "task": "T-F05-02",
+      "acceptance": "Participante cria conta, compra pela vitrine, vê evento/status/código em Meus ingressos; pending imediato e confirmado em até 5s para 0001.",
+      "evidence": "Playwright: cadastro, login, compra, tela pending e polling/reload até confirmed; conferir código em DB ou via F06 após integração."
+    },
+    {
+      "id": "A20",
+      "feature": "F05",
+      "rules": [
+        "R09",
+        "R13"
+      ],
+      "contract": "C-F05-A20",
+      "test": "TEST-A20",
+      "task": "T-F05-02",
+      "acceptance": "Meus ingressos filtra por participant_id autenticado, não por e-mail, e mostra todos os cinco rótulos; visitante não compra.",
+      "evidence": "Fixtures dos cinco estados; duas contas; ingresso partner com mesmo e-mail não aparece; POST anônimo sem efeito."
+    },
+    {
+      "id": "A21",
+      "feature": "F06",
+      "rules": [
+        "API",
+        "R02",
+        "R05"
+      ],
+      "contract": "C-F06-A21",
+      "test": "TEST-A21",
+      "task": "T-F06-02",
+      "acceptance": "GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.",
+      "evidence": "HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0."
+    },
+    {
+      "id": "A22",
+      "feature": "F06",
+      "rules": [
+        "API",
+        "R06",
+        "R07"
+      ],
+      "contract": "C-F06-A22",
+      "test": "TEST-A22",
+      "task": "T-F06-02",
+      "acceptance": "POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out.",
+      "evidence": "Tabela HTTP: JSON inválido e evento inexistente ->422; inválido e esgotado ->422; válido draft/cancelled/inexistente ->404; lotado ->409; válido ->202."
+    },
+    {
+      "id": "A23",
+      "feature": "F06",
+      "rules": [
+        "API",
+        "R09",
+        "R13"
+      ],
+      "contract": "C-F06-A23",
+      "test": "TEST-A23",
+      "task": "T-F06-02",
+      "acceptance": "GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.",
+      "evidence": "HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato."
+    },
+    {
+      "id": "A24",
+      "feature": "F06",
+      "rules": [
+        "R07",
+        "API"
+      ],
+      "contract": "C-F06-A24",
+      "test": "TEST-A24",
+      "task": "T-F06-03",
+      "acceptance": "Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados.",
+      "evidence": "Runner HTTP com barreira, 30 conexões, validar corpo e IDs únicos, consultar cada aceito e availableSeats=0; usar novo evento por rodada."
+    },
+    {
+      "id": "A25",
+      "feature": "F07",
+      "rules": [
+        "R10"
+      ],
+      "contract": "C-F07-A25",
+      "test": "TEST-A25",
+      "task": "T-F07-01",
+      "acceptance": "Check-in aplica exatamente as cinco mensagens na ordem definida; só confirmed não utilizado recebe checkedIn=true; dois check-ins concorrentes liberam uma entrada.",
+      "evidence": "Fixtures código inválido/outro evento, cancelado, pending/declined/refunded, confirmado já usado e novo; corrida com duas sessões do dono."
+    },
+    {
+      "id": "A26",
+      "feature": "F07",
+      "rules": [
+        "R11"
+      ],
+      "contract": "C-F07-A26",
+      "test": "TEST-A26",
+      "task": "T-F07-02",
+      "acceptance": "Cancelar publicado é irreversível; na mesma transação confirmed→refunded e pending→cancelled, sem alteração de declined; gateway posterior não modifica; edit/publish/compra rejeitados.",
+      "evidence": "Criar slow 0003 + fast 0001, cancelar antes de 30s; medir <=10s, aguardar >=45s, repetir cancelamento e testar ações; corrida cancelamento/reserva/finalização."
+    },
+    {
+      "id": "A27",
+      "feature": "F07",
+      "rules": [
+        "R05",
+        "R12"
+      ],
+      "contract": "C-F07-A27",
+      "test": "TEST-A27",
+      "task": "T-F07-03",
+      "acceptance": "Painel mostra seis métricas com snapshots de preço e ambos os canais; check-ins somente confirmed; cancelado tem receita/vagas/confirmados/pendentes/check-ins zero.",
+      "evidence": "Fixture 10000+10000+15000 confirmados, 1 check-in, recusado e estornado; conferir receita 35000 e todas as contagens; após cancelar comparar zeros e estornos."
+    },
+    {
+      "id": "A28",
+      "feature": "F07",
+      "rules": [
+        "R04",
+        "R13"
+      ],
+      "contract": "C-F07-A28",
+      "test": "TEST-A28",
+      "task": "T-F07-03",
+      "acceptance": "Check-in, cancelar e painel ficam na URL de gestão de cada evento; todas as ações exigem dono inclusive requisição direta.",
+      "evidence": "Browser A/B/P/visitante, POST forjado de B, verificar nenhum dado nem alteração; abrir gestão de A e executar ações."
+    }
+  ],
+  "cross": [
+    {
+      "id": "X01",
+      "provider": "F01",
+      "consumer": "F02",
+      "kind": "dependency",
+      "rules": [
+        "H01",
+        "H02"
+      ],
+      "contract": "C-F02-X01",
+      "test": "TEST-X01",
+      "task": "T-F02-04",
+      "acceptance": "Após up com seed, A/B/P autenticam; duas execuções da seed não duplicam contas.",
+      "evidence": "Subir ambiente limpo, login das três contas, comparar IDs após reseed."
+    },
+    {
+      "id": "X02",
+      "provider": "F01",
+      "consumer": "F03",
+      "kind": "dependency",
+      "rules": [
+        "H01",
+        "R01"
+      ],
+      "contract": "C-F03-X02",
+      "test": "TEST-X02",
+      "task": "T-F03-04",
+      "acceptance": "Migração e clock da fundação permitem criação e rejeição de data vencida.",
+      "evidence": "DB limpo migrado; criar evento futuro e rejeitar ontem."
+    },
+    {
+      "id": "X03",
+      "provider": "F02",
+      "consumer": "F03",
+      "kind": "dependency",
+      "rules": [
+        "R04",
+        "R13"
+      ],
+      "contract": "C-F03-X03",
+      "test": "TEST-X03",
+      "task": "T-F03-04",
+      "acceptance": "URL de gestão e listagem usam dono da sessão; B não pode editar/publicar A.",
+      "evidence": "Browser e POST direto B contra E1 de A; ausência de dados, estado intacto."
+    },
+    {
+      "id": "X04",
+      "provider": "F01",
+      "consumer": "F04",
+      "kind": "dependency",
+      "rules": [
+        "H01",
+        "R08"
+      ],
+      "contract": "C-F04-X04",
+      "test": "TEST-X04",
+      "task": "T-F04-04",
+      "acceptance": "Worker do Compose consome job persistido após reinício sem chave real.",
+      "evidence": "Comprar slow, reiniciar worker antes de due; obter status final uma vez."
+    },
+    {
+      "id": "X05",
+      "provider": "F03",
+      "consumer": "F04",
+      "kind": "dependency",
+      "rules": [
+        "R02",
+        "R03",
+        "R05",
+        "R07"
+      ],
+      "contract": "C-F04-X05",
+      "test": "TEST-X05",
+      "task": "T-F04-04",
+      "acceptance": "Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação.",
+      "evidence": "Corrida compra × redução e compra × preço; conferir invariantes e snapshots."
+    },
+    {
+      "id": "X06",
+      "provider": "F02",
+      "consumer": "F05",
+      "kind": "dependency",
+      "rules": [
+        "R09",
+        "R13"
+      ],
+      "contract": "C-F05-X06",
+      "test": "TEST-X06",
+      "task": "T-F05-04",
+      "acceptance": "Sessão define dono do ingresso; anônimo e outra conta não veem compra pessoal.",
+      "evidence": "Dois browsers com sessões distintas; compra e acesso cruzado."
+    },
+    {
+      "id": "X07",
+      "provider": "F03",
+      "consumer": "F05",
+      "kind": "dependency",
+      "rules": [
+        "R02",
+        "R05"
+      ],
+      "contract": "C-F05-X07",
+      "test": "TEST-X07",
+      "task": "T-F05-04",
+      "acceptance": "Publicar/lotar/cancelar reflete na vitrine sem cache obsoleto.",
+      "evidence": "Criar draft, publicar, reservar até lotar, cancelar fixture; recarregar catálogo."
+    },
+    {
+      "id": "X08",
+      "provider": "F04",
+      "consumer": "F05",
+      "kind": "dependency",
+      "rules": [
+        "R06",
+        "R08",
+        "R09"
+      ],
+      "contract": "C-F05-X08",
+      "test": "TEST-X08",
+      "task": "T-F05-04",
+      "acceptance": "Compra web usa reserve e worker; pendente ocupa e recusa libera na vitrine.",
+      "evidence": "Comprar 0004, observar lotação, após 45s ver declined e vaga."
+    },
+    {
+      "id": "X09",
+      "provider": "F03",
+      "consumer": "F06",
+      "kind": "dependency",
+      "rules": [
+        "R02",
+        "R03",
+        "R05",
+        "API"
+      ],
+      "contract": "C-F06-X09",
+      "test": "TEST-X09",
+      "task": "T-F06-04",
+      "acceptance": "API usa catálogo e centavos/ocupação canônicos; edição preço/capacidade reflete na listagem.",
+      "evidence": "GET antes/depois publicação, edição e cancelamento fixture."
+    },
+    {
+      "id": "X10",
+      "provider": "F04",
+      "consumer": "F06",
+      "kind": "dependency",
+      "rules": [
+        "R06",
+        "R07",
+        "R09",
+        "API"
+      ],
+      "contract": "C-F06-X10",
+      "test": "TEST-X10",
+      "task": "T-F06-04",
+      "acceptance": "API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture.",
+      "evidence": "POST simultâneo e GET ticket, comparar dados de ledger."
+    },
+    {
+      "id": "X16",
+      "provider": "F05",
+      "consumer": "F06",
+      "kind": "integration",
+      "rules": [
+        "R05",
+        "R07",
+        "R09",
+        "API"
+      ],
+      "contract": "C-F06-X16",
+      "test": "TEST-X16",
+      "task": "T-W6-02",
+      "acceptance": "Integração final: canais disputam mesma última vaga; consulta partner aceita ticket web e compra partner não entra em conta web.",
+      "evidence": "Corrida web e API com capacidade 1; um sucesso, outro esgotado; testar isolamento pelo e-mail."
+    },
+    {
+      "id": "X11",
+      "provider": "F02",
+      "consumer": "F07",
+      "kind": "dependency",
+      "rules": [
+        "R13"
+      ],
+      "contract": "C-F07-X11",
+      "test": "TEST-X11",
+      "task": "T-F07-04",
+      "acceptance": "Todas as ações operacionais respeitam guarda de dono.",
+      "evidence": "B tenta check-in e cancelamento de A, sem efeito e sem informação."
+    },
+    {
+      "id": "X12",
+      "provider": "F03",
+      "consumer": "F07",
+      "kind": "dependency",
+      "rules": [
+        "R04",
+        "R11"
+      ],
+      "contract": "C-F07-X12",
+      "test": "TEST-X12",
+      "task": "T-F07-04",
+      "acceptance": "Cancelamento bloqueia publicação/edição e integra gestão em URL existente.",
+      "evidence": "Cancelar publicado e tentar editar e republicar via POST; consultar catálogo."
+    },
+    {
+      "id": "X13",
+      "provider": "F04",
+      "consumer": "F07",
+      "kind": "dependency",
+      "rules": [
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "contract": "C-F07-X13",
+      "test": "TEST-X13",
+      "task": "T-F07-04",
+      "acceptance": "Check-in/painel/cancelamento compartilham status, lock e preço; gateway tardio não revive.",
+      "evidence": "Combinar slow, fast, check-in, cancelar e esperar resultado tardio."
+    },
+    {
+      "id": "X14",
+      "provider": "F05",
+      "consumer": "F07",
+      "kind": "integration",
+      "rules": [
+        "R06",
+        "R09",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "contract": "C-F07-X14",
+      "test": "TEST-X14",
+      "task": "T-W6-02",
+      "acceptance": "Integração final (não dependência de implementação): compra web aparece no painel e permite check-in; cancelamento aparece em Meus ingressos.",
+      "evidence": "Fluxo browser: comprar, confirmar, validar código, cancelar, recarregar ambos."
+    },
+    {
+      "id": "X15",
+      "provider": "F06",
+      "consumer": "F07",
+      "kind": "integration",
+      "rules": [
+        "R05",
+        "R07",
+        "R10",
+        "R11",
+        "R12",
+        "API"
+      ],
+      "contract": "C-F07-X15",
+      "test": "TEST-X15",
+      "task": "T-W6-02",
+      "acceptance": "Integração final: compra partner soma painel, é validada no check-in e deixa API após cancelamento.",
+      "evidence": "HTTP+browser: compra, consultar checkedIn, cancelar, verificar 404 e estorno."
+    }
+  ],
+  "process": [
+    {
+      "id": "P01",
+      "rules": [
+        "SDD"
+      ],
+      "test": "TEST-P01",
+      "contract": "C-RELEASE-P01",
+      "task": "T-W6-03",
+      "acceptance": "PRD >=5 features, fornece/consome, DAG e waves; todas R01–R13 citadas, cada aresta coberta."
+    },
+    {
+      "id": "P02",
+      "rules": [
+        "SDD"
+      ],
+      "test": "TEST-P02",
+      "contract": "C-RELEASE-P02",
+      "task": "T-W6-03",
+      "acceptance": "Spec, plano e contrato por feature, todos os critérios e cross-feature mapeados."
+    },
+    {
+      "id": "P03",
+      "rules": [
+        "EVAL"
+      ],
+      "test": "TEST-P03",
+      "contract": "C-RELEASE-P03",
+      "task": "T-W6-03",
+      "acceptance": "Cada feature aprovada em avaliação independente; relatório imutável com data, SHA, ferramenta, modelo, evidência por item."
+    },
+    {
+      "id": "P04",
+      "rules": [
+        "STATE"
+      ],
+      "test": "TEST-P04",
+      "contract": "C-RELEASE-P04",
+      "task": "T-W6-03",
+      "acceptance": "Estado final bate com relatórios existentes e mais recentes; sem status concluído sem aprovação."
+    },
+    {
+      "id": "P05",
+      "rules": [
+        "PAR"
+      ],
+      "test": "TEST-P05",
+      "contract": "C-RELEASE-P05",
+      "task": "T-W6-03",
+      "acceptance": "Pelo menos uma wave paralela via PRs mergeados; primeiro commit de cada PR anterior ao último de todos os demais."
+    },
+    {
+      "id": "P06",
+      "rules": [
+        "DELIVERY"
+      ],
+      "test": "TEST-P06",
+      "contract": "C-RELEASE-P06",
+      "task": "T-W6-03",
+      "acceptance": "Repo público único, main com README completo; fluxo externo 1–18 aprovado em clone limpo."
+    }
+  ]
+}

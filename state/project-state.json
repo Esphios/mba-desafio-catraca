@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "phase": "planning",
+  "baselineCommit": null,
+  "features": [
+    {
+      "id": "F01",
+      "wave": 1,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": false
+    },
+    {
+      "id": "F02",
+      "wave": 2,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": false
+    },
+    {
+      "id": "F03",
+      "wave": 3,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": false
+    },
+    {
+      "id": "F04",
+      "wave": 4,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": false
+    },
+    {
+      "id": "F05",
+      "wave": 5,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": false
+    },
+    {
+      "id": "F06",
+      "wave": 5,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": true
+    },
+    {
+      "id": "F07",
+      "wave": 5,
+      "status": "planned",
+      "branch": null,
+      "implementationCommit": null,
+      "latestEvaluation": null,
+      "pr": null,
+      "mergedCommit": null,
+      "integrationPending": true
+    }
+  ],
+  "release": {
+    "status": "planned",
+    "commit": null,
+    "report": null
+  },
+  "parallelWave": {
+    "wave": 5,
+    "prs": [],
+    "evidence": null
+  }
+}
