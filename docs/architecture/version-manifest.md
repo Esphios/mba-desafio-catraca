@@ -1,6 +1,6 @@
 # Manifesto de versões W0
 
-Status: **candidato para aprovação; W1 ainda deve materializar lockfile e imagens**.
+Status: **aprovado na W0; W1 ainda deve materializar lockfile e imagens**.
 
 Resolução verificada em 2026-11-26/27. Não usar tags `latest`.
 
@@ -36,7 +36,7 @@ W1 deve resolver e hashear todas as dependências transitivas. A escolha é
 `psycopg[binary]==3.3.9` para o harness local reproduzível; não pressupõe uso em
 produção externa.
 
-## Convenções congeladas pelo candidato
+## Convenções congeladas pela ratificação
 
 - DB e domínio em UTC; UI `America/Sao_Paulo`; API ISO 8601 com offset ou `Z`.
 - BRL em centavos inteiros, `1..9007199254740991`; nenhum float.

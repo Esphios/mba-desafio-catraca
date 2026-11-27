@@ -1,10 +1,11 @@
 # AMENDMENT-001 | Ratificação controlada da baseline W0
 
-Status: **candidato, aguardando revisão e aprovação final de produto e arquitetura**.
+Status: **ratificado por produto e arquitetura em 2026-11-27**.
 
 Autorização de preparação: proprietário solicitou prosseguir com a opção recomendada
-de ratificação controlada em 2026-11-27. Essa autorização permite preparar e testar
-o candidato; não equivale a aprovar antecipadamente seu conteúdo nem autoriza W1.
+de ratificação controlada em 2026-11-27. Após as revisões independentes e correções,
+o proprietário aprovou explicitamente `AMENDMENT-001` em 2026-11-27. A autorização
+de W1 continua condicionada ao G0 limpo e ao commit separado de estado.
 
 ## Motivo
 
@@ -14,7 +15,7 @@ recuperáveis. A busca local, no remoto e no workspace está registrada em
 correspondeu ao PRD e ao traceability commitados. Regenerar hashes sem amendment
 ocultaria o problema.
 
-## Autoridade proposta
+## Autoridade ratificada
 
 Após aprovação final deste amendment, PRD, OpenAPI e traceability tornam-se as três
 fontes primárias protegidas por hash. Matriz, contracts, test catalog, HLD/ADRs e
@@ -23,7 +24,7 @@ IDs e mapeamentos, e qualquer mudança sem novo amendment/revisão continua proi
 embora não sejam byte-locked. R01–R13, as três rotas fixas e os critérios A/X/P não
 são reduzidos.
 
-## Decisões do candidato
+## Decisões ratificadas
 
 1. `normalize_email` continua sendo fornecido por F01. F04 aplica a rotina no
    `PartnerBuyer` antes do lock; F06 valida envelope/transporte e não importa F01.
@@ -51,15 +52,15 @@ são reduzidos.
    F07 possui provider/partial/URLconf finais. O gate local usa overrides reais sem
    editar wiring; após merge, o coordenador troca defaults e repete A28 antes dos
    integrados. O seletor `purchase-submit` integra o contrato web.
-10. O manifesto de versões candidato está em
+10. O manifesto de versões aprovado está em
     `docs/architecture/version-manifest.md`; W1 materializa imagens e lockfile.
 
-## Hashes do conteúdo candidato
+## Hashes do conteúdo ratificado
 
-Estes hashes são informativos para revisão. A trava real permanece inalterada até o
-commit explícito de ratificação.
+Estes são os hashes aprovados e gravados na trava pelo commit explícito de
+ratificação.
 
-| Artefato | SHA-256 candidato |
+| Artefato | SHA-256 ratificado |
 | --- | --- |
 | `docs/prd/PRD.md` | `5f2764b10fab3da8027d1d423aa1b9abba270bf96812b86a16bb4c89ee0d9fec` |
 | `docs/interfaces/partner.openapi.json` | `141992b6ba262e96b55bdba8dc7bb541110b6a7174a7b448a9a6d778720e0a00` |
@@ -70,8 +71,10 @@ commit explícito de ratificação.
 Quatro revisores novos avaliaram o primeiro candidato em produto, arquitetura,
 contratos e governança. Todos bloquearam a ratificação e produziram correções:
 cobertura UUID/código/body cap, digests por arquitetura, wiring F07 e proveniência.
-Essas correções estão incorporadas neste candidato; a revisão fresca do delta e a
-aprovação humana ainda são obrigatórias antes da ratificação.
+As correções foram incorporadas em `eff1b20`; os quatro revisores reavaliaram o
+delta e emitiram PASS para apresentação. O proprietário aprovou explicitamente o
+pacote e o manifesto em 2026-11-27. A evidência está no run aditivo
+`runs/20261127T0245-0300-amendment/`.
 
 ## Sequência de aceitação
 
@@ -91,4 +94,13 @@ aprovação humana ainda são obrigatórias antes da ratificação.
 - Nenhuma feature está implementada ou aprovada.
 - Nenhum PASS documental prova concorrência, segurança ou runtime do produto.
 - Relatórios históricos permanecem imutáveis.
-- ADRs permanecem `proposed` até a aprovação final do pacote.
+- ADRs estão `accepted` pela ratificação final do pacote.
+
+## Registro da ratificação
+
+- Conteúdo candidato aprovado: `eff1b20cb50ae73313e8245d11a6a068fbda9bd5`.
+- Evidência aditiva revisada: `d1704f61312630fcae4f1f3eec79e7fec5c793e4`.
+- Aprovação humana explícita: proprietário, 2026-11-27, mensagem
+  `Aprovo o AMENDMENT-001`.
+- Próxima condição: G0 integral no commit de ratificação e atualização separada de
+  `state/project-state.json` antes de despachar F01.

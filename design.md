@@ -1,6 +1,6 @@
 # Design | arquitetura e contrato de implementação
 
-Status: proposta. PRD define comportamento; design define a solução, FDDs detalham execução. O código ainda não existe.
+Status: aprovado na ratificação W0 de 2026-11-27. PRD define comportamento; design define a solução, FDDs detalham execução. O código ainda não existe.
 
 ## 1. Drivers e limites
 

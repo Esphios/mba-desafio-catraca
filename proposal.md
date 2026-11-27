@@ -1,6 +1,6 @@
 # Proposal | Catraca
 
-Status: proposta para decisão de kickoff.
+Status: aprovado na ratificação W0 de 2026-11-27.
 
 ## Contexto
 
