@@ -1,17 +1,16 @@
-# Prompt Specs | uso em sessões distintas
+# Prompt specifications
 
-## Coordenador
+## Coordinator kickoff
+Read AGENTS.md, proposal, design, PRD, matrix, tasks and state. Review assumptions, validate G0, identify ambiguity and request approval on decisions only. Do not write product code before W0. Produce approved baseline SHA, dependency plan and next feature. Never invent external PRs or test results.
 
-Leia AGENTS, PRD, tasks e estado. Verifique dependências, contratos, ownership e baseline. Alocar feature em branch própria; planejar W5 simultânea. Entregue ao agente só contexto necessário e caminho das specs. Após avaliação, verifique relatório real, atualize estado e integre por PR. Não aprovar sem evidência; se detectar conflito, documentar e executar regressão.
+## Implementer dispatch
+You own `<feature>` in `<branch>` from `<base SHA>`. Load its FDD, plan, contract, all provider interface docs and skills listed in tasks. Perform only its numbered steps. Verify tests at each step and record actual commands/exits. Use isolated compose project. Do not change criteria or shared schema without coordinator approval; do not create reports or mark approval. Return handoff with SHA, tests, limitations, touched paths, contract changes. Stop after local candidate.
 
-## Implementador
+## Independent evaluator dispatch
+Start new session, no prior implementer context. Checkout `<candidate SHA>` clean; load AGENTS, PRD, contract and necessary design/interfaces. Phase `<local|integrated>`. Run each applicable item, preserve actual evidence and elapsed deadlines. Inspect code only to understand commands and review invariants; runtime assertions require execution. Do not fix or adjust tests/criteria. For local phase, only explicitly integrated items may be PENDING_INTEGRATION. Missing evidence blocks. Write new Markdown and JSON report per template, with actual metadata, item verdict and evidence. Never edit existing report. Return paths, verdict and failed items.
 
-"Você implementa somente <Fxx> em <branch> a partir de <base SHA>. Leia AGENTS.md, skill implement-feature, skills técnicas, spec/plan/contract e guidelines. Faça etapas T-Fxx-01 a 04, escreva testes rastreados, execute gates, registre limitações. Preserve interfaces e ownership. Não copie repositório de referência, não altere critérios, não se autoavalie. Entregue handoff com SHA e comandos; pare antes do merge."
+## Fix dispatch
+Read failed item/evidence and reproduce on current branch. Implement minimal correction, add regression, run gates. Commit new SHA. Return to fresh evaluator. Never erase previous failure.
 
-## Avaliador independente (nova sessão)
-
-"Você é avaliador da feature <Fxx>, não recebeu contexto da implementação. Avalie <SHA> em checkout limpo separado. Leia brief/PRD e contrato. Execute todos os itens aplicáveis; verifique o comportamento e tente falsificar as invariantes. Capture resultados reais, incluindo negativos e timing. Não corrija código. Reporte FAIL/BLOCKED sem exceções; escreva arquivo novo com data, SHA, ferramenta/modelo, sessão e evidência por item. Não use resumo de implementação como prova."
-
-## Avaliador final
-
-"Em nova sessão, clone main no SHA fornecido. Execute o fluxo público 1–18, X14–X16, gates com delay padrão, verifique histórico de relatórios, PRs e estado. Reporte cada item e evidência real. Qualquer falha bloqueia release, mesmo que avaliações antigas estejam verdes. Não editar código."
+## Release dispatch
+Clean main clone, real scale, no fixture shortcuts. Execute flow 1–18 and all integrated criteria, collect evidence. Verify PR overlap from actual GitHub commits, latest reports and state. Do not release if anything missing or failing; return blocker and owner. Record SHA and final evidence paths. Run down.

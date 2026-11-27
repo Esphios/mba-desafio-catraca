@@ -1,50 +1,54 @@
 # F06 | Plano de implementação
 
-Prerequisitos: baseline aprovada, dependências F03, F04 mergeadas; branch `feat/f06-parceiros`; ler spec, contrato, guidelines, skills e estado.
+Entrada: baseline W0 aprovada, dependências F03, F04 integradas e aprovadas, branch exclusiva. Skills: partner-api-contract, concurrency-validation, feature-implementation.
 
-## T-F06-01 | Etapa 1
+## T-F06-01
 
-- [ ] Implementar guard de chave, serializadores, registro de rotas e mapeamento estável de erros.
-- Validação: executar testes pertinentes ao componente; se falhar, corrigir antes de seguir. Na última etapa rodar contrato inteiro e gates; não marcar aprovado pelo próprio implementador.
-- Gate mínimo desta etapa: Teste de unidade de guard e tradução de erros; a autenticação de todas as rotas é verificada na etapa 2.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Implementar guard e serialização; tratamento explícito do parser e erros.
 
-## T-F06-02 | Etapa 2
+**Validação:** lint, checks do framework e testes já implementados; fase 1 não exige endpoints futuros.
+- Criar teste unitário ou de integração para a entrega desta etapa; provar caminho negativo e resultado observado antes da próxima etapa.
 
-- [ ] Implementar eventos e compras via catálogo/ledger; implementar consulta de ingresso.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A21`: HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0. Esperado: GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.
-  - `TEST-A22`: Tabela HTTP: JSON inválido e evento inexistente ->422; inválido e esgotado ->422; válido draft/cancelled/inexistente ->404; lotado ->409; válido ->202. Esperado: POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out.
-  - `TEST-A23`: HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato. Esperado: GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: HTTP 200/202/401/404/409/422 com corpos exatos, precedência e ambos canais.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
-## T-F06-03 | Etapa 3
+## T-F06-02
 
-- [ ] Executar testes de shape, precedência, autenticação, duas rodadas HTTP de 30 e consulta de fixture web.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A24`: Runner HTTP com barreira, 30 conexões, validar corpo e IDs únicos, consultar cada aceito e availableSeats=0; usar novo evento por rodada. Esperado: Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Probe 30×5 em dois eventos, códigos únicos, consulta de confirmação e vaga 0.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Ligar três rotas ao catálogo/ledger; OpenAPI e fixtures.
 
-## T-F06-04 | Etapa 4
+**Validação:** lint, checks do framework e testes já implementados; fase 2 não exige endpoints futuros.
+- `TEST-A21` (A21): GET /api/partner/events e validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites. Resultado: 200 array conforme schema; publicados inclusive esgotados; sem owner/PII; disponibilidade derivada.
+- `TEST-A22` (A22): POST válido; em seguida combinar erro de chave, payload inválido, evento indisponível e falta de vaga. Resultado: 202 pending exato; 401→422→404→409 na precedência; erros sem efeitos.
+- `TEST-A23` (A23): GET ambos os tickets, UUID ausente/malformado e validar 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida. Resultado: IDs UUID/código `[A-Z0-9]{12}` exatos; 404 para ausente/malformado; 401 em 6 combinações.
 
-- [ ] Abrir PR e avaliar X09–X10; X15/X16 serão verificados após merge.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A21`: HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0. Esperado: GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.
-  - `TEST-A22`: Tabela HTTP: JSON inválido e evento inexistente ->422; inválido e esgotado ->422; válido draft/cancelled/inexistente ->404; lotado ->409; válido ->202. Esperado: POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out.
-  - `TEST-A23`: HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato. Esperado: GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.
-  - `TEST-A24`: Runner HTTP com barreira, 30 conexões, validar corpo e IDs únicos, consultar cada aceito e availableSeats=0; usar novo evento por rodada. Esperado: Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados.
-  - `TEST-X09`: GET antes/depois publicação, edição e cancelamento fixture. Esperado: API usa catálogo e centavos/ocupação canônicos; edição preço/capacidade reflete na listagem.
-  - `TEST-X10`: POST simultâneo e GET ticket, comparar dados de ledger. Esperado: API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F06-03
+
+**Entrega:** Validar auth/precedência, malformed JSON, carga e consultas.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 3 não exige endpoints futuros.
+- `TEST-A24` (A24): Disparar 30 POSTs com final 0001 por evento usando barreira; verificar payloads, cinco IDs/códigos únicos, disponibilidade e confirmações até 10s. Resultado: Por rodada 5×202, 25×409 sold_out, nenhum outro status; cinco confirmed e 0 vagas.
+- `TEST-A34` (A34): Enviar chave ausente/duplicada/errada com body sentinela; com chave válida comparar JSON válido de 16.384/16.385 bytes e demais payloads inválidos. Resultado: 401 sem ler body; 16.384 alcança o domínio; 16.385/payload inválido dá 422 mesmo com evento inexistente/lotado; sem efeito/redirect/500.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F06-04
+
+**Entrega:** Avaliar local e preparar testes de canais mistos para integração.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 4 não exige endpoints futuros.
+- `TEST-A21` (A21): GET /api/partner/events e validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites. Resultado: 200 array conforme schema; publicados inclusive esgotados; sem owner/PII; disponibilidade derivada.
+- `TEST-A22` (A22): POST válido; em seguida combinar erro de chave, payload inválido, evento indisponível e falta de vaga. Resultado: 202 pending exato; 401→422→404→409 na precedência; erros sem efeitos.
+- `TEST-A23` (A23): GET ambos os tickets, UUID ausente/malformado e validar 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida. Resultado: IDs UUID/código `[A-Z0-9]{12}` exatos; 404 para ausente/malformado; 401 em 6 combinações.
+- `TEST-A24` (A24): Disparar 30 POSTs com final 0001 por evento usando barreira; verificar payloads, cinco IDs/códigos únicos, disponibilidade e confirmações até 10s. Resultado: Por rodada 5×202, 25×409 sold_out, nenhum outro status; cinco confirmed e 0 vagas.
+- `TEST-A34` (A34): Enviar chave ausente/duplicada/errada com body sentinela; com chave válida comparar JSON válido de 16.384/16.385 bytes e demais payloads inválidos. Resultado: 401 sem ler body; 16.384 alcança o domínio; 16.385/payload inválido dá 422 mesmo com evento inexistente/lotado; sem efeito/redirect/500.
+- `TEST-X09` (X09): GET antes/depois publicação, edição e cancelamento fixture. Resultado: A listagem de parceiros reflete publicação, preço e capacidade de F03; fixtures draft/cancelled ficam fora. Cancelamento real será validado em X15.
+- `TEST-X10` (X10): POST simultâneo e GET ticket, comparar dados de ledger. Resultado: API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## Integração posterior
+- X16 / TEST-X16: Corrida web e API com capacidade 1; um sucesso, outro esgotado; testar isolamento pelo e-mail.
 
 ## Handoff
-
-- [ ] Testes unitários, integração e contratos locais verdes no SHA indicado.
-- [ ] Nada fora da ownership; atualizar docs e registrar dependências.
-- [ ] Entregar SHA e comandos à sessão nova de avaliação; não entregar veredito pronto.
-- [ ] Após aprovação independente e PR mergeado, coordenador atualiza estado.
+Entregar SHA limpo, base SHA, interfaces, comandos, logs redigidos e desvios. Avaliador novo, sem histórico de conversa, julga apenas contrato e evidência. Coordenador integra após local PASS; relatório final da feature exige também itens integrados, se houver.

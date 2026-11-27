@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "sha256": {
+    "docs/prd/PRD.md": "5f2764b10fab3da8027d1d423aa1b9abba270bf96812b86a16bb4c89ee0d9fec",
+    "docs/interfaces/partner.openapi.json": "141992b6ba262e96b55bdba8dc7bb541110b6a7174a7b448a9a6d778720e0a00",
+    "docs/validation/traceability.json": "42a0c0233a29f29fccaee5a793c70c035c5bb1fb86ddfbc3a7b5c4eabe50d7ad"
+  }
+}

@@ -1,48 +1,49 @@
-# Catraca | pacote de planejamento greenfield
+# Catraca | baseline de design
 
-**Estado:** especificação inicial, não produto executável. Nenhuma feature implementada ou avaliada. Não há PRs fictícios.
+Este pacote inicia um repositório novo. Contém documentação, skills e ferramentas auxiliares; não é aplicação pronta. Todos os estados estão planejados. Primeiro W0, depois execução em waves conforme tasks.md.
 
-## Como iniciar agora
+## Como rodar (agora)
 
-1. Extraia este pacote em diretório vazio, não dentro de um clone da solução de referência.
-2. Leia `AGENTS.md`, `proposal.md`, `docs/prd/PRD.md`, `design.md` e `requirements-matrix.md`.
-3. Revise ADRs propostos e aprove a baseline no primeiro commit. Inicialize um Git próprio (`git init -b main`).
-4. Execute `python3 scripts/validate_docs.py` (Python 3 local opcional; alternativa: `docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/validate_docs.py`).
-5. Inicie F01 conforme `tasks.md`, com uma sessão implementadora; outra sessão avalia o contrato. Só então avance a wave.
+Docker/Compose e Git no host; Node LTS disponível, Python opcional. Para validar baseline sem Python local:
 
-## Contrato do README final (preencher durante implementação)
+```bash
+docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/validate_docs.py
+docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/verify_model.py
+```
 
-| Item | Planejado | Estado |
-|---|---|---|
-| Requisitos | Linux/macOS ou WSL, Docker Engine + Compose v2, Git, Node LTS opcional | A validar |
-| Subir | `./bin/up` | A implementar F01 |
-| Derrubar | `./bin/down` | A implementar F01 |
-| Gates | `./bin/gates` | A implementar F01, expandir por feature |
-| Web/API | `http://localhost:8080` (ambos, API em `/api/partner`) | Planejado |
-| Organizador A | `alice@catraca.test` / `DemoAlice!2026` | Seed planejada |
-| Organizador B | `bruno@catraca.test` / `DemoBruno!2026` | Seed planejada |
-| Participante | `participante@catraca.test` / `DemoPessoa!2026` | Seed planejada |
-| Chave parceira | `catraca-local-partner-demo-v1` | Somente demonstração local |
-| PRs paralelos | F05, F06, F07: registrar links reais após merge | Pendente |
+Com Python 3.12 local, executar diretamente. Para verificar o gate de evidências e seus testes negativos, usar `python scripts/validate_evidence.py` e `python scripts/test_baseline.py` (Git disponível no host). Ver [validação da baseline](docs/validation/baseline-validation.md). O modelo é oráculo independente de regras, não aplicação. O probe HTTP só após API existir. F01 implementará `bash bin/up`, `bash bin/down`, `bash bin/gates` e `bash bin/flow` (último em W6). Nenhum destes comandos de produto existe ainda; substituir esta nota no README de entrega somente após testes reais. Pré-requisitos finais Linux/macOS + Docker Compose + Git; Windows WSL. Não exigir cópia .env ou instalação adicional.
 
-Não use as credenciais de demonstração em serviços reais. Após F01, atualize este README com comandos confirmados e saída da subida. Antes da entrega, registre SHA final, links reais dos PRs e resultado do fluxo externo.
+## Endereços planejados
+
+WEB e API http://127.0.0.1:8080; CAT_PORT pode alterar. API começa em /api/partner; readiness /health/ready. CAT_PROJECT=catraca-demo; CAT_PROFILE=demo; CAT_GATEWAY_SCALE=1. Sem serviço de pagamento externo.
+
+## Credenciais de seed propostas (sintéticas, F01 implementará)
+
+| Papel         | E-mail                | Senha        |
+| ------------- | --------------------- | ------------ |
+| Organizador A | gestao.a@example.test | LocalA-2026! |
+| Organizador B | gestao.b@example.test | LocalB-2026! |
+| Participante  | pessoa@example.test   | LocalP-2026! |
+
+X-Api-Key: `local-passgate-26`. Apenas demo local, nunca reutilizar em produção. Verificar login e seed repetida quando implementados.
 
 ## Mapa dos artefatos
 
-- `proposal.md`: escopo e proposta executiva.
-- `docs/prd/PRD.md`: produto, regras, features, dependências, critérios locais e cruzados.
-- `design.md`: HLD, fronteiras, modelo de dados, concorrência e contratos internos.
-- `requirements-matrix.md` e `.csv`: rastreabilidade requisito → critério → contrato → teste → tarefa.
-- `tasks.md`: waves, tarefas, skills, gates e entregáveis.
-- `docs/features/F*/`: spec (FDD), plan, contract e espaço para relatórios reais.
-- `docs/architecture/`: diagramas, protocolo transacional, segurança, ADRs e pesquisa técnica.
-- `docs/engineering-guidelines.md`: regras de código, Git, testes e documentação.
-- `docs/validation/`: catálogo de testes, fluxo integrado, avaliação e harness.
-- `docs/agents/`: design do workflow agentic, prompts e templates de avaliação.
-- `state/project-state.json`: estado verdadeiro, inicialmente `planned`.
-- `AGENTS.md`, `CLAUDE.md`, `.agents/skills/`: instruções e skills portáveis.
-- `scripts/validate_docs.py`: verificador executável dos artefatos. `scripts/partner_probe.py`: teste HTTP para ambiente implementado.
+- [Proposal](proposal.md), [Design/HLD](design.md), [Matriz](requirements-matrix.md) e [Tasks](tasks.md).
+- [PRD](docs/prd/PRD.md), [ADRs](docs/architecture/adrs/README.md), [interfaces](docs/interfaces/internal.md), [OpenAPI](docs/interfaces/partner.openapi.json), [contrato web](docs/interfaces/web.md).
+- [AMENDMENT-001 candidato](docs/validation/w0-audit/AMENDMENT-001.md) e [manifesto de versões W0](docs/architecture/version-manifest.md); ambos aguardam aprovação final e não autorizam W1.
+- Features, spec/plan/contract/reports: `docs/features/`; cada diretório contém contrato e pasta vazia de relatórios.
+- [Gates](docs/validation/harness.md), [catálogo de testes](docs/validation/test-catalog.md), [fluxo de avaliação](docs/validation/evaluator-flow.md), [release contract](docs/validation/release-contract.md).
+- [AGENTS](AGENTS.md), [skills](.agents/skills/README.md), [workflow](docs/agents/workflow.md), [state](state/project-state.json), [guidelines](docs/engineering-guidelines.md).
 
-## Decisões previstas
+## PRs da wave paralela
 
-Python 3.12/Django 5.2 LTS, PostgreSQL 17, templates HTML com formulários e worker persistente, todos em containers. Compra, edição, pagamento, check-in e cancelamento compartilham lock da linha de evento. Pagamento simulado por job transacional com vencimento, sem sleep em request. Avaliadores trabalham em sessão nova contra SHA fixado, não editam código nem relatórios antigos. Todas são decisões de projeto, sujeitas à aprovação da baseline e aos testes reais.
+W5 F05/F06/F07; links, SHAs e sobreposição ainda não existem. Coordenador preenche somente com PRs reais mergeados. W6 verifica primeiro commit de cada PR anterior ao último dos demais.
+
+## Decisões
+
+Django + PostgreSQL para simplificar auth, CSRF, migrations e transações. R07 garantida por lock por evento e count após lock; prova condicional e testes de concorrência. Gateway: job persistido junto com ticket, worker separado, estado terminal protegido. Avaliação: sessão nova distinta do implementador, contrato por item, relatório append-only e integração final. Ver design/ADRs. O manifesto contém pins candidatos; aprovação W0 e materialização no harness continuam obrigatórias.
+
+## Probes após implementação
+
+`scripts/partner_probe.py` verifica duas rajadas de carga e contrato HTTP; `scripts/browser_release_probe.py` automatiza passos 2–16 e captura screenshots/JSON. Ambos dependem da aplicação futura; o segundo também de Playwright Python + Chromium no container de testes. Ver o roteiro de avaliação. Scripts auxiliares não substituem testes por feature e fluxo final.

@@ -1,24 +1,117 @@
 # F04 | Contrato de avaliação
 
-Versão 0.1 proposta. Avaliar SHA exato em checkout limpo, Docker/Compose v2, Git, porta/projeto isolados; usar PostgreSQL real. Instalar nada no host além dos pré-requisitos do brief. Rodar `./bin/up`, `./bin/gates F04` quando implementados e executar verificações específicas abaixo. Se comando não existir ou efeito não puder ser reproduzido, FAIL/ BLOCKED, nunca PASS. Em F01, gates inicial não pressupõe features futuras. Fixtures de estados futuros são permitidas para dependências ainda não implementadas, somente em DB de teste e indicadas no relatório. Não substituir provas HTTP/UI finais por fixtures.
+Versão 2 proposta. Ambiente: checkout limpo do SHA, Docker/Compose e Git; `bash bin/up` e `bash bin/gates --feature F04` após implementados. Banco PostgreSQL real, dados sintéticos, projeto/porta exclusivos, gateway padrão para itens de tempo. O avaliador cria relatório novo sem alterar código.
 
-## Itens obrigatórios locais
+## Fase LOCAL (antes do merge)
 
-| Item | Critério | Procedimento e evidência | Resultado esperado |
-|---|---|---|---|
-| C-F04-A13 | A13 (R05,R06,R09) | Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada. | Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga. |
-| C-F04-A14 | A14 (R07) | TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez. | Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas. |
-| C-F04-A15 | A15 (R08) | Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo. | Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga. |
-| C-F04-A16 | A16 (R03,R11) | Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único. | Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício. |
-| C-F04-A17 | A17 (R06) | Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs. | Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs. |
+### C-F04-A13 (A13)
 
-## Cross-feature (dependências anteriores)
+Preparação: E publicado cap 2 sem tickets; relógio de teste e worker pausado para conferir commit.
 
-| Item | Critério | Procedimento e evidência | Esperado |
-|---|---|---|---|
-| C-F04-X04 | X04 (F01→F04) | Comprar slow, reiniciar worker antes de due; obter status final uma vez. | Worker do Compose consome job persistido após reinício sem chave real. |
-| C-F04-X05 | X05 (F03→F04) | Corrida compra × redução e compra × preço; conferir invariantes e snapshots. | Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação. |
+Procedimento: Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; validar UUID, código por ^[A-Z0-9]{12}$ e preço.
 
-## Veredito
+PASS somente se: Um ticket pending e um job por chamada; IDs UUID e códigos válidos/distintos; 0 vagas após duas; não aguarda pagamento.
 
-PASS somente se todo item aplicável tem evidência real e satisfaz o resultado esperado. FAIL se divergente; BLOCKED se não reproduzível. Para itens W6, relatório isolado identifica explicitamente `not_applicable_until_integration`; o relatório mais recente após W6 cobre também esses itens. Guardar relatório em `reports/<UTC>-<shortSHA>.md` (novo arquivo; não alterar). Registrar data UTC, SHA completo, ferramenta/modelo, sessão independente, comandos, saída, artefatos, veredito individual e resumo. Usar template em docs/agents.
+Teste: `TEST-A13`. Evidência: Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada.
+
+### C-F04-A14 (A14)
+
+Preparação: PostgreSQL real, 10 eventos novos cap 5 e 30 clientes em conexões distintas.
+
+Procedimento: Barreira de início, usar cartões de aprovação; conferir resultados e contagem DB; rodar também cap 1 com 2 concorrentes.
+
+PASS somente se: Exatamente 5/25 em todas as rodadas, 1/1 no limite; nenhuma exceção inesperada nem job órfão.
+
+Teste: `TEST-A14`. Evidência: TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez.
+
+### C-F04-A15 (A15)
+
+Preparação: 5 eventos ou vagas independentes; worker padrão ativo; relógio monotônico + timestamps DB.
+
+Procedimento: Comprar cada final 0001/0002/0003/0004/9999; consultar pending e resultado até deadline; medir intervalo created→resolved, recarregar vagas.
+
+PASS somente se: Aprovação/recusa corretas; 2–5 s e 30–40 s; recusa libera exatamente uma vaga; nenhum terminal antecipado.
+
+Teste: `TEST-A15`. Evidência: Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo.
+
+### C-F04-A16 (A16)
+
+Preparação: Ticket slow e fixtures terminais; dois preços sucessivos.
+
+Procedimento: Comprar antes/depois da edição; reiniciar worker antes de due; executar resolução novamente; tentar aplicar a fixture terminal.
+
+PASS somente se: Preço histórico intacto; job recuperado; só uma transição; terminal nunca muda.
+
+Teste: `TEST-A16`. Evidência: Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único.
+
+### C-F04-A17 (A17)
+
+Preparação: E publicado com vaga; DB e captura sanitizada de log.
+
+Procedimento: Enviar cartões com 15/17 dígitos, letras, Unicode, espaços e tipo numérico; enviar e-mails com trim/casefold Unicode, inválido e >254 após casefold; inspecionar DB/logs.
+
+PASS somente se: E-mail válido é canônico; entradas inválidas não criam ticket/job; PAN e e-mail inválido não são salvos nem refletidos.
+
+Teste: `TEST-A17`. Evidência: Casos de cartão 15/17 dígitos, letras/Unicode/espaços e e-mails com trim/casefold, inválido e >254 canônicos; assert canonicidade ou contagem zero e inspeção DB/logs.
+
+### C-F04-A32 (A32)
+
+Preparação: Code generator injetável e DB transacional; evento com vagas.
+
+Procedimento: Forçar colisão uma vez e permanente; injetar falha ao criar job; verificar tickets/jobs antes/depois.
+
+PASS somente se: Colisão transitória resolve com novo código; permanente/falha reverte tudo, não retorna sold_out.
+
+Teste: `TEST-A32`. Evidência: Forçar colisões e exceção entre INSERTs; contar tickets/jobs, inspecionar status HTTP em teste integrado.
+
+### C-F04-A33 (A33)
+
+Preparação: Job vencido, dois workers independentes; lock de evento controlado.
+
+Procedimento: Ambos descobrem o mesmo ID; um rollback; outro conclui; repetir job terminal; testar evento diferente.
+
+PASS somente se: Um efeito, sem deadlock; retry só de transação abortada; eventos independentes não bloqueiam entre si.
+
+Teste: `TEST-A33`. Evidência: Duas conexões/processos, job selecionado duas vezes, lock hold/release, abortar uma execução, confirmar efeito único.
+
+### C-F04-X04 (X04)
+
+Preparação: Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.
+
+Procedimento: Comprar slow, reiniciar worker antes de due; obter status final uma vez.
+
+PASS somente se: Worker do Compose consome job persistido após reinício sem chave real.
+
+Teste: `TEST-X04`. Evidência: Comprar slow, reiniciar worker antes de due; obter status final uma vez.
+
+### C-F04-X05 (X05)
+
+Preparação: Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.
+
+Procedimento: Corrida compra × redução e compra × preço; conferir invariantes e snapshots.
+
+PASS somente se: Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação.
+
+Teste: `TEST-X05`. Evidência: Corrida compra × redução e compra × preço; conferir invariantes e snapshots.
+
+## Fase INTEGRATED (após merge da wave)
+
+Itens desta fase são explicitamente PENDING_INTEGRATION no relatório local; não contar como PASS e não exigir feature irmã no checkout isolado. Relatório integrado deve incluir todos os itens anteriores e os seguintes, sem pendências.
+
+Nenhum item exclusivo desta fase; o último relatório local permanece válido se nenhum comportamento foi alterado, sem dispensar regressão de release.
+
+## Mapeamento explícito
+
+| Critério | Item      | Teste    | Fase  |
+| -------- | --------- | -------- | ----- |
+| A13      | C-F04-A13 | TEST-A13 | local |
+| A14      | C-F04-A14 | TEST-A14 | local |
+| A15      | C-F04-A15 | TEST-A15 | local |
+| A16      | C-F04-A16 | TEST-A16 | local |
+| A17      | C-F04-A17 | TEST-A17 | local |
+| A32      | C-F04-A32 | TEST-A32 | local |
+| A33      | C-F04-A33 | TEST-A33 | local |
+| X04      | C-F04-X04 | TEST-X04 | local |
+| X05      | C-F04-X05 | TEST-X05 | local |
+
+Qualquer item aplicável sem evidência = FAIL. Fixture deve ser declarada; não usar fixture para substituir efeito real no integrado.

@@ -1,47 +1,50 @@
 # F02 | Plano de implementação
 
-Prerequisitos: baseline aprovada, dependências F01 mergeadas; branch `feat/f02-identidade`; ler spec, contrato, guidelines, skills e estado.
+Entrada: baseline W0 aprovada, dependências F01 integradas e aprovadas, branch exclusiva. Skills: secure-boundaries, feature-implementation.
 
-## T-F02-01 | Etapa 1
+## T-F02-01
 
-- [ ] Implementar formulário de cadastro, backend de autenticação quando necessário, rotas e templates de cadastro/login/logout.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A06`: Browser: cadastro/login/logout; POST com role=organizer; consulta DB somente para verificar hash e papel. Esperado: Cadastro público cria somente participante, e-mail normalizado único; senha armazenada como hash; login válido e logout invalidam sessão; erro genérico em credenciais inválidas.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Formulário rejeita e-mail inválido e role forjado; senha não é armazenada em claro; normalização de e-mail.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Implementar cadastro, login e logout com Django; validação de e-mail e senha.
 
-## T-F02-02 | Etapa 2
+**Validação:** lint, checks do framework e testes já implementados; fase 1 não exige endpoints futuros.
+- `TEST-A06` (A06): Cadastrar, repetir e-mail com caixa distinta, login incorreto/correto, logout; consultar hash sem registrá-lo. Resultado: Participante único; senha não em claro; sessão só após sucesso; logout invalida cookie anterior.
 
-- [ ] Definir guards de papel e dono, redirects, tratamento de erros e CSRF.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A07`: Sessões independentes A/B/P/anônima; fixture de evento A; assert HTTP 404 para B, ausência de nome/dados e nenhuma mutação; 403 ou redirect para demais. Esperado: Visitante e participante não acessam rotas de gestão; B não lê nem modifica eventos de A, incluindo URL direta e POST forjado.
-  - `TEST-A08`: Testar guarda de participante com duas contas e recurso fixture; tentar usar X-Api-Key em rota web; negar. Esperado: Participante só tem acesso aos próprios recursos; parceiro não cria sessão web nem vincula conta pelo e-mail.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Teste de guarda com A/B/participante/anônimo, CSRF real e sessão de login/logout.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
-## T-F02-03 | Etapa 3
+## T-F02-02
 
-- [ ] Testar papéis, invalidação da sessão, unicidade/hash e acesso indevido a fixtures; revisar logs.
-- Validação: executar testes pertinentes ao componente; se falhar, corrigir antes de seguir. Na última etapa rodar contrato inteiro e gates; não marcar aprovado pelo próprio implementador.
-- Gate mínimo desta etapa: Browser com duas sessões e tentativa de acesso por ID; conferir X01 com seed.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Expor Actor/guards e predicado de dono; comportamento de erros e redirects.
 
-## T-F02-04 | Etapa 4
+**Validação:** lint, checks do framework e testes já implementados; fase 2 não exige endpoints futuros.
+- `TEST-A07` (A07): Exercitar guardas com IDs de A e B; forjar proprietário no payload; comparar resultados e dados. Resultado: Anônimo redirecionado no GET, participante 403, B recebe 404 genérico ao acessar A; nenhuma mutação.
+- `TEST-A08` (A08): Forjar ID de participante no request/contexto, tentar autenticar por chave; validar identidade retornada. Resultado: ID da sessão é autoridade exclusiva; chave não cria sessão; login por e-mail continua conta distinta.
 
-- [ ] Verificar login da seed F01 e publicar contrato de autorização.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A06`: Browser: cadastro/login/logout; POST com role=organizer; consulta DB somente para verificar hash e papel. Esperado: Cadastro público cria somente participante, e-mail normalizado único; senha armazenada como hash; login válido e logout invalidam sessão; erro genérico em credenciais inválidas.
-  - `TEST-A07`: Sessões independentes A/B/P/anônima; fixture de evento A; assert HTTP 404 para B, ausência de nome/dados e nenhuma mutação; 403 ou redirect para demais. Esperado: Visitante e participante não acessam rotas de gestão; B não lê nem modifica eventos de A, incluindo URL direta e POST forjado.
-  - `TEST-A08`: Testar guarda de participante com duas contas e recurso fixture; tentar usar X-Api-Key em rota web; negar. Esperado: Participante só tem acesso aos próprios recursos; parceiro não cria sessão web nem vincula conta pelo e-mail.
-  - `TEST-X01`: Subir ambiente limpo, login das três contas, comparar IDs após reseed. Esperado: Após up com seed, A/B/P autenticam; duas execuções da seed não duplicam contas.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F02-03
+
+**Entrega:** Testar CSRF, role escalation, session replay, ownership por fixture, sanitização.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 3 não exige endpoints futuros.
+- `TEST-A30` (A30): Enviar role=organizer, token CSRF ausente, next=//host e variações, reutilizar cookie após logout. Resultado: Conta participante, mutação proibida sem CSRF, apenas redirect interno, sessão anterior inválida.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F02-04
+
+**Entrega:** Validar seed em ambiente real e congelar contrato de acesso.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 4 não exige endpoints futuros.
+- `TEST-A06` (A06): Cadastrar, repetir e-mail com caixa distinta, login incorreto/correto, logout; consultar hash sem registrá-lo. Resultado: Participante único; senha não em claro; sessão só após sucesso; logout invalida cookie anterior.
+- `TEST-A07` (A07): Exercitar guardas com IDs de A e B; forjar proprietário no payload; comparar resultados e dados. Resultado: Anônimo redirecionado no GET, participante 403, B recebe 404 genérico ao acessar A; nenhuma mutação.
+- `TEST-A08` (A08): Forjar ID de participante no request/contexto, tentar autenticar por chave; validar identidade retornada. Resultado: ID da sessão é autoridade exclusiva; chave não cria sessão; login por e-mail continua conta distinta.
+- `TEST-A30` (A30): Enviar role=organizer, token CSRF ausente, next=//host e variações, reutilizar cookie após logout. Resultado: Conta participante, mutação proibida sem CSRF, apenas redirect interno, sessão anterior inválida.
+- `TEST-X01` (X01): Subir ambiente limpo, login das três contas, comparar IDs após reseed. Resultado: Após up com seed, A/B/P autenticam; duas execuções da seed não duplicam contas.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## Integração posterior
+Não há item exclusivo de integração atribuído a esta feature; regressão global é obrigatória.
 
 ## Handoff
-
-- [ ] Testes unitários, integração e contratos locais verdes no SHA indicado.
-- [ ] Nada fora da ownership; atualizar docs e registrar dependências.
-- [ ] Entregar SHA e comandos à sessão nova de avaliação; não entregar veredito pronto.
-- [ ] Após aprovação independente e PR mergeado, coordenador atualiza estado.
+Entregar SHA limpo, base SHA, interfaces, comandos, logs redigidos e desvios. Avaliador novo, sem histórico de conversa, julga apenas contrato e evidência. Coordenador integra após local PASS; relatório final da feature exige também itens integrados, se houver.

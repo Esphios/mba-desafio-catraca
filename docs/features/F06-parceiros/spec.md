@@ -1,29 +1,36 @@
-# F06 | FDD: API pública de parceiros
+# F06 | FDD: Integração comercial por API
 
-Status: planejado. Wave W5. Fonte: PRD e HLD; ADRs propostos. Este FDD não atesta código existente.
+Status: proposto · Wave W5 · Fonte normativa: PRD e design.
 
-## Objetivo, provides e consumes
-As três rotas /api/partner, autenticação por chave, tradução de DTOs e erros do domínio.
+## Resultado e interfaces
 
-F03: catálogo público; F04: compra/consulta.
+Provides: As três rotas /api/partner, autenticação por chave, tradução de DTOs e erros do domínio.
 
-## Limites de escrita
-partner/, tests/partner; no modifications to ledger or catalog.
+Consumes: F03: `public_catalog`/`public_detail`; F04: compra/consulta e validação canônica do `PartnerBuyer`.
 
-## Design detalhado
-`partner/` owns fixed no-trailing-slash routes with string path params, exact key guard before parsing and resource lookup. No redirects from canonical URL. Validate JSON object, required fields and card/email before calling reserve; map errors exact. Content type application/json required for purchase. Do not serialize extra fields or secret; use safe JSON error responses. GET events uses catalog DTO, converts ISO timestamp and cents; GET ticket permits both channels. Concurrency runner uses real HTTP and distinct requests. No Django CSRF exemption beyond key-authenticated routes. Handle malformed IDs as unavailable/not found after key and payload validation. Do not add authentication requirement not in fixed contract.
+Ownership: partner API. Não alterar módulos de outras features sem amendment.
 
-## Dependências e integração
-F03, F04. Consumir interfaces do HLD, não importar views de outras features. Em caso de interface insuficiente, registrar bloqueio e pedir amendment; não criar cópia de regra. Contratos externos e códigos do brief têm precedência. Dependências cross-feature: X09, X10; ver contrato.
+## Low-level design
 
-## Critérios locais e casos de falha
-- A21 (API,R02,R05): GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.
-- A22 (API,R06,R07): POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out.
-- A23 (API,R09,R13): GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.
-- A24 (R07,API): Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados.
+As três rotas fixas não usam trailing slash. Middleware/guard de chave precede leitura/parse de corpo, validação de evento e capacidade. `X-Api-Key` é única credencial, comparada em tempo constante a valor local configurado; rejeitar ausente, duplicado ou inválido. Chave não vira sessão. JSON object com buyerEmail e cardNumber strings; `Content-Type: application/json` (parâmetro charset permitido); parse malformado, tipos errados ou cartão fora de 16 dígitos ASCII → 422. Campos extras são ignorados e não conferem papel nem associação de conta. F06 cria `PartnerBuyer` sem importar F01; F04 aplica a normalização canônica e devolve erro tipado. Para POST, chave → cap/payload → existência/publicação → disponibilidade. Nenhuma falha esperada responde HTML/redirect. Tratar UUID malformado como evento/ticket inexistente, depois das validações anteriores.
 
-## Testabilidade e segurança
-Usar fixtures mínimas isoladas; relógio injetável para lógica, modo padrão para prazo real. Validar entradas e falhas além de happy path. Nenhum dado real, nenhuma modificação de contrato para mascarar falha. Evidência independente no contrato.
+**Serialização:** GET events retorna array de exatamente id/name/startsAt/priceCents/availableSeats; IDs são UUID, código é `[A-Z0-9]{12}`, ISO 8601 usa offset ou Z; inclui publicados lotados. POST 202 exatamente ticketId/code/status pending; GET ticket 200 exatamente ticketId/code/eventId/status/checkedIn (booleano); consulta de qualquer canal sem buyerEmail/valor. API de parceiro pode consultar ticket web mesmo se não vendeu; é regra explícita.
 
-## Rollback e evolução
-Em falha, manter branch sem merge e corrigir com novo commit. Mudanças de schema após F01 exigem migração revisada, teste fresh/upgrade e coordenação. Não desfazer migração de dados em ambiente de usuário sem backup; neste MVP usar ambiente descartável de teste. Regressão final obrigatória após última integração.
+**Segurança:** isentar CSRF só do namespace da API sem autenticação por cookie; não aplicar CSRF exemption a web; nunca logar body/chave. Body cap de 16 KiB (16.384 bytes) no adapter, após autenticação; exceder retorna 422 invalid_request, inclusive evento ausente ou lotado; limitar leitura a cap+1, sem parse do excedente, erros internos 500 genérico (não mascarar como sold_out).
+
+**Testes:** contrato OpenAPI em `docs/interfaces/partner.openapi.json`; JSON exato, precedência cruzada, duas rodadas HTTP reais 30/5 e carga mista no integrado; client sem seguir redirect. Não assumir status terminal antes do gateway. F06 não precisa F05 para verificar leitura de fixture web; X16 exige compra web real.
+
+## Critérios e limites
+| ID | Fase | Aceite |
+| --- | --- | --- |
+| A21 | local | GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos. |
+| A22 | local | POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out. |
+| A23 | local | GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized. |
+| A24 | local | Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados. |
+| A34 | local | Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado. |
+| X09 | local | A listagem de parceiros reflete publicação, preço e capacidade de F03; fixtures draft/cancelled ficam fora. Cancelamento real será validado em X15. |
+| X10 | local | API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture. |
+| X16 | integrated | Integração final: canais disputam mesma última vaga; consulta partner aceita ticket web e compra partner não entra em conta web. |
+
+## Evolução e rollback
+Mudança de contrato exige ADR/amendment aprovado e reavaliação de consumidores. Em falha de implementação, corrigir em commit novo; não alterar migrations aplicadas nem relatórios. No MVP local usar ambiente de testes descartável para rollback de schema; não apagar volume de demonstração.

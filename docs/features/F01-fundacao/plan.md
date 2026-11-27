@@ -1,51 +1,53 @@
 # F01 | Plano de implementação
 
-Prerequisitos: baseline aprovada, dependências nenhuma mergeadas; branch `feat/f01-fundacao`; ler spec, contrato, guidelines, skills e estado.
+Entrada: baseline W0 aprovada, dependências nenhuma integradas e aprovadas, branch exclusiva. Skills: harness-engineering, schema-review, feature-implementation.
 
-## T-F01-01 | Etapa 1
+## T-F01-01
 
-- [ ] Preparar repositório, fixar versões de containers e dependências, lint, runner e configuração; construir imagens para as arquiteturas suportadas.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A03`: Executar gates e injetar falha em cópia descartável; capturar códigos de saída. Esperado: ./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Build da imagem, `django check`, runner com teste mínimo que falha intencionalmente em cópia descartável e gate documental.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Materializar os pins aprovados na W0 em runtime, Dockerfile, Compose, lockfile, estrutura de comandos e lint; implementar health inicial.
 
-## T-F01-02 | Etapa 2
+**Validação:** lint, checks do framework e testes já implementados; fase 1 não exige endpoints futuros.
+- `TEST-A03` (A03): Rodar gates íntegro; repetir com asserção false e depois restaurar; verificar código de saída e cleanup. Resultado: Suíte íntegra exit 0; versão quebrada exit diferente de 0; relatório lista testes realmente executados.
 
-- [ ] Definir schema de contas, eventos, ingressos e jobs, constraints, índices e migração inicial; usar PostgreSQL e estabelecer convenção de lock.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A05`: Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas. Esperado: Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Migração em DB limpo, constraints negativas, `makemigrations --check`.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
-## T-F01-03 | Etapa 3
+## T-F01-02
 
-- [ ] Implementar seed, serviço one-shot de migração, heartbeat inicial do worker, readiness e scripts up/down/gates com ambiente de testes isolado.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A01`: Clonar SHA em pasta temporária; executar up; verificar HTTP e compose ps. Esperado: Clone limpo: ./bin/up constrói, migra, semeia e espera web/worker/DB prontos; /health/ready retorna 200 sem configuração manual.
-  - `TEST-A02`: Executar up, seed duas vezes, down, provar porta fechada e ps vazio, up novamente; comparar IDs e autenticação após F02. Esperado: ./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.
-  - `TEST-A04`: Inspeção dos arquivos, ambiente sem .env e sem credenciais externas. Esperado: AGENTS.md e README contêm comandos, endereços, credenciais de seed, mapa; modo padrão não exige gateway real.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Readiness e seed, comparar IDs antes/depois, testar encerramento e reinício.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Criar user custom e models/schema, constraints, índices e migrations; rodar testes de integridade.
 
-## T-F01-04 | Etapa 4
+**Validação:** lint, checks do framework e testes já implementados; fase 2 não exige endpoints futuros.
+- `TEST-A05` (A05): Forçar código duplicado/curto/longo/minúsculo/não alfanumérico, FK/status/limites inválidos, buyer misto, dois jobs e pares state/processed_at inválidos; migrar de novo. Resultado: Todas as escritas inválidas falham, inclusive fora de `[A-Z0-9]{12}`; DB permite ticket sem job apenas fora do serviço; dados válidos persistem; sem migração pendente.
 
-- [ ] Comprovar clone limpo, seed repetível, down/up e gate negativo; registrar comandos e ambiente.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A01`: Clonar SHA em pasta temporária; executar up; verificar HTTP e compose ps. Esperado: Clone limpo: ./bin/up constrói, migra, semeia e espera web/worker/DB prontos; /health/ready retorna 200 sem configuração manual.
-  - `TEST-A02`: Executar up, seed duas vezes, down, provar porta fechada e ps vazio, up novamente; comparar IDs e autenticação após F02. Esperado: ./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.
-  - `TEST-A03`: Executar gates e injetar falha em cópia descartável; capturar códigos de saída. Esperado: ./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos.
-  - `TEST-A04`: Inspeção dos arquivos, ambiente sem .env e sem credenciais externas. Esperado: AGENTS.md e README contêm comandos, endereços, credenciais de seed, mapa; modo padrão não exige gateway real.
-  - `TEST-A05`: Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas. Esperado: Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F01-03
+
+**Entrega:** Implementar bootstrap, seed e scripts de subida/descida/gates; validar clone limpo.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 3 não exige endpoints futuros.
+- `TEST-A01` (A01): Executar bash bin/up; GET readiness pelo host; inspect serviços; autenticar seed quando F02 disponível. Resultado: Exit 0; DB, web e worker prontos; migração/seed one-shot concluídas; nenhuma chave real; antes de F02 comprovar linhas e hashes da seed.
+- `TEST-A02` (A02): Executar down; verificar ausência de containers e listener; subir novamente; seed outra vez; comparar IDs e quantidade. Resultado: Nenhum serviço do projeto ativo; dados persistem e seed permanece com 2 organizadores + 1 participante seed, sem duplicação.
+- `TEST-A04` (A04): Seguir comandos e verificar nomes, porta, chave local, mapa e defaults. Resultado: Comandos reproduzíveis; sem setup manual; links internos existentes; endereços corretos.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F01-04
+
+**Entrega:** Verificar fail-closed do harness, isolamento e documentação; fornecer interface e avaliação.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 4 não exige endpoints futuros.
+- `TEST-A01` (A01): Executar bash bin/up; GET readiness pelo host; inspect serviços; autenticar seed quando F02 disponível. Resultado: Exit 0; DB, web e worker prontos; migração/seed one-shot concluídas; nenhuma chave real; antes de F02 comprovar linhas e hashes da seed.
+- `TEST-A02` (A02): Executar down; verificar ausência de containers e listener; subir novamente; seed outra vez; comparar IDs e quantidade. Resultado: Nenhum serviço do projeto ativo; dados persistem e seed permanece com 2 organizadores + 1 participante seed, sem duplicação.
+- `TEST-A03` (A03): Rodar gates íntegro; repetir com asserção false e depois restaurar; verificar código de saída e cleanup. Resultado: Suíte íntegra exit 0; versão quebrada exit diferente de 0; relatório lista testes realmente executados.
+- `TEST-A04` (A04): Seguir comandos e verificar nomes, porta, chave local, mapa e defaults. Resultado: Comandos reproduzíveis; sem setup manual; links internos existentes; endereços corretos.
+- `TEST-A05` (A05): Forçar código duplicado/curto/longo/minúsculo/não alfanumérico, FK/status/limites inválidos, buyer misto, dois jobs e pares state/processed_at inválidos; migrar de novo. Resultado: Todas as escritas inválidas falham, inclusive fora de `[A-Z0-9]{12}`; DB permite ticket sem job apenas fora do serviço; dados válidos persistem; sem migração pendente.
+- `TEST-A29` (A29): Rodar gate positivo e com falha de setup; interromper execução; conferir ps e listener, estado demo. Resultado: Cleanup isolado; nenhum volume demo removido; falha/cleanup não zero; demo responde.
+- `TEST-A37` (A37): Executar verificador; alterar item, remover mapeamento, simular relatório faltante, editar relatório commitado. Resultado: Falha estrutural ou de histórico detectada; baseline sem relatórios é válida, release incompleto falha.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## Integração posterior
+Não há item exclusivo de integração atribuído a esta feature; regressão global é obrigatória.
 
 ## Handoff
-
-- [ ] Testes unitários, integração e contratos locais verdes no SHA indicado.
-- [ ] Nada fora da ownership; atualizar docs e registrar dependências.
-- [ ] Entregar SHA e comandos à sessão nova de avaliação; não entregar veredito pronto.
-- [ ] Após aprovação independente e PR mergeado, coordenador atualiza estado.
+Entregar SHA limpo, base SHA, interfaces, comandos, logs redigidos e desvios. Avaliador novo, sem histórico de conversa, julga apenas contrato e evidência. Coordenador integra após local PASS; relatório final da feature exige também itens integrados, se houver.

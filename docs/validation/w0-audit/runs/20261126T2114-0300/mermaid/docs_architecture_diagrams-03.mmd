@@ -1,0 +1,5 @@
+erDiagram
+    USER ||--o{ EVENT : owns
+    USER o|--o{ TICKET : purchases_web
+    EVENT ||--o{ TICKET : has
+    TICKET ||--|| PAYMENT_JOB : schedules

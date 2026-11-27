@@ -1,28 +1,18 @@
-# AGENTS.md | instruções de execução
+# AGENTS.md | contrato de trabalho
 
-Este é um projeto greenfield. Não buscar, copiar ou adaptar a implementação do repositório de referência. O brief é normativo. O pacote inicial contém apenas design e ferramentas auxiliares; não afirmar que o produto existe ou que gates passaram quando não executados.
-
-## Leitura obrigatória
-
-1. `README.md`, `proposal.md`, `docs/prd/PRD.md`, `design.md`, `requirements-matrix.md`, `tasks.md` e `state/project-state.json`.
-2. Para sua feature, `docs/features/Fxx-*/spec.md`, `plan.md`, `contract.md`, ADRs relevantes e `docs/engineering-guidelines.md`.
-3. Carregar skills locais em `.agents/skills/`; seguir `docs/agents/workflow.md` para handoff/isolamento. Claude Code pode usar `CLAUDE.md`; as skills são também instruções textuais portáveis, não dependência de marketplace.
+Projeto greenfield, documentação pré-implementação. Comece por proposal.md, design.md, docs/prd/PRD.md, requirements-matrix.md, tasks.md e state/project-state.json. Depois leia spec/plan/contract da feature, interfaces consumidas e skills indicadas em tasks. A fonte normativa é o brief e os contratos rastreados. Nenhuma implementação existe neste pacote.
 
 ## Comandos
+Planejamento: `python3 scripts/validate_docs.py`, `python3 scripts/verify_model.py`, `python3 scripts/test_baseline.py`, `python3 docs/validation/w0-audit/reproduce_mutations.py`; host sem Python: `docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/validate_docs.py` (idem verify_model). Após F01: `bash bin/up`, `bash bin/down`, `bash bin/gates`; candidato `bash bin/gates --feature Fxx`; release `bash bin/gates --release`, `bash bin/flow`. `python3 scripts/validate_evidence.py --release` requer Git e histórico real. Não confundir docs check com testes do produto. Default simulator, no payment key.
 
-- `./bin/up` (F01 implementará): build, migrate, seed, readiness.
-- `./bin/down`: parar todos os serviços do projeto sem apagar dados por padrão.
-- `./bin/gates [Fxx]`: lint, documentação e testes, com DB isolado; sem argumento executa tudo.
-- `python3 scripts/validate_docs.py` ou container Python descrito no README: disponível já no pacote.
-- `scripts/partner_probe.py`: executável via Python somente após API implementada; ver `docs/validation/harness.md`.
+## Invioláveis
+- R01–R13 e API fixa; web/API partilham ledger. Todos os writes de evento sob event→ticket→job; preço histórico; nenhum status terminal revive; read snapshot único. Não modificar modelos, contratos ou código compartilhado fora de ownership.
+- Auth server-side/owner em todas as rotas; CSRF no web; key antes de parse na API; não logar dados sensíveis.
+- Providers aprovados/mergeados antes de consumidores. Wave paralela por worktrees; Compose project e porta distintos.
+- Implementer testa, não avalia. Evaluator fresh context, SHA limpo e relatório novo, sem edição histórica. Local PASS não equivale a integrated PASS. Não inventar evidência.
+- Coordenador escreve state; cada etapa tem teste, commit e handoff. Gate falho impede merge/release. Não alterar teste para esconder defeito.
 
-## Regras inegociáveis
+## Mapa
+PRD em docs/prd, FDDs/plan/contracts em docs/features, arquitetura/ADRs em docs/architecture, API/UI/internal em docs/interfaces, skills em .agents/skills, avaliação em docs/agents, testes/traceability/flow em docs/validation, scripts auxiliares em scripts, estado em state. README registra comandos/credenciais/PRs reais. Veja engineering-guidelines para padrões. Se ferramenta lê outro arquivo, apontar para este, sem regras conflitantes.
 
-- Implementador nunca é avaliador. Novo contexto e SHA fixado para avaliar. Sem inventar evidência, sem alterar relatórios commitados.
-- Não mudar contrato para passar teste. Se ambíguo, registrar proposta e obter aprovação do coordenador; atualizar critérios, matriz e consumidores antes de código.
-- Toda mutação de evento/ticket segue lock de evento e ordem event→ticket→job. Não implementar compras separadas por canal.
-- Não usar SQLite para prova concorrente; não persistir cartão. Não usar dados/segredos reais.
-- Usar branches por feature e limites de escrita; migrations compartilhadas com coordenador. Antes de W5, congelar interfaces.
-- Testar falhas, estados terminais, segurança e integração. Sem skips para requisitos obrigatórios. Gates retornam não zero em falha.
-- Não usar `git push --force`, reescrever histórico de relatórios ou editar branches alheias. Não fazer deploy.
-- Estado inicial planejado; coordenador atualiza status e links com fatos verificados. Leia os artefatos referenciados no README para mapa completo.
+A trava `docs/validation/normative-lock.json` protege as fontes normativas desta revisão contra alterações acidentais. Não regenerar para fazer gate passar; mudança normativa exige amendment, revisão humana e commit explícito. Em W0 consulte `docs/validation/w0-audit/CORRECTIONS.md` e `docs/validation/w0-audit/APPROVAL-CHECKLIST.md`; nenhum PASS estrutural autoriza iniciar W1.

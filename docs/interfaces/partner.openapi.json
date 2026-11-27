@@ -1,0 +1,363 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Catraca partner contract",
+    "version": "1.0.0"
+  },
+  "security": [
+    {
+      "PartnerKey": []
+    }
+  ],
+  "paths": {
+    "/api/partner/events": {
+      "get": {
+        "operationId": "listEvents",
+        "responses": {
+          "200": {
+            "description": "Published events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "name",
+                      "startsAt",
+                      "priceCents",
+                      "availableSeats"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "minLength": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "startsAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "priceCents": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "availableSeats": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/partner/events/{eventId}/purchases": {
+      "post": {
+        "operationId": "purchase",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "minLength": 1
+            }
+          }
+        ],
+        "description": "Error precedence: unauthorized, invalid_request, event_not_available, sold_out. A missing, duplicated or invalid X-Api-Key returns 401 before the request body is read. After authentication, the raw body limit is 16384 bytes inclusive; 16385 bytes or more returns 422 invalid_request before JSON parsing.",
+        "requestBody": {
+          "description": "Raw UTF-8 JSON body, at most 16384 bytes. buyerEmail is stripped and Unicode-casefolded by the domain; the canonical value must be a valid email of at most 254 characters.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "buyerEmail",
+                  "cardNumber"
+                ],
+                "properties": {
+                  "buyerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The canonical value after strip and Unicode casefold must contain at most 254 characters."
+                  },
+                  "cardNumber": {
+                    "type": "string",
+                    "pattern": "^[0-9]{16}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Pending ticket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "ticketId",
+                    "code",
+                    "status"
+                  ],
+                  "properties": {
+                    "ticketId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "minLength": 12,
+                      "maxLength": 12,
+                      "pattern": "^[A-Z0-9]{12}$"
+                    },
+                    "status": {
+                      "type": "string",
+                      "const": "pending"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid_request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "invalid_request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "event_not_available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "event_not_available"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "sold_out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "sold_out"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/partner/tickets/{ticketId}": {
+      "get": {
+        "operationId": "readTicket",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket from either channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "ticketId",
+                    "code",
+                    "eventId",
+                    "status",
+                    "checkedIn"
+                  ],
+                  "properties": {
+                    "ticketId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "minLength": 12,
+                      "maxLength": 12,
+                      "pattern": "^[A-Z0-9]{12}$"
+                    },
+                    "eventId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "minLength": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "confirmed",
+                        "declined",
+                        "cancelled",
+                        "refunded"
+                      ]
+                    },
+                    "checkedIn": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ticket_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "const": "ticket_not_found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "PartnerKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Key",
+        "description": "Exactly one header field is required. Missing, duplicated or invalid values return 401 before any request body read or parsing."
+      }
+    }
+  }
+}

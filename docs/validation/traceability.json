@@ -6,7 +6,9 @@
       "wave": 1,
       "dependsOn": [],
       "provides": "Ambiente Compose, schema compartilhado, clock, runner, dados de demonstração e interfaces de registro de rotas.",
-      "consumes": "Nenhuma feature anterior."
+      "consumes": "Nenhuma feature anterior.",
+      "name": "Ambiente reproduzível e persistência",
+      "scope": "platform, migrations, boot, bin, CI"
     },
     {
       "id": "F02",
@@ -15,8 +17,10 @@
       "dependsOn": [
         "F01"
       ],
-      "provides": "Cadastro/login/logout, sessão, funções require_participant e require_owner, identidade dos usuários da seed.",
-      "consumes": "F01: schema, seed e ambiente."
+      "provides": "Cadastro/login/logout, sessão, funções require_participant e require_organizer + predicado de dono, identidade dos usuários da seed.",
+      "consumes": "F01: schema, seed e ambiente.",
+      "name": "Identidade e fronteiras de acesso",
+      "scope": "identity, web account"
     },
     {
       "id": "F03",
@@ -26,8 +30,10 @@
         "F01",
         "F02"
       ],
-      "provides": "CRUD limitado de evento, publicação, página de gestão /organizer/events/{id}/, consulta pública, lock e leitura canônica de ocupação.",
-      "consumes": "F01: schema e clock; F02: identidade e autorização."
+      "provides": "CRUD limitado de evento, publicação, página de gestão /gestao/eventos/<id>/, consulta pública, lock e leitura canônica de ocupação.",
+      "consumes": "F01: schema e clock; F02: identidade e autorização.",
+      "name": "Administração e catálogo de eventos",
+      "scope": "catalog, organizer event views"
     },
     {
       "id": "F04",
@@ -37,8 +43,10 @@
         "F01",
         "F03"
       ],
-      "provides": "Serviço reserve, finalize_payment, consulta de ingresso, job persistente e regras transacionais de venda.",
-      "consumes": "F01: DB/worker/clock; F03: evento bloqueável e ocupação."
+      "provides": "Serviço reserve, resolve_due, consulta de ingresso, job persistente e regras transacionais de venda.",
+      "consumes": "F01: DB/worker/clock; F03: evento bloqueável e ocupação.",
+      "name": "Livro de ingressos e liquidação simulada",
+      "scope": "ledger, worker"
     },
     {
       "id": "F05",
@@ -50,7 +58,9 @@
         "F04"
       ],
       "provides": "Vitrine pública, compra autenticada e página de ingressos pessoais.",
-      "consumes": "F02: participante/sessão; F03: catálogo; F04: reserve e consulta."
+      "consumes": "F02: participante/sessão; F03: catálogo; F04: reserve e consulta.",
+      "name": "Jornada de participante",
+      "scope": "participant web"
     },
     {
       "id": "F06",
@@ -61,7 +71,9 @@
         "F04"
       ],
       "provides": "As três rotas /api/partner, autenticação por chave, tradução de DTOs e erros do domínio.",
-      "consumes": "F03: catálogo público; F04: compra/consulta."
+      "consumes": "F03: public_catalog/public_detail; F04: compra/consulta e validação canônica do PartnerBuyer.",
+      "name": "Integração comercial por API",
+      "scope": "partner API"
     },
     {
       "id": "F07",
@@ -73,7 +85,9 @@
         "F04"
       ],
       "provides": "Ações de gestão, cancelamento atômico, check-in serializado, painel coerente com todos os estados e canais.",
-      "consumes": "F02: dono; F03: página/lock/estado; F04: ingressos, preço e job."
+      "consumes": "F02: dono; F03: página/lock/estado; F04: ingressos, preço e job.",
+      "name": "Operação do evento e apuração",
+      "scope": "operations, management partial"
     }
   ],
   "criteria": [
@@ -87,7 +101,12 @@
       "test": "TEST-A01",
       "task": "T-F01-03",
       "acceptance": "Clone limpo: ./bin/up constrói, migra, semeia e espera web/worker/DB prontos; /health/ready retorna 200 sem configuração manual.",
-      "evidence": "Clonar SHA em pasta temporária; executar up; verificar HTTP e compose ps."
+      "evidence": "Clonar SHA em pasta temporária; executar up; verificar HTTP e compose ps.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Clone de SHA limpo; Docker/Compose; sem .env; sem imagem local obrigatória.",
+      "procedure": "Executar bash bin/up; GET readiness pelo host; inspect serviços; autenticar seed quando F02 disponível.",
+      "oracle": "Exit 0; DB, web e worker prontos; migração/seed one-shot concluídas; nenhuma chave real; antes de F02 comprovar linhas e hashes da seed."
     },
     {
       "id": "A02",
@@ -99,7 +118,12 @@
       "test": "TEST-A02",
       "task": "T-F01-03",
       "acceptance": "./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.",
-      "evidence": "Executar up, seed duas vezes, down, provar porta fechada e ps vazio, up novamente; comparar IDs e autenticação após F02."
+      "evidence": "Executar up, seed duas vezes, down, provar porta fechada e ps vazio, up novamente; comparar IDs e autenticação após F02.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Stack da demo com usuário e evento sentinela.",
+      "procedure": "Executar down; verificar ausência de containers e listener; subir novamente; seed outra vez; comparar IDs e quantidade.",
+      "oracle": "Nenhum serviço do projeto ativo; dados persistem e seed permanece com 2 organizadores + 1 participante seed, sem duplicação."
     },
     {
       "id": "A03",
@@ -111,7 +135,12 @@
       "test": "TEST-A03",
       "task": "T-F01-01",
       "acceptance": "./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos.",
-      "evidence": "Executar gates e injetar falha em cópia descartável; capturar códigos de saída."
+      "evidence": "Executar gates e injetar falha em cópia descartável; capturar códigos de saída.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Ambiente de teste exclusivo e teste propositalmente falho em cópia.",
+      "procedure": "Rodar gates íntegro; repetir com asserção false e depois restaurar; verificar código de saída e cleanup.",
+      "oracle": "Suíte íntegra exit 0; versão quebrada exit diferente de 0; relatório lista testes realmente executados."
     },
     {
       "id": "A04",
@@ -122,8 +151,13 @@
       "contract": "C-F01-A04",
       "test": "TEST-A04",
       "task": "T-F01-03",
-      "acceptance": "AGENTS.md e README contêm comandos, endereços, credenciais de seed, mapa; modo padrão não exige gateway real.",
-      "evidence": "Inspeção dos arquivos, ambiente sem .env e sem credenciais externas."
+      "acceptance": "README e AGENTS.md descrevem os comandos, endpoints, contas e mapa; o padrão local usa somente simulador e não requer configuração de pagamento.",
+      "evidence": "Inspeção dos arquivos, ambiente sem .env e sem credenciais externas.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "README e AGENTS no candidato.",
+      "procedure": "Seguir comandos e verificar nomes, porta, chave local, mapa e defaults.",
+      "oracle": "Comandos reproduzíveis; sem setup manual; links internos existentes; endereços corretos."
     },
     {
       "id": "A05",
@@ -135,8 +169,13 @@
       "contract": "C-F01-A05",
       "test": "TEST-A05",
       "task": "T-F01-02",
-      "acceptance": "Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.",
-      "evidence": "Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas."
+      "acceptance": "Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis.",
+      "evidence": "Aplicar migração em DB vazio e reexecutar; tentar cada classe de código [A-Z0-9]{12} inválido, status/FK/limites inválidos, dois jobs e combinações state/processed_at inválidas; registrar constraints rejeitadas.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Banco PostgreSQL migrado em volume vazio.",
+      "procedure": "Forçar código duplicado, curto, longo, minúsculo ou não alfanumérico, FK inexistente, status inválido, preço 0/>2^53−1, capacidade 0/>2^31−1, buyer misto, dois jobs e queued/processado ou terminal/null; migrar de novo.",
+      "oracle": "Todas as escritas inválidas falham; DB permite ticket sem job apenas fora do serviço, enquanto reserve prova totalidade; dados válidos persistem; sem migração pendente."
     },
     {
       "id": "A06",
@@ -148,7 +187,12 @@
       "test": "TEST-A06",
       "task": "T-F02-01",
       "acceptance": "Cadastro público cria somente participante, e-mail normalizado único; senha armazenada como hash; login válido e logout invalidam sessão; erro genérico em credenciais inválidas.",
-      "evidence": "Browser: cadastro/login/logout; POST com role=organizer; consulta DB somente para verificar hash e papel."
+      "evidence": "Browser: cadastro/login/logout; POST com role=organizer; consulta DB somente para verificar hash e papel.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Browser sem sessão e contas seed.",
+      "procedure": "Cadastrar, repetir e-mail com caixa distinta, login incorreto/correto, logout; consultar hash sem registrá-lo.",
+      "oracle": "Participante único; senha não em claro; sessão só após sucesso; logout invalida cookie anterior."
     },
     {
       "id": "A07",
@@ -159,8 +203,13 @@
       "contract": "C-F02-A07",
       "test": "TEST-A07",
       "task": "T-F02-02",
-      "acceptance": "Visitante e participante não acessam rotas de gestão; B não lê nem modifica eventos de A, incluindo URL direta e POST forjado.",
-      "evidence": "Sessões independentes A/B/P/anônima; fixture de evento A; assert HTTP 404 para B, ausência de nome/dados e nenhuma mutação; 403 ou redirect para demais."
+      "acceptance": "Guarda de papel e predicado de dono são aplicados em todos os recursos de gestão; no contrato local, validar com fixtures e endpoints de teste; as rotas reais são validadas em X03 e X11.",
+      "evidence": "Sessões independentes A/B/P/anônima; fixture de evento A; assert HTTP 404 para B, ausência de nome/dados e nenhuma mutação; 403 ou redirect para demais.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Fixtures de eventos A/B e atores anônimo/P/A/B.",
+      "procedure": "Exercitar guardas com IDs de A e B; forjar proprietário no payload; comparar resultados e dados.",
+      "oracle": "Anônimo redirecionado no GET, participante 403, B recebe 404 genérico ao acessar A; nenhuma mutação."
     },
     {
       "id": "A08",
@@ -172,8 +221,13 @@
       "contract": "C-F02-A08",
       "test": "TEST-A08",
       "task": "T-F02-02",
-      "acceptance": "Participante só tem acesso aos próprios recursos; parceiro não cria sessão web nem vincula conta pelo e-mail.",
-      "evidence": "Testar guarda de participante com duas contas e recurso fixture; tentar usar X-Api-Key em rota web; negar."
+      "acceptance": "O serviço de identidade identifica participante por ID de sessão, não por e-mail ou parâmetro; parceiro não é uma identidade web. Titularidade real de ingressos é validada em X06/X16.",
+      "evidence": "Testar guarda de participante com duas contas e recurso fixture; tentar usar X-Api-Key em rota web; negar.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Dois participantes com e-mails distintos e credencial de parceiro.",
+      "procedure": "Forjar ID de participante no request/contexto, tentar autenticar por chave; validar identidade retornada.",
+      "oracle": "ID da sessão é autoridade exclusiva; chave não cria sessão; login por e-mail continua conta distinta."
     },
     {
       "id": "A09",
@@ -185,7 +239,12 @@
       "test": "TEST-A09",
       "task": "T-F03-01",
       "acceptance": "Nome/local não vazios; lotação inteira >=1; preço em centavos >0; início estritamente futuro em criar e editar, inclusive requisição direta.",
-      "evidence": "Tabela de casos com agora, passado, futuro, 0, -1, 1.5, preço zero e campos vazios; checar persistência."
+      "evidence": "Tabela de casos com agora, passado, futuro, 0, -1, 1.5, preço zero e campos vazios; checar persistência.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "A autenticado; formulário de criação e edição.",
+      "procedure": "Enviar campos vazios, preço 0, capacidade 0, data ontem, depois data futura válida.",
+      "oracle": "422 ou formulário com erros; nenhum evento inválido; sucesso cria draft com valores normalizados."
     },
     {
       "id": "A10",
@@ -198,7 +257,12 @@
       "test": "TEST-A10",
       "task": "T-F03-03",
       "acceptance": "Evento nasce draft; publicar torna visível a consulta pública; gestão tem URL estável e lista apenas próprios eventos.",
-      "evidence": "Criar E1, consultar catálogo antes/depois e abrir URL de gestão com dono."
+      "evidence": "Criar E1, consultar catálogo antes/depois e abrir URL de gestão com dono.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Dois organizadores, E1 draft e E2 de B.",
+      "procedure": "Abrir gestão E1, listar A, consultar catálogo, publicar e recarregar.",
+      "oracle": "URL estável, apenas eventos de A na gestão, E1 fora antes e visível depois."
     },
     {
       "id": "A11",
@@ -211,7 +275,12 @@
       "test": "TEST-A11",
       "task": "T-F03-02",
       "acceptance": "Editar sob lock do evento; capacidade abaixo de pending+confirmed é rejeitada; igual/acima aceita; preço novo não altera snapshot de ingressos.",
-      "evidence": "Fixtures de dois ingressos ocupando; reduzir para 1 rejeita, 2/3 aceitam; snapshot histórico inalterado."
+      "evidence": "Fixtures de dois ingressos ocupando; reduzir para 1 rejeita, 2/3 aceitam; snapshot histórico inalterado.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "E1 com pending e confirmed, ocupação 2; preço 10000.",
+      "procedure": "Editar para cap 1, 2 e 3; trocar preço para 15000; comparar snapshot de tickets.",
+      "oracle": "Cap 1 nega sem mudança; 2 e 3 aceitam; ingressos anteriores continuam 10000."
     },
     {
       "id": "A12",
@@ -223,7 +292,12 @@
       "test": "TEST-A12",
       "task": "T-F03-02",
       "acceptance": "Evento cancelled não pode ser alterado/republicado; catálogo e disponibilidade pública o excluem.",
-      "evidence": "Fixture de estado cancelled; POST edição/publicação e leitura pública; negar sem mutação."
+      "evidence": "Fixture de estado cancelled; POST edição/publicação e leitura pública; negar sem mutação.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Evento fixture cancelled, publicado e draft.",
+      "procedure": "Tentar editar e publicar cancelado, consultar lista pública.",
+      "oracle": "Cancelado ausente e imutável; somente publicado elegível."
     },
     {
       "id": "A13",
@@ -236,8 +310,13 @@
       "contract": "C-F04-A13",
       "test": "TEST-A13",
       "task": "T-F04-02",
-      "acceptance": "Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.",
-      "evidence": "Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada."
+      "acceptance": "Uma compra válida retorna ingresso pending com ID UUID e código [A-Z0-9]{12} únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.",
+      "evidence": "Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "E publicado cap 2 sem tickets; relógio de teste e worker pausado para conferir commit.",
+      "procedure": "Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; validar UUID, código por ^[A-Z0-9]{12}$ e preço.",
+      "oracle": "Um ticket pending e um job por chamada; IDs UUID e códigos válidos/distintos; 0 vagas após duas; não aguarda pagamento."
     },
     {
       "id": "A14",
@@ -249,7 +328,12 @@
       "test": "TEST-A14",
       "task": "T-F04-02",
       "acceptance": "Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas.",
-      "evidence": "TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez."
+      "evidence": "TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "PostgreSQL real, 10 eventos novos cap 5 e 30 clientes em conexões distintas.",
+      "procedure": "Barreira de início, usar cartões de aprovação; conferir resultados e contagem DB; rodar também cap 1 com 2 concorrentes.",
+      "oracle": "Exatamente 5/25 em todas as rodadas, 1/1 no limite; nenhuma exceção inesperada nem job órfão."
     },
     {
       "id": "A15",
@@ -261,7 +345,12 @@
       "test": "TEST-A15",
       "task": "T-F04-03",
       "acceptance": "Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga.",
-      "evidence": "Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo."
+      "evidence": "Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "5 eventos ou vagas independentes; worker padrão ativo; relógio monotônico + timestamps DB.",
+      "procedure": "Comprar cada final 0001/0002/0003/0004/9999; consultar pending e resultado até deadline; medir intervalo created→resolved, recarregar vagas.",
+      "oracle": "Aprovação/recusa corretas; 2–5 s e 30–40 s; recusa libera exatamente uma vaga; nenhum terminal antecipado."
     },
     {
       "id": "A16",
@@ -274,7 +363,12 @@
       "test": "TEST-A16",
       "task": "T-F04-03",
       "acceptance": "Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício.",
-      "evidence": "Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único."
+      "evidence": "Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Ticket slow e fixtures terminais; dois preços sucessivos.",
+      "procedure": "Comprar antes/depois da edição; reiniciar worker antes de due; executar resolução novamente; tentar aplicar a fixture terminal.",
+      "oracle": "Preço histórico intacto; job recuperado; só uma transição; terminal nunca muda."
     },
     {
       "id": "A17",
@@ -285,8 +379,13 @@
       "contract": "C-F04-A17",
       "test": "TEST-A17",
       "task": "T-F04-01",
-      "acceptance": "Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.",
-      "evidence": "Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs."
+      "acceptance": "Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail parceiro é strip+casefold, validado e limitado a 254 caracteres canônicos; PAN/e-mail inválidos não persistem nem aparecem em logs.",
+      "evidence": "Casos de cartão 15/17 dígitos, letras/Unicode/espaços e e-mails com trim/casefold, inválido e >254 canônicos; assert canonicidade ou contagem zero e inspeção DB/logs.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "E publicado com vaga; DB e captura sanitizada de log.",
+      "procedure": "Enviar cartões com 15/17 dígitos, letras, Unicode, espaços e tipo numérico; enviar e-mails com trim/casefold Unicode, inválido e >254 após casefold; inspecionar DB/logs.",
+      "oracle": "E-mail válido é canônico; entradas inválidas não criam ticket/job; PAN e e-mail inválido não são salvos nem refletidos."
     },
     {
       "id": "A18",
@@ -300,7 +399,12 @@
       "test": "TEST-A18",
       "task": "T-F05-01",
       "acceptance": "Vitrine exibe só publicados não cancelados, inclusive esgotados com texto exato Ingressos esgotados; tentativa concorrente recebe mesma mensagem.",
-      "evidence": "Browser: draft/publicado/cancelled, capacidade 1 pendente e tentativa direta sem vaga."
+      "evidence": "Browser: draft/publicado/cancelled, capacidade 1 pendente e tentativa direta sem vaga.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "E1 draft, E2 publicado com vaga, E3 publicado lotado, E4 cancelado fixture.",
+      "procedure": "Visitar vitrine anonimamente e detalhe E3; forjar POST quando vaga termina.",
+      "oracle": "Só E2/E3 listados; mensagem Ingressos esgotados no detalhe ou tentativa; sem venda adicional."
     },
     {
       "id": "A19",
@@ -314,7 +418,12 @@
       "test": "TEST-A19",
       "task": "T-F05-02",
       "acceptance": "Participante cria conta, compra pela vitrine, vê evento/status/código em Meus ingressos; pending imediato e confirmado em até 5s para 0001.",
-      "evidence": "Playwright: cadastro, login, compra, tela pending e polling/reload até confirmed; conferir código em DB ou via F06 após integração."
+      "evidence": "Playwright: cadastro, login, compra, tela pending e polling/reload até confirmed; conferir código em DB ou via F06 após integração.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Browser participante novo e evento publicado disponível.",
+      "procedure": "Cadastrar, comprar 0001, abrir Meus ingressos imediatamente e recarregar até 5s.",
+      "oracle": "Evento e código visíveis, pendente inicialmente, confirmado até deadline; sem esperar gateway no POST."
     },
     {
       "id": "A20",
@@ -327,7 +436,12 @@
       "test": "TEST-A20",
       "task": "T-F05-02",
       "acceptance": "Meus ingressos filtra por participant_id autenticado, não por e-mail, e mostra todos os cinco rótulos; visitante não compra.",
-      "evidence": "Fixtures dos cinco estados; duas contas; ingresso partner com mesmo e-mail não aparece; POST anônimo sem efeito."
+      "evidence": "Fixtures dos cinco estados; duas contas; ingresso partner com mesmo e-mail não aparece; POST anônimo sem efeito.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Fixtures de cinco status para P, ticket de outro participante e parceiro com mesmo e-mail.",
+      "procedure": "Abrir Meus ingressos, trocar sessão, tentar URL/ID forjado e compra anônima.",
+      "oracle": "Só tickets do ID da sessão; cinco rótulos exatos; parceiro não aparece; visitante não compra."
     },
     {
       "id": "A21",
@@ -340,8 +454,13 @@
       "contract": "C-F06-A21",
       "test": "TEST-A21",
       "task": "T-F06-02",
-      "acceptance": "GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.",
-      "evidence": "HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0."
+      "acceptance": "GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos.",
+      "evidence": "HTTP GET com fixtures dos estados; validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites; esgotado permanece com 0.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Eventos draft, published, lotado e cancelled; chave válida.",
+      "procedure": "GET /api/partner/events; validar cada item contra o schema OpenAPI, inclusive UUID, timestamp e limites numéricos.",
+      "oracle": "200 array conforme OpenAPI; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada."
     },
     {
       "id": "A22",
@@ -355,7 +474,12 @@
       "test": "TEST-A22",
       "task": "T-F06-02",
       "acceptance": "POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out.",
-      "evidence": "Tabela HTTP: JSON inválido e evento inexistente ->422; inválido e esgotado ->422; válido draft/cancelled/inexistente ->404; lotado ->409; válido ->202."
+      "evidence": "Tabela HTTP: JSON inválido e evento inexistente ->422; inválido e esgotado ->422; válido draft/cancelled/inexistente ->404; lotado ->409; válido ->202.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "E disponível, draft, inexistente, esgotado, cancelado fixture.",
+      "procedure": "POST válido; em seguida combinar erro de chave, payload inválido, evento indisponível e falta de vaga.",
+      "oracle": "202 pending exato; 401→422→404→409 na precedência; erros sem efeitos."
     },
     {
       "id": "A23",
@@ -368,8 +492,13 @@
       "contract": "C-F06-A23",
       "test": "TEST-A23",
       "task": "T-F06-02",
-      "acceptance": "GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.",
-      "evidence": "HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato."
+      "acceptance": "GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized.",
+      "evidence": "HTTP em três rotas × sem/errada; consultar fixtures web/partner, UUID inexistente e malformado; validar respostas 200 contra OpenAPI.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Ticket web fixture e parceiro; ID inexistente; chaves válidas e inválidas.",
+      "procedure": "GET ambos os tickets, ID UUID ausente e UUID malformado; validar respostas 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida.",
+      "oracle": "200 com IDs UUID, código ^[A-Z0-9]{12}$ e demais campos exatos; ausente/malformado dá 404 ticket_not_found; 401 unauthorized em 6 combinações."
     },
     {
       "id": "A24",
@@ -382,7 +511,12 @@
       "test": "TEST-A24",
       "task": "T-F06-03",
       "acceptance": "Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados.",
-      "evidence": "Runner HTTP com barreira, 30 conexões, validar corpo e IDs únicos, consultar cada aceito e availableSeats=0; usar novo evento por rodada."
+      "evidence": "Runner HTTP com barreira, 30 conexões, validar corpo e IDs únicos, consultar cada aceito e availableSeats=0; usar novo evento por rodada.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Dois eventos novos, cap 5, preço 1000, gateway padrão, web concorrente.",
+      "procedure": "Disparar 30 POSTs com final 0001 por evento usando barreira; verificar payloads, cinco IDs/códigos únicos, disponibilidade e confirmações até 10s.",
+      "oracle": "Por rodada 5×202, 25×409 sold_out, nenhum outro status; cinco confirmed e 0 vagas."
     },
     {
       "id": "A25",
@@ -393,8 +527,13 @@
       "contract": "C-F07-A25",
       "test": "TEST-A25",
       "task": "T-F07-01",
-      "acceptance": "Check-in aplica exatamente as cinco mensagens na ordem definida; só confirmed não utilizado recebe checkedIn=true; dois check-ins concorrentes liberam uma entrada.",
-      "evidence": "Fixtures código inválido/outro evento, cancelado, pending/declined/refunded, confirmado já usado e novo; corrida com duas sessões do dono."
+      "acceptance": "A decisão de check-in respeita a precedência R10 e somente um pedido concorrente pode marcar entrada; no evento cancelado, a página oculta o formulário, e POST direto mantém precedência.",
+      "evidence": "Fixtures código inválido/outro evento, cancelado, pending/declined/refunded, confirmado já usado e novo; corrida com duas sessões do dono.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Ingresso de outro evento, código inexistente, pending, declined, confirmed livre/usado, cancelado.",
+      "procedure": "Executar tabela de decisão e 10 POSTs concorrentes para código livre; em cancelado testar POST com inválido e próprio.",
+      "oracle": "Mensagens R10 em ordem; exatamente uma entrada liberada; nenhum efeito nos demais; timestamp original preservado."
     },
     {
       "id": "A26",
@@ -405,8 +544,13 @@
       "contract": "C-F07-A26",
       "test": "TEST-A26",
       "task": "T-F07-02",
-      "acceptance": "Cancelar publicado é irreversível; na mesma transação confirmed→refunded e pending→cancelled, sem alteração de declined; gateway posterior não modifica; edit/publish/compra rejeitados.",
-      "evidence": "Criar slow 0003 + fast 0001, cancelar antes de 30s; medir <=10s, aguardar >=45s, repetir cancelamento e testar ações; corrida cancelamento/reserva/finalização."
+      "acceptance": "Cancelar evento publicado é uma operação terminal; em até 10 s (baseline: no mesmo commit), pending passa a cancelled e confirmed a refunded; declined permanece; nenhuma resposta tardia reabre ingresso. Rejeitar edição e republicação por POST.",
+      "evidence": "Criar slow 0003 + fast 0001, cancelar antes de 30s; medir <=10s, aguardar >=45s, repetir cancelamento e testar ações; corrida cancelamento/reserva/finalização.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Evento publicado, ticket confirmado e slow pending + declined; relógio real.",
+      "procedure": "Cancelar antes de 30s; consultar estados em até 10s, novamente após 45s; forjar edição/republicação; tentar cancelar draft e repetir cancelamento.",
+      "oracle": "Evento terminal; confirmed refunded, pending cancelled, declined intacto; nenhum ingresso reativado; ações inválidas negadas."
     },
     {
       "id": "A27",
@@ -418,8 +562,13 @@
       "contract": "C-F07-A27",
       "test": "TEST-A27",
       "task": "T-F07-03",
-      "acceptance": "Painel mostra seis métricas com snapshots de preço e ambos os canais; check-ins somente confirmed; cancelado tem receita/vagas/confirmados/pendentes/check-ins zero.",
-      "evidence": "Fixture 10000+10000+15000 confirmados, 1 check-in, recusado e estornado; conferir receita 35000 e todas as contagens; após cancelar comparar zeros e estornos."
+      "acceptance": "As seis métricas usam uma consulta coerente sobre evento e ingressos, sem contadores de canal; preço histórico apenas de confirmed. Cancelamento zera tudo exceto estornados.",
+      "evidence": "Fixture 10000+10000+15000 confirmados, 1 check-in, recusado e estornado; conferir receita 35000 e todas as contagens; após cancelar comparar zeros e estornos.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Ingressos mistos de dois canais com preço 10000,10000,15000 confirmados e um declined; um já utilizado.",
+      "procedure": "Abrir painel, comparar ao oráculo; cancelar; recarregar.",
+      "oracle": "Antes 3/0/1/0/35000/0 (cap 3), depois 0/0/0/0/0/3; soma por preço congelado."
     },
     {
       "id": "A28",
@@ -432,7 +581,176 @@
       "test": "TEST-A28",
       "task": "T-F07-03",
       "acceptance": "Check-in, cancelar e painel ficam na URL de gestão de cada evento; todas as ações exigem dono inclusive requisição direta.",
-      "evidence": "Browser A/B/P/visitante, POST forjado de B, verificar nenhum dado nem alteração; abrir gestão de A e executar ações."
+      "evidence": "Browser A/B/P/visitante pela URL completa, POST forjado de B e ações de A; registrar overrides dos hooks e diff sem edição de wiring compartilhado.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "A, B, P, anônimo; E de A com ticket; settings de teste apontam os hooks precriados ao provider, partial e URLconf reais de F07.",
+      "procedure": "Acessar URL e enviar check-in/cancelamento em cada sessão; conferir HTML e banco.",
+      "oracle": "A tem gestão completa; B, P, anônimo não leem nem alteram; resposta sem dados de A."
+    },
+    {
+      "id": "A29",
+      "feature": "F01",
+      "rules": [
+        "H01",
+        "H03"
+      ],
+      "contract": "C-F01-A29",
+      "test": "TEST-A29",
+      "task": "T-F01-04",
+      "acceptance": "Gates rodam em projeto Compose distinto do ambiente de demonstração, sem remover volumes alheios; falha de bootstrap ou cleanup retorna não zero.",
+      "evidence": "Criar ambiente sentinela, induzir falha em gate isolado, verificar código e containers/volume do sentinela.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Demo sentinela em projeto/volume próprio; gate em outro projeto.",
+      "procedure": "Rodar gate positivo e com falha de setup; interromper execução; conferir ps e listener, estado demo.",
+      "oracle": "Cleanup isolado; nenhum volume demo removido; falha/cleanup não zero; demo responde."
+    },
+    {
+      "id": "A30",
+      "feature": "F02",
+      "rules": [
+        "R13"
+      ],
+      "contract": "C-F02-A30",
+      "test": "TEST-A30",
+      "task": "T-F02-03",
+      "acceptance": "Cadastro ignora papel recebido; sessão é rotacionada no login e invalidada no logout; mutações web exigem CSRF e redirecionamento local seguro.",
+      "evidence": "POST forjado, role=organizer, cookies antes/depois, token ausente e next externo; comparar banco.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Sessão anônima, formulários públicos e protegidos.",
+      "procedure": "Enviar role=organizer, token CSRF ausente, next=//host e variações, reutilizar cookie após logout.",
+      "oracle": "Conta participante, mutação proibida sem CSRF, apenas redirect interno, sessão anterior inválida."
+    },
+    {
+      "id": "A31",
+      "feature": "F03",
+      "rules": [
+        "R01",
+        "R03"
+      ],
+      "contract": "C-F03-A31",
+      "test": "TEST-A31",
+      "task": "T-F03-02",
+      "acceptance": "Edição revalida a data no instante da escrita e não aceita frações de vaga, centavos fracionários ou valores fora dos limites documentados; nenhuma escrita parcial.",
+      "evidence": "Tabela de limites: ontem/agora/futuro, 0/1/1.5, 0/0.01/1.001, campos vazios, limite numérico.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Clock injetável e A dono de evento.",
+      "procedure": "Executar limites numéricos, data igual a now, inválida e futura; atrasar lock até data vencer; editar parcialmente inválido.",
+      "oracle": "Validação estrita dentro da escrita; sem alteração parcial; moeda decimal exata."
+    },
+    {
+      "id": "A32",
+      "feature": "F04",
+      "rules": [
+        "R06",
+        "R09"
+      ],
+      "contract": "C-F04-A32",
+      "test": "TEST-A32",
+      "task": "T-F04-02",
+      "acceptance": "Falha ao criar job reverte reserva; colisão de código usa savepoint e retry limitado; conflitos inesperados não viram sold_out.",
+      "evidence": "Forçar colisões e exceção entre INSERTs; contar tickets/jobs, inspecionar status HTTP em teste integrado.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Code generator injetável e DB transacional; evento com vagas.",
+      "procedure": "Forçar colisão uma vez e permanente; injetar falha ao criar job; verificar tickets/jobs antes/depois.",
+      "oracle": "Colisão transitória resolve com novo código; permanente/falha reverte tudo, não retorna sold_out."
+    },
+    {
+      "id": "A33",
+      "feature": "F04",
+      "rules": [
+        "R07",
+        "R08",
+        "R11"
+      ],
+      "contract": "C-F04-A33",
+      "test": "TEST-A33",
+      "task": "T-F04-03",
+      "acceptance": "Worker concorrente obedece event→ticket→job e revalida estado/vencimento; nenhuma espera de gateway ou lock global; transação abortada é retomável.",
+      "evidence": "Duas conexões/processos, job selecionado duas vezes, lock hold/release, abortar uma execução, confirmar efeito único.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Job vencido, dois workers independentes; lock de evento controlado.",
+      "procedure": "Ambos descobrem o mesmo ID; um rollback; outro conclui; repetir job terminal; testar evento diferente.",
+      "oracle": "Um efeito, sem deadlock; retry só de transação abortada; eventos independentes não bloqueiam entre si."
+    },
+    {
+      "id": "A34",
+      "feature": "F06",
+      "rules": [
+        "API",
+        "R06",
+        "R07"
+      ],
+      "contract": "C-F06-A34",
+      "test": "TEST-A34",
+      "task": "T-F06-03",
+      "acceptance": "Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado.",
+      "evidence": "HTTP bruto registrando multiplicidade da chave e bytes efetivamente lidos para 16.384/16.385; conferir resposta exata, ordem das guardas e ausência de efeitos.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Chave válida/errada, evento ausente e esgotado.",
+      "procedure": "Enviar chave ausente/duplicada/errada com body sentinela; com chave válida enviar JSON válido de exatamente 16.384 bytes, o mesmo com 16.385 bytes, JSON truncado/null/array, e-mail canônico inválido/>254, cartão Unicode/numérico e content-type incorreto.",
+      "oracle": "401 sem ler/parsear body para chave ausente/duplicada/errada; 16.384 bytes alcança o domínio; 16.385 bytes e payload inválido autenticado dão 422 mesmo com evento inexistente/lotado; sem efeito, redirect ou 500."
+    },
+    {
+      "id": "A35",
+      "feature": "F07",
+      "rules": [
+        "R05",
+        "R11",
+        "R12"
+      ],
+      "contract": "C-F07-A35",
+      "test": "TEST-A35",
+      "task": "T-F07-03",
+      "acceptance": "Leitura de gestão/painel usa snapshot único incluindo capacidade/status/owner e agregados; corridas de edição e cancelamento não produzem combinações impossíveis.",
+      "evidence": "Forçar alternância de snapshots e comparar cada resultado a estados completos permitidos; verificar ausência de clamp de contagem negativa.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Dois estados válidos de evento/tickets em transações; consultas simultâneas.",
+      "procedure": "Usar barreira para alterar capacity e status durante leituras; comparar cada resultado a snapshots completos.",
+      "oracle": "Sem mistura de dados de commits distintos, sem clamp escondendo ocupação inválida; painel sempre deriva do mesmo snapshot."
+    },
+    {
+      "id": "A36",
+      "feature": "F07",
+      "rules": [
+        "R07",
+        "R10",
+        "R11"
+      ],
+      "contract": "C-F07-A36",
+      "test": "TEST-A36",
+      "task": "T-F07-04",
+      "acceptance": "Corridas reserva/cancelamento, gateway/cancelamento e check-in/cancelamento terminam em estado serial válido, sem 5xx ou entrada após cancelamento.",
+      "evidence": "Barreiras e locks controlados em ambas as ordens; comparar sequência de commits e estado terminal.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Evento publicado cap 1 ou 2; conexões separadas; ticket pending/confirmed.",
+      "procedure": "Forçar as duas ordens de lock em cada par: reserva×cancelar, finalize×cancelar, checkin×cancelar.",
+      "oracle": "Somente resultados serializáveis; no final 0 pending/confirmed, nenhum check-in liberado se cancelar ganhou; sem deadlock/5xx."
+    },
+    {
+      "id": "A37",
+      "feature": "F01",
+      "rules": [
+        "H03"
+      ],
+      "contract": "C-F01-A37",
+      "test": "TEST-A37",
+      "task": "T-F01-04",
+      "acceptance": "Gate documental diferencia baseline, candidato local e release; relatório incompleto, falso PASS, arquivo alterado ou estado inconsistente causam falha na fase apropriada.",
+      "evidence": "Executar verificador sobre fixture Git descartável e mutações negativas.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Baseline e fixture Git local sem credenciais.",
+      "procedure": "Executar verificador; alterar item, remover mapeamento, simular relatório faltante, editar relatório commitado.",
+      "oracle": "Falha estrutural ou de histórico detectada; baseline sem relatórios é válida, release incompleto falha."
     }
   ],
   "cross": [
@@ -449,7 +767,12 @@
       "test": "TEST-X01",
       "task": "T-F02-04",
       "acceptance": "Após up com seed, A/B/P autenticam; duas execuções da seed não duplicam contas.",
-      "evidence": "Subir ambiente limpo, login das três contas, comparar IDs após reseed."
+      "evidence": "Subir ambiente limpo, login das três contas, comparar IDs após reseed.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Subir ambiente limpo, login das três contas, comparar IDs após reseed.",
+      "oracle": "Após up com seed, A/B/P autenticam; duas execuções da seed não duplicam contas."
     },
     {
       "id": "X02",
@@ -464,7 +787,12 @@
       "test": "TEST-X02",
       "task": "T-F03-04",
       "acceptance": "Migração e clock da fundação permitem criação e rejeição de data vencida.",
-      "evidence": "DB limpo migrado; criar evento futuro e rejeitar ontem."
+      "evidence": "DB limpo migrado; criar evento futuro e rejeitar ontem.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "DB limpo migrado; criar evento futuro e rejeitar ontem.",
+      "oracle": "Migração e clock da fundação permitem criação e rejeição de data vencida."
     },
     {
       "id": "X03",
@@ -479,7 +807,12 @@
       "test": "TEST-X03",
       "task": "T-F03-04",
       "acceptance": "URL de gestão e listagem usam dono da sessão; B não pode editar/publicar A.",
-      "evidence": "Browser e POST direto B contra E1 de A; ausência de dados, estado intacto."
+      "evidence": "Browser e POST direto B contra E1 de A; ausência de dados, estado intacto.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Browser e POST direto B contra E1 de A; ausência de dados, estado intacto.",
+      "oracle": "URL de gestão e listagem usam dono da sessão; B não pode editar/publicar A."
     },
     {
       "id": "X04",
@@ -494,7 +827,12 @@
       "test": "TEST-X04",
       "task": "T-F04-04",
       "acceptance": "Worker do Compose consome job persistido após reinício sem chave real.",
-      "evidence": "Comprar slow, reiniciar worker antes de due; obter status final uma vez."
+      "evidence": "Comprar slow, reiniciar worker antes de due; obter status final uma vez.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Comprar slow, reiniciar worker antes de due; obter status final uma vez.",
+      "oracle": "Worker do Compose consome job persistido após reinício sem chave real."
     },
     {
       "id": "X05",
@@ -511,7 +849,12 @@
       "test": "TEST-X05",
       "task": "T-F04-04",
       "acceptance": "Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação.",
-      "evidence": "Corrida compra × redução e compra × preço; conferir invariantes e snapshots."
+      "evidence": "Corrida compra × redução e compra × preço; conferir invariantes e snapshots.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Corrida compra × redução e compra × preço; conferir invariantes e snapshots.",
+      "oracle": "Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação."
     },
     {
       "id": "X06",
@@ -526,7 +869,12 @@
       "test": "TEST-X06",
       "task": "T-F05-04",
       "acceptance": "Sessão define dono do ingresso; anônimo e outra conta não veem compra pessoal.",
-      "evidence": "Dois browsers com sessões distintas; compra e acesso cruzado."
+      "evidence": "Dois browsers com sessões distintas; compra e acesso cruzado.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Dois browsers com sessões distintas; compra e acesso cruzado.",
+      "oracle": "Sessão define dono do ingresso; anônimo e outra conta não veem compra pessoal."
     },
     {
       "id": "X07",
@@ -540,8 +888,13 @@
       "contract": "C-F05-X07",
       "test": "TEST-X07",
       "task": "T-F05-04",
-      "acceptance": "Publicar/lotar/cancelar reflete na vitrine sem cache obsoleto.",
-      "evidence": "Criar draft, publicar, reservar até lotar, cancelar fixture; recarregar catálogo."
+      "acceptance": "A publicação e as vagas calculadas por F03 chegam à vitrine; draft/cancelled não são exibidos, inclusive fixture cancelada. A ação real de cancelar é validada em X14.",
+      "evidence": "Criar draft, publicar, reservar até lotar, cancelar fixture; recarregar catálogo.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Criar draft, publicar, reservar até lotar, cancelar fixture; recarregar catálogo.",
+      "oracle": "A publicação e as vagas calculadas por F03 chegam à vitrine; draft/cancelled não são exibidos, inclusive fixture cancelada. A ação real de cancelar é validada em X14."
     },
     {
       "id": "X08",
@@ -557,7 +910,12 @@
       "test": "TEST-X08",
       "task": "T-F05-04",
       "acceptance": "Compra web usa reserve e worker; pendente ocupa e recusa libera na vitrine.",
-      "evidence": "Comprar 0004, observar lotação, após 45s ver declined e vaga."
+      "evidence": "Comprar 0004, observar lotação, após 45s ver declined e vaga.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Comprar 0004, observar lotação, após 45s ver declined e vaga.",
+      "oracle": "Compra web usa reserve e worker; pendente ocupa e recusa libera na vitrine."
     },
     {
       "id": "X09",
@@ -573,8 +931,13 @@
       "contract": "C-F06-X09",
       "test": "TEST-X09",
       "task": "T-F06-04",
-      "acceptance": "API usa catálogo e centavos/ocupação canônicos; edição preço/capacidade reflete na listagem.",
-      "evidence": "GET antes/depois publicação, edição e cancelamento fixture."
+      "acceptance": "A listagem de parceiros reflete publicação, preço e capacidade de F03; fixtures draft/cancelled ficam fora. Cancelamento real será validado em X15.",
+      "evidence": "GET antes/depois publicação, edição e cancelamento fixture.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "GET antes/depois publicação, edição e cancelamento fixture.",
+      "oracle": "A listagem de parceiros reflete publicação, preço e capacidade de F03; fixtures draft/cancelled ficam fora. Cancelamento real será validado em X15."
     },
     {
       "id": "X10",
@@ -591,7 +954,12 @@
       "test": "TEST-X10",
       "task": "T-F06-04",
       "acceptance": "API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture.",
-      "evidence": "POST simultâneo e GET ticket, comparar dados de ledger."
+      "evidence": "POST simultâneo e GET ticket, comparar dados de ledger.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "POST simultâneo e GET ticket, comparar dados de ledger.",
+      "oracle": "API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture."
     },
     {
       "id": "X16",
@@ -608,7 +976,12 @@
       "test": "TEST-X16",
       "task": "T-W6-02",
       "acceptance": "Integração final: canais disputam mesma última vaga; consulta partner aceita ticket web e compra partner não entra em conta web.",
-      "evidence": "Corrida web e API com capacidade 1; um sucesso, outro esgotado; testar isolamento pelo e-mail."
+      "evidence": "Corrida web e API com capacidade 1; um sucesso, outro esgotado; testar isolamento pelo e-mail.",
+      "phase": "integrated",
+      "level": "e2e",
+      "precondition": "Checkout integrado contendo ambas as features; realizar ações reais via UI/API, sem editar DB.",
+      "procedure": "Corrida web e API com capacidade 1; um sucesso, outro esgotado; testar isolamento pelo e-mail.",
+      "oracle": "Integração final: canais disputam mesma última vaga; consulta partner aceita ticket web e compra partner não entra em conta web."
     },
     {
       "id": "X11",
@@ -622,7 +995,12 @@
       "test": "TEST-X11",
       "task": "T-F07-04",
       "acceptance": "Todas as ações operacionais respeitam guarda de dono.",
-      "evidence": "B tenta check-in e cancelamento de A, sem efeito e sem informação."
+      "evidence": "B tenta check-in e cancelamento de A, sem efeito e sem informação.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "B tenta check-in e cancelamento de A, sem efeito e sem informação.",
+      "oracle": "Todas as ações operacionais respeitam guarda de dono."
     },
     {
       "id": "X12",
@@ -637,7 +1015,12 @@
       "test": "TEST-X12",
       "task": "T-F07-04",
       "acceptance": "Cancelamento bloqueia publicação/edição e integra gestão em URL existente.",
-      "evidence": "Cancelar publicado e tentar editar e republicar via POST; consultar catálogo."
+      "evidence": "Cancelar publicado e tentar editar e republicar via POST; consultar catálogo.",
+      "phase": "local",
+      "level": "e2e",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Cancelar publicado e tentar editar e republicar via POST; consultar catálogo.",
+      "oracle": "Cancelamento bloqueia publicação/edição e integra gestão em URL existente."
     },
     {
       "id": "X13",
@@ -653,7 +1036,12 @@
       "test": "TEST-X13",
       "task": "T-F07-04",
       "acceptance": "Check-in/painel/cancelamento compartilham status, lock e preço; gateway tardio não revive.",
-      "evidence": "Combinar slow, fast, check-in, cancelar e esperar resultado tardio."
+      "evidence": "Combinar slow, fast, check-in, cancelar e esperar resultado tardio.",
+      "phase": "local",
+      "level": "integration",
+      "precondition": "Checkout com providers e consumer disponíveis; fixtures isoladas e dados sintéticos.",
+      "procedure": "Combinar slow, fast, check-in, cancelar e esperar resultado tardio.",
+      "oracle": "Check-in/painel/cancelamento compartilham status, lock e preço; gateway tardio não revive."
     },
     {
       "id": "X14",
@@ -670,8 +1058,13 @@
       "contract": "C-F07-X14",
       "test": "TEST-X14",
       "task": "T-W6-02",
-      "acceptance": "Integração final (não dependência de implementação): compra web aparece no painel e permite check-in; cancelamento aparece em Meus ingressos.",
-      "evidence": "Fluxo browser: comprar, confirmar, validar código, cancelar, recarregar ambos."
+      "acceptance": "Com UI e operações integradas, uma compra web confirmada incrementa painel, permite check-in e, após cancelamento, some do catálogo e vira estornada em Meus ingressos.",
+      "evidence": "Fluxo browser: comprar, confirmar, validar código, cancelar, recarregar ambos.",
+      "phase": "integrated",
+      "level": "e2e",
+      "precondition": "Checkout integrado contendo ambas as features; realizar ações reais via UI/API, sem editar DB.",
+      "procedure": "Fluxo browser: comprar, confirmar, validar código, cancelar, recarregar ambos.",
+      "oracle": "Com UI e operações integradas, uma compra web confirmada incrementa painel, permite check-in e, após cancelamento, some do catálogo e vira estornada em Meus ingressos."
     },
     {
       "id": "X15",
@@ -689,8 +1082,13 @@
       "contract": "C-F07-X15",
       "test": "TEST-X15",
       "task": "T-W6-02",
-      "acceptance": "Integração final: compra partner soma painel, é validada no check-in e deixa API após cancelamento.",
-      "evidence": "HTTP+browser: compra, consultar checkedIn, cancelar, verificar 404 e estorno."
+      "acceptance": "Com API e operações integradas, ingresso de parceiro conta na lotação e painel, permite check-in e consulta checkedIn; cancelar remove evento da lista, bloqueia POST, estorna e conserva consulta do ticket.",
+      "evidence": "HTTP+browser: compra, consultar checkedIn, cancelar, verificar 404 e estorno.",
+      "phase": "integrated",
+      "level": "e2e",
+      "precondition": "Checkout integrado contendo ambas as features; realizar ações reais via UI/API, sem editar DB.",
+      "procedure": "HTTP+browser: compra, consultar checkedIn, cancelar, verificar 404 e estorno.",
+      "oracle": "Com API e operações integradas, ingresso de parceiro conta na lotação e painel, permite check-in e consulta checkedIn; cancelar remove evento da lista, bloqueia POST, estorna e conserva consulta do ticket."
     }
   ],
   "process": [
@@ -702,7 +1100,13 @@
       "test": "TEST-P01",
       "contract": "C-RELEASE-P01",
       "task": "T-W6-03",
-      "acceptance": "PRD >=5 features, fornece/consome, DAG e waves; todas R01–R13 citadas, cada aresta coberta."
+      "acceptance": "PRD >=5 features, fornece/consome, DAG e waves; todas R01–R13 citadas, cada aresta coberta.",
+      "phase": "release",
+      "evidence": "Inspeção dos artefatos e do histórico Git; registrar evidência verificável.",
+      "level": "process",
+      "precondition": "main final, clone completo com histórico Git, PRs acessíveis e ambiente padrão.",
+      "procedure": "Executar validate_docs e revisar DAG, regras, escopo e cada critério.",
+      "oracle": "PRD >=5 features, fornece/consome, DAG e waves; todas R01–R13 citadas, cada aresta coberta."
     },
     {
       "id": "P02",
@@ -712,7 +1116,13 @@
       "test": "TEST-P02",
       "contract": "C-RELEASE-P02",
       "task": "T-W6-03",
-      "acceptance": "Spec, plano e contrato por feature, todos os critérios e cross-feature mapeados."
+      "acceptance": "Spec, plano e contrato por feature, todos os critérios e cross-feature mapeados.",
+      "phase": "release",
+      "evidence": "Inspeção dos artefatos e do histórico Git; registrar evidência verificável.",
+      "level": "process",
+      "precondition": "main final, clone completo com histórico Git, PRs acessíveis e ambiente padrão.",
+      "procedure": "Inspecionar todos os FDD, planos, contratos e mapeamentos; validar existência dos testes.",
+      "oracle": "Spec, plano e contrato por feature, todos os critérios e cross-feature mapeados."
     },
     {
       "id": "P03",
@@ -722,7 +1132,13 @@
       "test": "TEST-P03",
       "contract": "C-RELEASE-P03",
       "task": "T-W6-03",
-      "acceptance": "Cada feature aprovada em avaliação independente; relatório imutável com data, SHA, ferramenta, modelo, evidência por item."
+      "acceptance": "Para cada feature há relatório novo e imutável, com data UTC, SHA completo, ferramenta, modelo, identidade de sessão e evidência por item; último relatório integrado aprova tudo aplicável.",
+      "phase": "release",
+      "evidence": "Inspeção dos artefatos e do histórico Git; registrar evidência verificável.",
+      "level": "process",
+      "precondition": "main final, clone completo com histórico Git, PRs acessíveis e ambiente padrão.",
+      "procedure": "Rodar validate_evidence --release e conferir evidência original, SHA, sessão, modelo e imutabilidade.",
+      "oracle": "Para cada feature há relatório novo e imutável, com data UTC, SHA completo, ferramenta, modelo, identidade de sessão e evidência por item; último relatório integrado aprova tudo aplicável."
     },
     {
       "id": "P04",
@@ -732,7 +1148,13 @@
       "test": "TEST-P04",
       "contract": "C-RELEASE-P04",
       "task": "T-W6-03",
-      "acceptance": "Estado final bate com relatórios existentes e mais recentes; sem status concluído sem aprovação."
+      "acceptance": "Estado final aponta ao último relatório aprovado, commit implementado e PR de cada feature; nenhum concluído sem integração verificada.",
+      "phase": "release",
+      "evidence": "Inspeção dos artefatos e do histórico Git; registrar evidência verificável.",
+      "level": "process",
+      "precondition": "main final, clone completo com histórico Git, PRs acessíveis e ambiente padrão.",
+      "procedure": "Cruzar state, relatórios mais recentes, SHAs e PRs; confirmar todos os status.",
+      "oracle": "Estado final aponta ao último relatório aprovado, commit implementado e PR de cada feature; nenhum concluído sem integração verificada."
     },
     {
       "id": "P05",
@@ -742,7 +1164,13 @@
       "test": "TEST-P05",
       "contract": "C-RELEASE-P05",
       "task": "T-W6-03",
-      "acceptance": "Pelo menos uma wave paralela via PRs mergeados; primeiro commit de cada PR anterior ao último de todos os demais."
+      "acceptance": "Pelo menos uma wave paralela via PRs mergeados; primeiro commit de cada PR anterior ao último de todos os demais.",
+      "phase": "release",
+      "evidence": "Inspeção dos artefatos e do histórico Git; registrar evidência verificável.",
+      "level": "process",
+      "precondition": "main final, clone completo com histórico Git, PRs acessíveis e ambiente padrão.",
+      "procedure": "Abrir PRs da wave, conferir merge e lista de commits; testar sobreposição estrita para cada par.",
+      "oracle": "Pelo menos uma wave paralela via PRs mergeados; primeiro commit de cada PR anterior ao último de todos os demais."
     },
     {
       "id": "P06",
@@ -752,7 +1180,13 @@
       "test": "TEST-P06",
       "contract": "C-RELEASE-P06",
       "task": "T-W6-03",
-      "acceptance": "Repo público único, main com README completo; fluxo externo 1–18 aprovado em clone limpo."
+      "acceptance": "Repo público único, main com README completo; fluxo externo 1–18 aprovado em clone limpo.",
+      "phase": "release",
+      "evidence": "Inspeção dos artefatos e do histórico Git; registrar evidência verificável.",
+      "level": "process",
+      "precondition": "main final, clone completo com histórico Git, PRs acessíveis e ambiente padrão.",
+      "procedure": "Clonar main em pasta vazia, rodar os 18 passos, conferir README e repo público.",
+      "oracle": "Repo público único, main com README completo; fluxo externo 1–18 aprovado em clone limpo."
     }
   ]
 }

@@ -1,0 +1,10 @@
+flowchart LR
+    D[Design aprovado] --> I[Implementar em branch]
+    I --> L[Local gates]
+    L --> E[Avaliador independente]
+    E -->|FAIL| I
+    E -->|Local PASS| M[Merge via PR]
+    M --> G[Integração da wave]
+    G -->|FAIL| I
+    G --> R[Fluxo final e evidência]
+    R --> F[Release]

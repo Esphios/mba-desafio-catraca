@@ -1,0 +1,17 @@
+flowchart LR
+    Visitor[Visitante] --> Web[Web Django]
+    Participant[Participante] --> Web
+    Organizer[Organizador] --> Web
+    Partner[Parceiro] --> HTTP[API JSON]
+    Web --> Identity[Identidade]
+    Web --> Catalog[Catálogo]
+    Web --> Ledger[Livro de ingressos]
+    Web --> Ops[Operações]
+    HTTP --> Catalog
+    HTTP --> Ledger
+    Ops --> Ledger
+    Ops --> Catalog
+    Catalog --> DB[(PostgreSQL)]
+    Ledger --> DB
+    Identity --> DB
+    Worker[Worker separado] --> Ledger

@@ -1,30 +1,35 @@
-# F01 | FDD: Harness e persistência
+# F01 | FDD: Ambiente reproduzível e persistência
 
-Status: planejado. Wave W1. Fonte: PRD e HLD; ADRs propostos. Este FDD não atesta código existente.
+Status: proposto · Wave W1 · Fonte normativa: PRD e design.
 
-## Objetivo, provides e consumes
-Ambiente Compose, schema compartilhado, clock, runner, dados de demonstração e interfaces de registro de rotas.
+## Resultado e interfaces
 
-Nenhuma feature anterior.
+Provides: Ambiente Compose, schema compartilhado, clock, runner, dados de demonstração e interfaces de registro de rotas.
 
-## Limites de escrita
-Container, schema, configuration, tooling and only initial shared files. No app domain features.
+Consumes: Nenhuma feature anterior.
 
-## Design detalhado
-`compose.yaml`, `Dockerfile`, `bin/`, `config/`, `catraca_platform/`, shared models and migrations. Schema from HLD must be defined before any dependent feature. Create custom account model first, then event/ticket/job. Model constraints and enum labels fixed. Seed command uses stable normalized emails, update_or_create or get_or_create with explicit role verification; no reset of business records. Do not create event fixtures in production seed; tests create fresh events. Health checks DB and worker heartbeat. Compose worker skeleton runs idle until F04. Initial route stubs for later features must not pretend to implement business behavior. The baseline URL registry includes each feature URL module only when present or empty placeholder. Document per-worktree port/project and test DB cleanup.
+Ownership: platform, migrations, boot, bin, CI. Não alterar módulos de outras features sem amendment.
 
-## Dependências e integração
-Nenhuma. Consumir interfaces do HLD, não importar views de outras features. Em caso de interface insuficiente, registrar bloqueio e pedir amendment; não criar cópia de regra. Contratos externos e códigos do brief têm precedência. Dependências cross-feature: nenhuma; ver contrato.
+## Low-level design
 
-## Critérios locais e casos de falha
-- A01 (H01): Clone limpo: ./bin/up constrói, migra, semeia e espera web/worker/DB prontos; /health/ready retorna 200 sem configuração manual.
-- A02 (H02): ./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.
-- A03 (H03): ./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos.
-- A04 (H04): AGENTS.md e README contêm comandos, endereços, credenciais de seed, mapa; modo padrão não exige gateway real.
-- A05 (R05,R09): Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.
+A fundação fixa o schema compartilhado e fornece um ambiente real, mesmo antes de existirem jornadas. Use um app Django `coredata` para os quatro modelos de negócio e `accounts.User` como AUTH_USER_MODEL antes da primeira migration. Django migrations são o dono do DDL; nenhuma segunda ferramenta de migration. O banco utiliza volume por projeto. F01 fornece `accounts/email_policy.py` com a normalização canônica da seed, reutilizada sem duplicação em F02 e na validação de comprador do ledger. Bootstrap usa role de migração; web/worker usam role runtime sem DDL. Configuração vem de defaults locais + variáveis de ambiente, não de cópia manual de arquivo. O serviço bootstrap aplica migrate e seed uma vez por subida. Web e worker só começam após bootstrap exit 0; health do worker confirma loop e conexão, não apenas PID. No início o worker é scaffolding que só sinaliza prontidão e não consome jobs. F04 o substitui. Gates usam banco de teste separado e projeto distinto da demo.
 
-## Testabilidade e segurança
-Usar fixtures mínimas isoladas; relógio injetável para lógica, modo padrão para prazo real. Validar entradas e falhas além de happy path. Nenhum dado real, nenhuma modificação de contrato para mascarar falha. Evidência independente no contrato.
+**Contrato de configuração:** CAT_PROJECT, CAT_PORT, CAT_PARTNER_KEY, CAT_SECRET, CAT_PROFILE, CAT_GATEWAY_SCALE. `CAT_PROFILE=demo` exige escala 1. O bootstrap se recusa a rodar seed fora de demo/teste; idempotência por chave natural de conta, sem alterar usuários que não pertencem à seed. Dependências pinadas em lockfile e imagem por versão/digest selecionados em W0.
 
-## Rollback e evolução
-Em falha, manter branch sem merge e corrigir com novo commit. Mudanças de schema após F01 exigem migração revisada, teste fresh/upgrade e coordenação. Não desfazer migração de dados em ambiente de usuário sem backup; neste MVP usar ambiente descartável de teste. Regressão final obrigatória após última integração.
+**Falhas:** rede de registry, porta ocupada, schema inválido, bootstrap abortado, worker indisponível, gate com falha. Em todos, diagnóstico com serviço e saída; sem falso health verde. Seed usa senha hash do Django. Não publicar porta DB. O comando down não remove dados por padrão.
+
+**Handoff:** schema e app label imutáveis sem alteração formal; portas `normalize_email`, `clock_now`, `fixture_factory` e `worker_command` conforme o registro interno; F04 recebe o entrypoint do worker e consome a normalização para `PartnerBuyer`; documentação de bootstrap e teste de volume/portas.
+
+## Critérios e limites
+| ID | Fase | Aceite |
+| --- | --- | --- |
+| A01 | local | Clone limpo: ./bin/up constrói, migra, semeia e espera web/worker/DB prontos; /health/ready retorna 200 sem configuração manual. |
+| A02 | local | ./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas. |
+| A03 | local | ./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos. |
+| A04 | local | README e AGENTS.md descrevem os comandos, endpoints, contas e mapa; o padrão local usa somente simulador e não requer configuração de pagamento. |
+| A05 | local | Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis. |
+| A29 | local | Gates rodam em projeto Compose distinto do ambiente de demonstração, sem remover volumes alheios; falha de bootstrap ou cleanup retorna não zero. |
+| A37 | local | Gate documental diferencia baseline, candidato local e release; relatório incompleto, falso PASS, arquivo alterado ou estado inconsistente causam falha na fase apropriada. |
+
+## Evolução e rollback
+Mudança de contrato exige ADR/amendment aprovado e reavaliação de consumidores. Em falha de implementação, corrigir em commit novo; não alterar migrations aplicadas nem relatórios. No MVP local usar ambiente de testes descartável para rollback de schema; não apagar volume de demonstração.
