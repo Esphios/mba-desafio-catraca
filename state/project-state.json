@@ -1,94 +1,93 @@
 {
-  "schemaVersion": 1,
-  "phase": "planning",
+  "schemaVersion": 2,
+  "baseline": "proposed",
   "baselineCommit": null,
+  "releaseStatus": "planned",
+  "currentWave": 0,
   "features": [
     {
       "id": "F01",
-      "wave": 1,
       "status": "planned",
+      "wave": 1,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": false
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": false
     },
     {
       "id": "F02",
-      "wave": 2,
       "status": "planned",
+      "wave": 2,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": false
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": false
     },
     {
       "id": "F03",
-      "wave": 3,
       "status": "planned",
+      "wave": 3,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": false
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": false
     },
     {
       "id": "F04",
-      "wave": 4,
       "status": "planned",
+      "wave": 4,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": false
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": false
     },
     {
       "id": "F05",
-      "wave": 5,
       "status": "planned",
+      "wave": 5,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": false
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": false
     },
     {
       "id": "F06",
-      "wave": 5,
       "status": "planned",
+      "wave": 5,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": true
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": true
     },
     {
       "id": "F07",
-      "wave": 5,
       "status": "planned",
+      "wave": 5,
       "branch": null,
       "implementationCommit": null,
-      "latestEvaluation": null,
-      "pr": null,
       "mergedCommit": null,
-      "integrationPending": true
+      "pr": null,
+      "latestEvaluation": null,
+      "implementerSession": null,
+      "integratedRequired": true
     }
-  ],
-  "release": {
-    "status": "planned",
-    "commit": null,
-    "report": null
-  },
-  "parallelWave": {
-    "wave": 5,
-    "prs": [],
-    "evidence": null
-  }
+  ]
 }

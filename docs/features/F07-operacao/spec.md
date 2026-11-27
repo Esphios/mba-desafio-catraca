@@ -1,29 +1,39 @@
-# F07 | FDD: Operação de evento: check-in, cancelamento e painel
+# F07 | FDD: Operação do evento e apuração
 
-Status: planejado. Wave W5. Fonte: PRD e HLD; ADRs propostos. Este FDD não atesta código existente.
+Status: proposto · Wave W5 · Fonte normativa: PRD e design.
 
-## Objetivo, provides e consumes
-Ações de gestão, cancelamento atômico, check-in serializado, painel coerente com todos os estados e canais.
+## Resultado e interfaces
 
-F02: dono; F03: página/lock/estado; F04: ingressos, preço e job.
+Provides: Ações de gestão, cancelamento atômico, check-in serializado, painel coerente com todos os estados e canais.
 
-## Limites de escrita
-operations/, templates/operations/, tests/operations; consume F03 template include, do not edit shared shell unless integration coordinator approves.
+Consumes: F02: dono; F03: página/lock/estado; F04: ingressos, preço e job.
 
-## Design detalhado
-`operations/` owns management extension. Check-in loads actor event with lock, lookup code and test R10 order; timestamp only on success, preserve status. Cancel uses same lock and one atomic update of event and pending/confirmed tickets, preserves history and job queued; repeated attempt no new effect. Panel uses one aggregate query with status-filtered counts and sum of snapshots; avoid join multiplication, show zero and BRL format. Page uses F03 extension include; POSTs verify owner and CSRF. The cancellation fixture can use core reserve without API/F05 when evaluated on isolated branch; full UI/API cross-channel proofs must be run after W5 merge. Test real late gateway and concurrency; cancelled UI hides field with message; direct POST still follows R10 precedence. Never add second state source.
+Ownership: operations, management partial. Não alterar módulos de outras features sem amendment.
 
-## Dependências e integração
-F02, F03, F04. Consumir interfaces do HLD, não importar views de outras features. Em caso de interface insuficiente, registrar bloqueio e pedir amendment; não criar cópia de regra. Contratos externos e códigos do brief têm precedência. Dependências cross-feature: X11, X12, X13; ver contrato.
+## Low-level design
 
-## Critérios locais e casos de falha
-- A25 (R10): Check-in aplica exatamente as cinco mensagens na ordem definida; só confirmed não utilizado recebe checkedIn=true; dois check-ins concorrentes liberam uma entrada.
-- A26 (R11): Cancelar publicado é irreversível; na mesma transação confirmed→refunded e pending→cancelled, sem alteração de declined; gateway posterior não modifica; edit/publish/compra rejeitados.
-- A27 (R05,R12): Painel mostra seis métricas com snapshots de preço e ambos os canais; check-ins somente confirmed; cancelado tem receita/vagas/confirmados/pendentes/check-ins zero.
-- A28 (R04,R13): Check-in, cancelar e painel ficam na URL de gestão de cada evento; todas as ações exigem dono inclusive requisição direta.
+Operações de organizador compartilham a URL de gestão de F03. A view renderiza partial de métricas e ações; POST `/gestao/eventos/<id>/entrada/` e `/cancelar/` exigem Actor organizador, CSRF e ownership dentro da transação. Não basta esconder botão. Lock por evento primeiro. Check-in procura ticket pelo código e event_id, sem lock de outro evento; se inexistente ou outro, inválido. Depois checa cancelled, status confirmed, checked_in_at; se elegível grava timestamp único. UI em evento cancelado oculta campo e exibe Evento cancelado; POST direto mantém precedência do código.
 
-## Testabilidade e segurança
-Usar fixtures mínimas isoladas; relógio injetável para lógica, modo padrão para prazo real. Validar entradas e falhas além de happy path. Nenhum dado real, nenhuma modificação de contrato para mascarar falha. Evidência independente no contrato.
+**Cancelamento:** somente published→cancelled; atomicamente atualiza estado do evento, timestamps, todos confirmed→refunded e pending→cancelled. Declined permanece. Preservar checked_in_at para histórico; métrica check-ins conta apenas confirmed. Jobs pendentes podem continuar aguardando vencimento; worker os resolve como ignored. Nada de chamadas externas, sem varrer eventos alheios, sem retorno antes do commit. Repetir cancelamento retorna conflito genérico sem alterar dados.
 
-## Rollback e evolução
-Em falha, manter branch sem merge e corrigir com novo commit. Mudanças de schema após F01 exigem migração revisada, teste fresh/upgrade e coordenação. Não desfazer migração de dados em ambiente de usuário sem backup; neste MVP usar ambiente descartável de teste. Regressão final obrigatória após última integração.
+**Painel:** single SQL/ORM statement que seleciona event.id, owner, state, capacity e agregados condicionais do mesmo snapshot. Uma consulta por página para campos críticos; não reutilizar evento de outra query para availability. Confirmados inclui utilizados, receita soma price_cents de confirmed, vagas 0 se cancelled; estornados count refunded. Não usar max(0, capacity−occupied): se negativo, sinalizar invariante violada e falhar gate. Sem contadores materializados.
+
+**Integração:** F07 testa core com chamadas de ledger nas branches; X14/X15 só após merge das interfaces. API GET ticket deve continuar respondendo mesmo cancelado. Executar corridas em ambas as ordens (event lock controlado) para provar estados finais válidos.
+
+## Critérios e limites
+| ID | Fase | Aceite |
+| --- | --- | --- |
+| A25 | local | A decisão de check-in respeita a precedência R10 e somente um pedido concorrente pode marcar entrada; no evento cancelado, a página oculta o formulário, e POST direto mantém precedência. |
+| A26 | local | Cancelar evento publicado é uma operação terminal; em até 10 s (baseline: no mesmo commit), pending passa a cancelled e confirmed a refunded; declined permanece; nenhuma resposta tardia reabre ingresso. Rejeitar edição e republicação por POST. |
+| A27 | local | As seis métricas usam uma consulta coerente sobre evento e ingressos, sem contadores de canal; preço histórico apenas de confirmed. Cancelamento zera tudo exceto estornados. |
+| A28 | local | Check-in, cancelar e painel ficam na URL de gestão de cada evento; todas as ações exigem dono inclusive requisição direta. |
+| A35 | local | Leitura de gestão/painel usa snapshot único incluindo capacidade/status/owner e agregados; corridas de edição e cancelamento não produzem combinações impossíveis. |
+| A36 | local | Corridas reserva/cancelamento, gateway/cancelamento e check-in/cancelamento terminam em estado serial válido, sem 5xx ou entrada após cancelamento. |
+| X11 | local | Todas as ações operacionais respeitam guarda de dono. |
+| X12 | local | Cancelamento bloqueia publicação/edição e integra gestão em URL existente. |
+| X13 | local | Check-in/painel/cancelamento compartilham status, lock e preço; gateway tardio não revive. |
+| X14 | integrated | Com UI e operações integradas, uma compra web confirmada incrementa painel, permite check-in e, após cancelamento, some do catálogo e vira estornada em Meus ingressos. |
+| X15 | integrated | Com API e operações integradas, ingresso de parceiro conta na lotação e painel, permite check-in e consulta checkedIn; cancelar remove evento da lista, bloqueia POST, estorna e conserva consulta do ticket. |
+
+## Evolução e rollback
+Mudança de contrato exige ADR/amendment aprovado e reavaliação de consumidores. Em falha de implementação, corrigir em commit novo; não alterar migrations aplicadas nem relatórios. No MVP local usar ambiente de testes descartável para rollback de schema; não apagar volume de demonstração.

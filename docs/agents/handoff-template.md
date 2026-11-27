@@ -1,5 +1,12 @@
-# Handoff | TEMPLATE
+# Handoff template (copy into a new note/PR)
 
-Feature / wave: <id>; branch: <real>; commit SHA: <real>; base SHA: <real>.
-Contrato: <path>. Critérios tocados: <IDs>. Dependências e interfaces: <versões/paths>.
-Comandos de ambiente/gate: <exact>. Alterações de ownership/amendments: <nenhuma ou link aprovado>. Testes implementados: <IDs + paths>. Bloqueios reais: <descrição ou nenhum>. Não fornecer instrução de veredito; não substituir avaliação por resumo do implementador.
+- Feature / wave / branch / base SHA / candidate SHA:
+- Implementer session ID (actual):
+- Interfaces consumed and provided, versions:
+- Steps completed and touched paths:
+- Migration/schema changes or none:
+- Tests executed, command, exit, artifacts:
+- Known limits/blocked items, deviations approved:
+- Required integration-only checks:
+- Environment project/port; cleanup outcome:
+- Request independent evaluation (no self-verdict):

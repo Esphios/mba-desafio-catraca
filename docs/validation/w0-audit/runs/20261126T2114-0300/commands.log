@@ -1,0 +1,63 @@
+timestamp=2026-11-26T21:14:01-03:00
+tested_commit=b159b3d70f6bdef6775589528d1b247fb09407aa
+
+$ python scripts/test_validate_docs_parser.py
+exit=0
+Ran 1 test in 0.000s
+OK
+
+$ python scripts/validate_docs.py
+exit=1
+FAIL normative drift (review/amendment required): docs/prd/PRD.md
+FAIL normative drift (review/amendment required): docs/validation/traceability.json
+
+$ python scripts/verify_model.py
+exit=0
+PASS abstract model: 4290 states, 36558 transitions; oversell negative rejected.
+Bounded model assumes serialized transitions; not a database/concurrency or product test.
+
+$ python scripts/test_baseline.py
+exit=1
+AssertionError at `assert not docs(root)`: the unmodified baseline does not pass.
+
+$ python scripts/validate_evidence.py
+exit=1
+FAIL normative drift (review/amendment required): docs/prd/PRD.md
+FAIL normative drift (review/amendment required): docs/validation/traceability.json
+
+$ python scripts/validate_evidence.py --release
+exit=1
+Two normative drifts; F01-F07 release incomplete; missing merge/PR evidence; release state incomplete.
+
+$ python docs/validation/w0-audit/reproduce_mutations.py
+exit=1
+AssertionError: Unmodified baseline does not pass
+
+$ python -m compileall -q scripts docs/validation/w0-audit/reproduce_mutations.py
+exit=0
+
+$ openapi-spec-validator --schema 3.1 docs/interfaces/partner.openapi.json
+container=python:3.12.12-slim-bookworm@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c
+tool=openapi-spec-validator==0.7.2
+exit=0
+docs/interfaces/partner.openapi.json: OK
+
+$ mermaid-cli 11.12.0 render all Markdown fences
+image=ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:11.12.0@sha256:bad64c9d9ad917c8dfbe9d9e9c162b96f6615ff019b37058638d16eb27ce7783
+exit=0
+fences=10
+svg=10
+png=10
+visual_inspection=10/10 legible, no render error
+
+$ docker version / docker compose version
+exit=0
+client=29.9.2/windows/amd64 server=29.9.2/linux/amd64
+Docker Compose version v5.6.1
+
+$ python --version; git --version; node --version; wsl -e uname -a
+exit=0
+Python 3.12.10
+git version 2.52.0.windows.1
+v24.12.0
+Linux WSL2 6.6.87.2 x86_64

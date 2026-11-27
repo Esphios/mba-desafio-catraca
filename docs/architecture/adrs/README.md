@@ -1,9 +1,15 @@
-# Índice de ADRs
+# Registro de decisões
 
-- [ADR-001 | Monólito modular Django/PostgreSQL](ADR-001-stack-local.md) (proposto)
-- [ADR-002 | Lock por evento como protocolo comum](ADR-002-event-lock.md) (proposto)
-- [ADR-003 | Fila durável no banco](ADR-003-payment-job.md) (proposto)
-- [ADR-004 | Snapshot monetário e estado derivado](ADR-004-money-status.md) (proposto)
-- [ADR-005 | Cancelamento transacional](ADR-005-cancel-atomic.md) (proposto)
-- [ADR-006 | Contratos, branches e avaliação independente](ADR-006-agent-handoff.md) (proposto)
-- [ADR-007 | Sessão web e chave de parceiro separadas](ADR-007-identity-boundaries.md) (proposto)
+| ADR | Título | Estado |
+| --- | --- | --- |
+| [ADR-001](ADR-001.md) | Monólito modular com Django e PostgreSQL | proposed |
+| [ADR-002](ADR-002.md) | Serialização por evento | proposed |
+| [ADR-003](ADR-003.md) | Agendamento persistente e resultado idempotente | proposed |
+| [ADR-004](ADR-004.md) | Dados monetários e máquina de estados | proposed |
+| [ADR-005](ADR-005.md) | Cancelamento atômico e projeções | proposed |
+| [ADR-006](ADR-006.md) | Handoff e avaliação por fases | proposed |
+| [ADR-007](ADR-007.md) | Identidade e separação dos canais | proposed |
+| [ADR-008](ADR-008.md) | Harness isolado e fail-closed | proposed |
+| [ADR-009](ADR-009.md) | Tempos simulados determinísticos | proposed |
+
+Revisar e aceitar em W0. MADR: contexto, drivers, alternativas, decisão, consequências, confirmação e evolução.

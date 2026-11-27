@@ -1,24 +1,21 @@
 ---
 name: architecture-review
-description: Definir ou revisar HLD/FDD, ADRs e diagramas em greenfield.
+description: Revisar HLD/FDD/ADR e diagramas. Use quando a tarefa da wave exigir esta responsabilidade.
 ---
 
 # architecture-review
 
-## Quando usar
-Definir ou revisar HLD/FDD, ADRs e diagramas em greenfield.
+## When to use
+Revisar HLD/FDD/ADR e diagramas. Leia AGENTS.md e tarefas da feature primeiro.
 
-## Entradas
-proposal, PRD, design, ADR, pesquisa, FDDs.
+## Inputs
+design, FDDs, research, ADRs, internal ports. Confirme SHA, fase e ownership.
 
-## Procedimento
-1. Identificar fronteiras, invariantes, interfaces, estados e requisitos não funcionais.
-2. Pesquisar fontes oficiais em duas fases: alternativas e aprofundamento; registrar versões e lacunas.
-3. Avaliar trade-offs, ADR para decisões relevantes, diagramas C4/Mermaid sem classes inventadas.
-4. Validar lock/atomicidade, falhas, segurança e interfaces; depois do código confrontar arquitetura com implementação.
+## Procedure
+Mapear responsabilidades e dependências; testar hipóteses de snapshots e ordem de locks; comparar alternativas; revisar configurações, segurança e recursos; validar diagramas Mermaid e preparar ADR para mudanças.
 
-## Saída e gate
-HLD/FDD/ADRs e diagramas consistentes; hipóteses mensuráveis; gate documental.
+## Validation
+G0, render Mermaid, revisão da prova condicional e do contrato.
 
-## Regras
-Ler AGENTS.md. Não inventar resultado, não copiar implementação de referência. Registrar bloqueios e respeitar ownership, contrato e avaliação independente.
+## Output and guardrails
+Design/ADR aprovado ou bloqueio explícito. Se faltar pré-requisito, registre bloqueio, não fabrique evidência. Não substituir regra normativa por conveniência.

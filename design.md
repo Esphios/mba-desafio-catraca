@@ -1,115 +1,116 @@
-# Design | HLD do Catraca
+# Design | arquitetura e contrato de implementação
 
-Estado: proposto. FDDs em `docs/features/`; este HLD define interfaces e invariantes comuns. A matriz de requisitos indica quem testa cada decisão.
+Status: proposta. PRD define comportamento; design define a solução, FDDs detalham execução. O código ainda não existe.
 
-## 1. Contexto, qualidade e fronteiras
+## 1. Drivers e limites
 
-Produto local multiusuário, sem serviço externo real. Web HTML server-rendered e JSON de parceiros no mesmo serviço HTTP. Aplicação modular Django; banco PostgreSQL único, worker executa o simulador via tabela de jobs. Navegador não escreve banco diretamente. Chave de parceiro não é sessão; sessão web não substitui chave. Sem cache de vagas ou contagens. O tempo de relógio deve vir de clock injetável em testes e timezone-aware no produto.
+R07 e R11 exigem consistência mesmo com concorrência, R06 exige resposta assíncrona, R12 exige valor histórico, R13 exige autorização server-side. Linux/macOS + Docker + Git + Node LTS disponíveis; qualquer Python roda em container. Priorizar simples e verificável, não arquitetura distribuída. Nenhuma dependência de pagamento externo. O tempo de trabalho é limitado e a UI não é critério estético.
 
-| Componente | Responsabilidade | Não faz |
-|---|---|---|
-| identity | contas, sessões, papéis, guarda de acesso | venda, cálculo de vaga |
-| catalog | evento, publicação, gestão base, catálogo, lock e consulta de ocupação | criar ticket |
-| ledger | reserva, código, job e resolução de pagamento | montar HTML ou HTTP |
-| storefront | páginas públicas e participante, adaptador de compra | calcular vagas isoladamente |
-| partner | autenticar chave e mapear contrato JSON | criar ticket direto pelo ORM |
-| operations | check-in, cancelamento, métricas, formulários de gestão | duplicar reserva ou gateway |
-| platform | configuração, schema e migrações, health, runner | inventar regras de negócio |
+## 2. HLD: monólito modular
 
-## 2. Stack proposta
+```mermaid
+flowchart LR
+    Visitor[Visitante] --> Web[Web Django]
+    Participant[Participante] --> Web
+    Organizer[Organizador] --> Web
+    Partner[Parceiro] --> HTTP[API JSON]
+    Web --> Identity[Identidade]
+    Web --> Catalog[Catálogo]
+    Web --> Ledger[Livro de ingressos]
+    Web --> Ops[Operações]
+    HTTP --> Catalog
+    HTTP --> Ledger
+    Ops --> Ledger
+    Ops --> Catalog
+    Catalog --> DB[(PostgreSQL)]
+    Ledger --> DB
+    Identity --> DB
+    Worker[Worker separado] --> Ledger
+```
 
-Python 3.12, Django 5.2 LTS, psycopg 3, PostgreSQL 17, Gunicorn com 4 workers gthread × 8 threads (32 requests simultâneas, ajustar se medição exigir), templates Django, CSS simples, pytest-django ou runner Django (preferência: runner Django + unittest), Playwright em container para browser, Ruff para lint, Node apenas opcional para validação local. Compose v2. Fixar versões de patch, imagens e dependências verificadas na F01, com lockfile/hash e suporte Linux/macOS arm64/amd64. Não impor Python/Playwright ao host. Banco e worker não expõem porta externa. Apenas 127.0.0.1:8080. Não usar runserver na carga concorrente. Não há escolha de versão patch inventada neste documento.
+A aplicação serve templates e API, o worker aplica resultados agendados. Ambos usam mesma base, código de domínio e schema. O compose publica só web. O serviço bootstrap cria schema e seed antes de web/worker. Bibliotecas: Python 3.12, Django 5.2 LTS, psycopg 3, Gunicorn, Ruff, Playwright Python. PostgreSQL 17. Patch e digest específicos devem ser confirmados e congelados no kickoff, não usar latest. Aplicação com Gunicorn gthread (baseline 4 workers × 8 threads; ajustar só após teste de carga); conexões Django com CONN_MAX_AGE=0 nos testes; DB comporta web + worker + ferramentas (configurar max_connections e medir). Não usar devserver single-thread para carga.
 
-## 3. Modelo persistente
+## 3. Layout proposto do código
 
-| Tabela lógica | Campos/constraints |
-|---|---|
-| account | id UUID PK; name; email normalizado unique; password hash Django; role participant/organizer; ativo; timestamps. Custom User desde migração inicial. |
-| event | id UUID PK; owner_id FK account PROTECT; name/location; starts_at timestamptz; capacity integer CHECK >=1; price_cents bigint CHECK >0; state draft/published/cancelled CHECK; cancelled_at nullable; created/updated_at. |
-| ticket | id UUID PK; event_id FK PROTECT; participant_id FK nullable; buyer_email; channel web/partner; code unique global (8 caracteres alfanuméricos maiúsculos com CSPRNG); status CHECK enum; price_cents bigint positivo; checked_in_at nullable; created_at, status_changed_at. CHECK: web exige participante, partner exige null; não exigir checked_in_at null em refunded. |
-| payment_job | ticket_id unique FK PROTECT; outcome approved/declined; due_at timestamptz; state queued/done/ignored; completed_at; created_at. Nenhum PAN, CVV ou cartão parcial armazenado. |
-| django_session | sessão padrão server-side; expiração, rotação e invalidação via Django. |
+```text
+app/
+  config/             # settings, URL wiring, WSGI
+  accounts/           # user model/authentication, Actor and guards
+  coredata/           # event, ticket, payment job model + migrations
+  catalog/            # events, ownership and inventory read, event lock
+  ledger/             # reserve, payment resolution and ticket queries
+  participant/        # public templates + participant adapters
+  partner/            # JSON API adapter
+  operations/         # check-in/cancellation/dashboard
+  catraca_platform/   # bootstrap and readiness/heartbeat
+  worker/             # entrypoint and persistent processing
+  templates/          # base layout and module-local templates
+  tests/              # unit, db integration, HTTP, browser, concurrency
+bin/                  # up, down, gates, flow
+```
 
-Índices: event(owner_id,state), event(state,starts_at), ticket(event_id,status), ticket(participant_id,created_at), payment_job(state,due_at). Código unique global, reintentar colisão via savepoint (máximo 5) sem quebrar atomicidade. Usar bigint e Decimal para conversão reais→centavos; rejeitar >2 casas, limites de representação inválidos, bool e floats ambiguamente arredondados. A capacidade não será mantida em contador duplicado. Horário futuro é validação de comando, não CHECK baseado em now(). Sem exclusão física de evento/ticket no MVP.
+F01 creates wiring, schema and the account model; F02 owns account behavior; F03 catalog and management shell; F04 ledger and worker; F05 participant; F06 partner; F07 operations and its management partial. Shared files `config/urls.py`, migration and base layout are coordinator-owned; F01/F03 add includes/slots in advance, not fake business handlers. Exact ownership and transfers are defined in the internal interface registry. The parallel wave edits separate modules and templates. No cross-feature monkey patching.
 
-## 4. Máquinas de estado
+## 4. Logical model and constraints
 
-Evento: draft → published → cancelled. Cancelled terminal; published pode ser editado se início informado futuro e lotação válida. Repetir publicação de published é no-op/erro de domínio sem efeito; cancelar só published, repetição retorna estado terminal/erro sem nova transição. Nenhuma reversão de cancelled. Não inventar estado de evento expirado.
+| Entity           | Fields                                                                                                                                                    | Constraints / indexes                                                                                                                                                    |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| User             | UUID id, normalized email, name, role, password hash, timestamps                                                                                          | unique normalized email; role participant/organizer; custom Django user before migration; session table built-in                                                         |
+| Event            | UUID id, owner FK, name, venue, starts_at timestamptz, capacity int, price_cents bigint, status, published_at, cancelled_at                               | positive capacity/price, allowed status, owner immutable in services, owner+id index, status+starts_at index; future enforced at create/edit not CHECK clock             |
+| Ticket           | UUID id, event FK, global code, channel, participant FK nullable, buyer_email, price_cents bigint, status, checked_in_at nullable, created_at, changed_at | unique code, FK protect, positive price, allowed status/channel, web requires participant, partner null; indexes event+status and participant+created_at; code immutable |
+| PaymentJob       | UUID id, ticket FK unique, outcome, due_at, state, processed_at, created_at                                                                               | one job per ticket, queued/done/ignored, approved/declined; partial index queued on due_at; terminal processed_at nonnull                                                |
+| Worker heartbeat | singleton per worker identity, last_seen, started_at                                                                                                      | health freshness; no business derivation from heartbeat                                                                                                                  |
 
-| Ticket API | Rótulo UI | Ocupa? | Transições permitidas |
-|---|---|---|---|
-| pending | pendente | sim | confirmed, declined, cancelled |
-| confirmed | confirmado | sim | refunded |
-| declined | recusado | não | nenhuma |
-| cancelled | cancelado | não | nenhuma |
-| refunded | estornado | não | nenhuma |
+Database role used by application has necessary DML only; bootstrap owns DDL. A CHECK cannot enforce aggregate occupied≤capacity across rows. Do not claim arbitrary SQL writes are safe. All mutations must use canonical services and event lock; direct ORM writes allowed only for migration/fixture with review. Do not implement unprotected COUNT trigger as concurrency guard: two transactions can see the same committed snapshot. If stronger DB enforcement becomes needed, ADR must define atomic counter or serialized trigger and adversarial tests.
 
-`checkedIn` é booleano derivado de `checked_in_at != null`, independente de status; estorno preserva histórico de entrada, mas painel ignora check-ins não confirmed. Código sempre consultável; parceiro pode consultar todo ticket com a chave. Ticket web é associado ao ID autenticado, jamais por igualdade de e-mail. Partner não cria ou vincula conta.
+## 5. Machine of states
 
-## 5. Interfaces internas (congelar antes de W5)
+```mermaid
+stateDiagram
+    [*] --> draft
+    draft --> published : publish
+    published --> cancelled : cancel
+    cancelled --> [*]
+```
 
-Python, assinaturas ilustrativas, não código implementado. DTOs imutáveis; erros tipados e adaptados no limite HTTP. Definir tipos reais em módulos indicados; mudanças de contrato exigem ADR ou amendment, revisão de consumidores e tests.
+```mermaid
+stateDiagram
+    [*] --> pending : reserve
+    pending --> confirmed : approve
+    pending --> declined : decline
+    pending --> cancelled : cancel event
+    confirmed --> refunded : cancel event
+    declined --> [*]
+    cancelled --> [*]
+    refunded --> [*]
+```
 
-| Provedor / módulo | Operação / resultado |
-|---|---|
-| identity/access.py | `require_participant(request) -> Account`; `require_organizer(request) -> Account`; `require_owner(actor,event) -> None` (404 para outro dono) |
-| catalog/services.py | `create_event(actor, fields) -> EventDTO`; `edit_event(actor,id,fields)`; `publish_event(actor,id)`; `get_owned_event(actor,id)` |
-| catalog/queries.py | `public_events() -> list[EventSaleDTO]`; `public_event(id)`; `occupied(event_id) -> int`; `available(event, occupied) -> int` |
-| catalog/locking.py | `locked_event(event_id) -> Event` exige transaction.atomic ativa, lock exclusivo e objeto atualizado; não abre/fecha transação do chamador |
-| ledger/services.py | `reserve(event_id, buyer, card_number) -> TicketDTO` (validar entrada, depois estado, depois vaga); `finalize_payment(ticket_id)`; `find_ticket(id)`; `participant_tickets(participant_id)` |
-| operations/services.py | `check_in(actor,event_id,code) -> CheckInResult`; `cancel_event(actor,event_id) -> EventDTO`; `dashboard(actor,event_id) -> DashboardDTO` |
+Check-in sets checked_in_at, does not transition status. It remains in history on refund; API checkedIn derives from presence, dashboard counts confirmed AND checked_in_at present. No transition out of terminal state. Event published may be edited while not cancelled. Draft cannot be cancelled. R01 validates start at create/edit; no extra automatic expiration. No event deletion or ticket transfer.
 
-EventSaleDTO: id, name, starts_at, location, price_cents, available_seats; TicketDTO: id, code, event_id, status, checked_in, price_cents, participant_id, event_name; Buyer: channel, email, participant_id nullable; DashboardDTO: confirmed, pending, checkins, available, revenue_cents, refunded. Nenhum DTO externo recebe senha, PAN, dados de terceiros ou detalhes do job. Erros: InvalidRequest, EventNotAvailable, SoldOut, TicketNotFound, Forbidden/NotFound, InvalidTransition, ValidationError. Request validation deve preservar precedência externa. Passar ator explícito a operações privadas; não confiar em owner_id enviado.
+## 6. Transaction and consistency design
 
-## 6. Protocolo de concorrência e pagamento
+Refer to [transaction protocol](docs/architecture/transactions.md) for linearization, proof and tests. One event lock per mutation; acquire event before tickets/jobs; query occupancy after lock in a new SQL command with READ COMMITTED. Never hold lock during external I/O or sleep. Reserve commits ticket and job together. Worker rechecks due/state under event lock and transitions exactly once. Cancellation commits event and all affected tickets together. Every read of capacity/status/metrics uses one statement snapshot. No cache, clamp, derived revenue counters or per-channel inventory.
 
-Detalhamento normativo em `docs/architecture/transactions.md`. Cada operação que modifica evento, estado de ticket ou check-in adquire primeiro lock do evento em transação curta. Isolamento READ COMMITTED; contagem após lock em segunda consulta SQL. Ordem de lock event → ticket(s) → job(s). Nenhum sleep/rede enquanto segura lock. Operações distintas podem ocorrer em eventos distintos. Vitrine/API são consultas derivadas; a reserva sempre revalida sob lock. Cancelamento é transação única com status do evento e transições dos ingressos, de modo que os prazos do brief são satisfeitos sem fila de reembolso. Jobs que chegam depois são ignorados e finalizados sem reescrever estado terminal.
+## 7. Interface contracts
 
-## 7. Contrato de parceiro (fixo do brief)
+[Internal ports and ownership](docs/interfaces/internal.md) define actor, DTO, return/error, transaction owner and import rules. [OpenAPI](docs/interfaces/partner.openapi.json) fixes partner API. Web paths and stable test selectors: [UI contract](docs/interfaces/web.md). Public API never requires browser cookie; key precedes parse. UI requires session/CSRF; ownership enforced in domain, not merely navigation. Unauthorized responses do not reveal event data. DTOs only expose necessary fields.
 
-Autenticar primeiro em todas as rotas com `X-Api-Key`, comparar em tempo constante; falta/inválida → 401 `{"error":"unauthorized"}`. JSON UTF-8, sem redirects em rotas válidas. Todas as IDs string. `GET /api/partner/events` → 200 array de objetos `{id,name,startsAt,priceCents,availableSeats}`; ISO 8601 com offset/Z; número inteiro para centavos/vagas. Inclui publicado esgotado (0). Não inclui draft/cancelled.
+## 8. Time, money and ID conventions
 
-`POST /api/partner/events/{eventId}/purchases`, JSON `{"buyerEmail":"comprador@example.com","cardNumber":"4000000000000001"}` → 202 `{"ticketId":"<uuid>","code":"<codigo>","status":"pending"}`. Exigir e-mail válido e cartão string de 16 dígitos ASCII; JSON inválido/campos ausentes/tipos inválidos → 422 `{"error":"invalid_request"}` mesmo que evento inexistente ou esgotado. Depois, evento inexistente/draft/cancelled → 404 `{"error":"event_not_available"}`; depois, sem vaga → 409 `{"error":"sold_out"}`. Não tratar UUID malformado como 500: mapear ao erro de recurso inexistente após validar corpo. Evitar rota Django com conversor UUID que retorna 404 antes da chave/validação; capturar segmento string. CSRF dispensado apenas nessas rotas autenticadas por chave, não no restante.
+UTC aware timestamps in DB; UI America/Sao_Paulo, API ISO 8601 with offset/Z. Date picker interpreted in UI timezone. Tests generate future relative dates and use controllable clock for unit/DB; real deadlines use monotonic elapsed time. BRL parsed with Decimal and exact cents, no floats or rounding excess decimals. Revenue sum is arbitrary-precision integer at application boundary; cents representation bounded to interoperable JSON integer range for priceCents. Ticket code generated CSPRNG, 12 uppercase alphanumeric, global uniqueness DB, savepoint collision retry; code can be typed case-insensitively (normalize uppercase+trim). UUID public IDs opaque, invalid UUID yields not found, no path parsing exceptions leak.
 
-`GET /api/partner/tickets/{ticketId}` → 200 `{"ticketId":"<uuid>","code":"<codigo>","eventId":"<uuid>","status":"confirmed","checkedIn":false}` (status qualquer dos cinco). Desconhecido → 404 `{"error":"ticket_not_found"}`. Sem campos adicionais nos DTOs fixos. Sem HTML em erros contratados. A documentação OpenAPI futura poderá derivar desta tabela; não alterar URLs/JSON.
+## 9. Runtime lifecycle and observability
 
-## 8. UX e rotas web
+Health: `/health/live` process, `/health/ready` DB + migrations/bootstrap complete + recent worker heartbeat; F01 worker scaffold heartbeat only until F04. Log request ID, operation, outcome, event/ticket ID, duration, SQLSTATE sanitized; never PAN, passwords, API key, session IDs or email. Log queue lag and errors to stdout; metrics not necessary for brief. Worker updates heartbeat even with empty queue; readiness stale >5s fails. No extra exposed telemetry ports. Compose down isolates project and preserves data. Gates use isolated environment and default delay for timing tests. See [harness](docs/validation/harness.md).
 
-| Método / rota proposta | Permissão e efeito |
-|---|---|
-| GET / | pública; vitrine com nome/data/local/preço, vagas e esgotado |
-| GET/POST /signup/ | pública, somente participant; form nome/email/senha |
-| GET/POST /login/ | autenticação; redirect por papel |
-| POST /logout/ | sessão; CSRF e invalidação |
-| GET /events/{id}/ | pública se à venda; detalhes e compra unitária |
-| POST /events/{id}/purchase/ | participant; cartão; sucesso redireciona Meus ingressos (303), erro sem ticket |
-| GET /my-tickets/ | participant; evento, status em português, código; reload suficiente |
-| GET /organizer/events/ | organizer; somente próprios eventos |
-| GET/POST /organizer/events/new/ | organizer; criar draft e redirect gestão |
-| GET /organizer/events/{id}/ | owner; detalhes e seções de edição, publicação, cancelamento, check-in, painel |
-| POST /organizer/events/{id}/edit/ | owner; validação e lock |
-| POST /organizer/events/{id}/publish/ | owner; transição |
-| POST /organizer/events/{id}/cancel/ | owner; ação irrevogável com confirmação visual |
-| POST /organizer/events/{id}/check-in/ | owner; mensagem exata, redirect para gestão ou render |
+## 10. Quality attributes and testability
 
-Layout mínimo sem SPA; labels acessíveis, inputs de data e hora, lotação, preço, senha e cartão. Não oferecer link de gestão de outro usuário. Renderizar estado de venda atualizado a cada GET. Página de gestão deve manter URL estável; F03 cria template base com slots independentes `ops_actions`, `checkin`, `metrics` ou include `operations/panel.html` placeholder sob ownership F07 (reservar um ponto único sem edição por F05/F06). Em cancelado, exibir painel e mensagem "Evento cancelado" no lugar do campo, ocultar edição/publicação; servidor rejeita POST mesmo escondido.
+Correctness: no oversell and terminal states preserved under concurrent writes. Security: actor derived from session/key, role+owner and CSRF. Availability: durable jobs and idempotent bootstrap, health; no uptime promise beyond local harness. Maintainability: typed domain ports, migrations, stable IDs, docs generated from one traceability source. Performance: prove 30 concurrent requests with 5/25 and 5 confirmed within 10s; no claims without measurement. Tests at unit, PostgreSQL, HTTP, real browser, adversarial and release. See [test catalog](docs/validation/test-catalog.md).
 
-## 9. Check-in e painel
+## 11. Failure and recovery
 
-Após autenticação e dono, dentro de lock do evento, procurar código por igualdade exata normalizada (trim e uppercase, escolha local). A ordem de R10 é obrigatória:
+DB unavailable: readiness fails, request generic 503/500, no fake success. Transaction abort: rollback; retry bounded only known-aborted operations; unknown commit outcome never auto-resubmit. Worker crash: queued persisted jobs consumed after restart. Cancel operation failure: no partial updates; retry user-visible. Code collision: retry only named unique constraint. Bootstrap failure: web/worker not ready, report error and preserve volume. Gate/merge failure: new commit and new report, no mutating historical evidence.
 
-1. Inexistente ou de outro evento: `Ingresso inválido para este evento`.
-2. Evento cancelado: `Evento cancelado`.
-3. Status diferente de confirmed: `Ingresso não confirmado`.
-4. checked_in_at já preenchido: `Ingresso já utilizado`.
-5. Preencher checked_in_at e retornar `Entrada liberada`.
+## 12. Decisions and open questions
 
-Nunca confundir check-in com status. A consulta do painel usa uma única instrução SQL de agregação filtrada, unida ao evento para snapshot coerente. `confirmed=COUNT(status=confirmed)`, `pending=COUNT(pending)`, `checkins=COUNT(confirmed AND checked_in_at IS NOT NULL)`, `available=0 se cancelled senão capacity-confirmed-pending`, `revenue_cents=COALESCE(SUM(price_cents WHERE confirmed),0)`, `refunded=COUNT(refunded)`. Exibir rótulos Confirmados, Pendentes, Check-ins, Vagas disponíveis, Receita, Estornados. Valor BRL com 2 decimais. Sem agregação global de outros eventos.
-
-## 10. Deployment e falhas
-
-Compose: postgres saudável → migrate-seed one-shot → web e worker; `up` espera readiness incluindo worker ativo (heartbeat no DB ou probe equivalente), `down` remove containers e redes do projeto, conserva volume; gates com projeto e volume separados e cleanup em trap. Logs estruturados com IDs de evento/ticket, operação e latência, sem payload sensível. Falha transacional retorna erro sem sucesso fictício. Worker busca jobs vencidos sem bloquear evento antes da hora, revalida e finaliza transacionalmente; reinício reprocessa jobs queued. Não marcar done antes do commit. Monitorar atraso real; nenhuma garantia de prazo sob desligamento ou infraestrutura indisponível, mas recuperar após reinício.
-
-## 11. Verificação e evolução
-
-ADRs e diagrama vinculados a este HLD. Manter cada implementação, teste, doc e contrato na mesma mudança. A regra mais restritiva prevalece: brief → PRD/contrato externo → HLD/ADR aprovados → FDD/plano → código. Divergência bloqueia merge e exige resolução explícita. Ver `requirements-matrix.md`, `docs/validation/`, `tasks.md`.
+See ADRs and [technical research](docs/architecture/research.md). Confirm patch versions and platform support in W0; verify browser runner image works amd64/arm64; confirm actual latency budget on machine. No benchmarks were run for this baseline. API, business rules and deadlines are fixed. New scope requires amendment; diagrams show planned topology not deployed services.

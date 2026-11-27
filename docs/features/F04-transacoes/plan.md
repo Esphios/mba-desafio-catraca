@@ -1,53 +1,57 @@
 # F04 | Plano de implementação
 
-Prerequisitos: baseline aprovada, dependências F01, F03 mergeadas; branch `feat/f04-transacoes`; ler spec, contrato, guidelines, skills e estado.
+Entrada: baseline W0 aprovada, dependências F01, F03 integradas e aprovadas, branch exclusiva. Skills: transaction-safety, payment-simulation, feature-implementation.
 
-## T-F04-01 | Etapa 1
+## T-F04-01
 
-- [ ] Implementar Buyer/TicketDTO tipados, validação, classificação do gateway e geração de código.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A17`: Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs. Esperado: Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Validadores puros, todos finais de cartão, geração de código e entradas inválidas; teste de ausência de efeitos após implementação da reserva na etapa 2.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Criar Buyer/Ticket DTO, validador de cartão, classificação de gateway e código.
 
-## T-F04-02 | Etapa 2
+**Validação:** lint, checks do framework e testes já implementados; fase 1 não exige endpoints futuros.
+- `TEST-A17` (A17): Enviar cartão com 15/17 dígitos, letras, Unicode, espaços, tipo numérico; e-mail inválido; procurar número de teste em DB/logs. Resultado: Sem ticket/job para entradas inválidas; PAN não salvo nem refletido.
 
-- [ ] Implementar reserva atômica, lock seguido de contagem, snapshot e job durável; testar falha e colisão.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A13`: Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada. Esperado: Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.
-  - `TEST-A14`: TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez. Esperado: Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Rollback injetado ao gravar job, preço e código; stress com PostgreSQL e conexões distintas.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
-## T-F04-03 | Etapa 3
+## T-F04-02
 
-- [ ] Implementar loop de finalização, proteção terminal, recuperação após reinício e consultas de ingressos.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A15`: Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo. Esperado: Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga.
-  - `TEST-A16`: Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único. Esperado: Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Gate mínimo desta etapa: Finalização idempotente e timing padrão, job persistente após restart e estado terminal.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Entrega:** Implementar reserve atômico, savepoint de colisão e rollback ticket/job; stress.
 
-## T-F04-04 | Etapa 4
+**Validação:** lint, checks do framework e testes já implementados; fase 2 não exige endpoints futuros.
+- `TEST-A13` (A13): Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; comparar preço/código. Resultado: Um ticket pending e um job por chamada; código distinto; 0 vagas após duas; não aguarda pagamento.
+- `TEST-A14` (A14): Barreira de início, usar cartões de aprovação; conferir resultados e contagem DB; rodar também cap 1 com 2 concorrentes. Resultado: Exatamente 5/25 em todas as rodadas, 1/1 no limite; nenhuma exceção inesperada nem job órfão.
+- `TEST-A32` (A32): Forçar colisão uma vez e permanente; injetar falha ao criar job; verificar tickets/jobs antes/depois. Resultado: Colisão transitória resolve com novo código; permanente/falha reverte tudo, não retorna sold_out.
 
-- [ ] Executar stress concorrente, timing real e corridas edição/reserva; congelar interfaces e registrar base SHA para W5.
-- Validação rastreável (executar quando a dependência do cenário estiver disponível; no gate final nenhum item aplicável pode faltar):
-  - `TEST-A13`: Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada. Esperado: Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.
-  - `TEST-A14`: TransactionTestCase com barreira de threads/conexões distintas e PostgreSQL real; consultar ocupação, jobs e erros; repetir 10 vezes como robustez. Esperado: Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas.
-  - `TEST-A15`: Testes unitários de mapeamento e integração com relógio real: polling, timestamps, ocupação; não acelerar teste de prazo. Esperado: Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga.
-  - `TEST-A16`: Testar preço antes/depois, aplicar resultado duas vezes e fixtures cancelled/refunded; parar/reiniciar worker com job pendente e verificar efeito único. Esperado: Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício.
-  - `TEST-A17`: Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs. Esperado: Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.
-  - `TEST-X04`: Comprar slow, reiniciar worker antes de due; obter status final uma vez. Esperado: Worker do Compose consome job persistido após reinício sem chave real.
-  - `TEST-X05`: Corrida compra × redução e compra × preço; conferir invariantes e snapshots. Esperado: Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação.
-  - Rodar lint e testes já existentes da feature. Falha impede avançar.
-- Evidência: código de saída, teste nomeado, SHA e arquivos modificados; registrar no handoff.
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F04-03
+
+**Entrega:** Implementar worker durável, due_at, restart e proteção de terminal; timing real.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 3 não exige endpoints futuros.
+- `TEST-A15` (A15): Comprar cada final 0001/0002/0003/0004/9999; consultar pending e resultado até deadline; medir intervalo created→resolved, recarregar vagas. Resultado: Aprovação/recusa corretas; 2–5 s e 30–40 s; recusa libera exatamente uma vaga; nenhum terminal antecipado.
+- `TEST-A16` (A16): Comprar antes/depois da edição; reiniciar worker antes de due; executar resolução novamente; tentar aplicar a fixture terminal. Resultado: Preço histórico intacto; job recuperado; só uma transição; terminal nunca muda.
+- `TEST-A33` (A33): Ambos descobrem o mesmo ID; um rollback; outro conclui; repetir job terminal; testar evento diferente. Resultado: Um efeito, sem deadlock; retry só de transação abortada; eventos independentes não bloqueiam entre si.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## T-F04-04
+
+**Entrega:** Executar concorrência, corrida preço/capacidade e avaliação de interfaces.
+
+**Validação:** lint, checks do framework e testes já implementados; fase 4 não exige endpoints futuros.
+- `TEST-A13` (A13): Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; comparar preço/código. Resultado: Um ticket pending e um job por chamada; código distinto; 0 vagas após duas; não aguarda pagamento.
+- `TEST-A14` (A14): Barreira de início, usar cartões de aprovação; conferir resultados e contagem DB; rodar também cap 1 com 2 concorrentes. Resultado: Exatamente 5/25 em todas as rodadas, 1/1 no limite; nenhuma exceção inesperada nem job órfão.
+- `TEST-A15` (A15): Comprar cada final 0001/0002/0003/0004/9999; consultar pending e resultado até deadline; medir intervalo created→resolved, recarregar vagas. Resultado: Aprovação/recusa corretas; 2–5 s e 30–40 s; recusa libera exatamente uma vaga; nenhum terminal antecipado.
+- `TEST-A16` (A16): Comprar antes/depois da edição; reiniciar worker antes de due; executar resolução novamente; tentar aplicar a fixture terminal. Resultado: Preço histórico intacto; job recuperado; só uma transição; terminal nunca muda.
+- `TEST-A17` (A17): Enviar cartão com 15/17 dígitos, letras, Unicode, espaços, tipo numérico; e-mail inválido; procurar número de teste em DB/logs. Resultado: Sem ticket/job para entradas inválidas; PAN não salvo nem refletido.
+- `TEST-A32` (A32): Forçar colisão uma vez e permanente; injetar falha ao criar job; verificar tickets/jobs antes/depois. Resultado: Colisão transitória resolve com novo código; permanente/falha reverte tudo, não retorna sold_out.
+- `TEST-A33` (A33): Ambos descobrem o mesmo ID; um rollback; outro conclui; repetir job terminal; testar evento diferente. Resultado: Um efeito, sem deadlock; retry só de transação abortada; eventos independentes não bloqueiam entre si.
+- `TEST-X04` (X04): Comprar slow, reiniciar worker antes de due; obter status final uma vez. Resultado: Worker do Compose consome job persistido após reinício sem chave real.
+- `TEST-X05` (X05): Corrida compra × redução e compra × preço; conferir invariantes e snapshots. Resultado: Reserve usa mesmo lock de editar; draft/cancelled recusam, alteração de capacidade não gera sobrelotação.
+
+**Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
+
+## Integração posterior
+Não há item exclusivo de integração atribuído a esta feature; regressão global é obrigatória.
 
 ## Handoff
-
-- [ ] Testes unitários, integração e contratos locais verdes no SHA indicado.
-- [ ] Nada fora da ownership; atualizar docs e registrar dependências.
-- [ ] Entregar SHA e comandos à sessão nova de avaliação; não entregar veredito pronto.
-- [ ] Após aprovação independente e PR mergeado, coordenador atualiza estado.
+Entregar SHA limpo, base SHA, interfaces, comandos, logs redigidos e desvios. Avaliador novo, sem histórico de conversa, julga apenas contrato e evidência. Coordenador integra após local PASS; relatório final da feature exige também itens integrados, se houver.

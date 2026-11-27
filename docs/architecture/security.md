@@ -1,19 +1,18 @@
-# Security Design | ambiente local
+# Security design and threat model
 
-## Ativos e fronteiras
+Local MVP, synthetic data only. Assets: user identities/sessions, event ownership, ticket codes, sales integrity, partner key, payment simulation input, reports. Trust boundaries: anonymous browser, session browser, API key client, web/worker, DB, agent/Git. Never log raw card, key, password, cookie or email. Never ask for real card. TLS not in local scope; bind host port to loopback by default.
 
-Contas, hash de senha, sessão, titularidade de eventos, ingressos/códigos, chave de parceiro e integridade financeira. Dados fictícios apenas. Web usa cookie de sessão e CSRF; API autentica chave por header e não aceita cookie como alternativa. Banco/worker restritos à rede Compose. Não usar cartão real.
+| Threat | Control | Evidence |
+| --- | --- | --- |
+| role escalation in signup | role assigned server-side, whitelist fields, DB enum | TEST-A30 |
+| IDOR | actor+owner filter for GET/POST, generic 404, no payload owner | TEST-A07,X03,X11,A28 |
+| session replay/fixation | Django session rotation/logout flush, HttpOnly/SameSite; safe next URL | TEST-A30 |
+| CSRF | middleware/forms + token, API-only exemption with key auth | TEST-A30,A34 |
+| input injection/XSS | ORM bind params, autoescape, reject malformed data, no safe untrusted HTML | TEST-A09,A17,A34; adversarial escaped markup |
+| card/secret leakage | simulator uses suffix transiently, logs allowlist; no body logging | TEST-A17 |
+| API enumeration | fixed contract allows lookup across channels with valid key; no PII; opaque UUID | TEST-A23 |
+| unauthorized API request parse | key guard before reading body; 16 KiB body cap after key guard (422), no redirects | TEST-A34 |
+| overbooking / replay result | DB guard, atomic job, terminal check | TEST-A14,A33,A36 |
+| tampering with reports | append-only files, SHA + Git history, separate context | TEST-A37,P03 |
 
-| Ameaça | Controle | Evidência |
-|---|---|---|
-| IDOR por URL/POST | Query de dono + guarda server-side antes de mostrar dados; 404 para outro dono | A07/X03/X11/A28 |
-| Escalação por role no cadastro | Ignorar/rejeitar role do cliente e fixar participant | A06 |
-| Vazamento de ingressos | Filtrar participant_id; não usar buyer_email como identidade | A20/X16 |
-| CSRF | Middleware Django e token nos POST web; logout POST; API só key e CSRF exemption localizada | testes de CSRF real |
-| Injeção | ORM parametrizado; sem SQL string formatada; escape de templates | testes input e revisão |
-| Chave ausente/inválida | Compare_digest e autenticação antes do parsing, não registrar chave | A23 |
-| PAN e senha em log | Não persistir PAN nem raw body; redaction e hash framework | A17/A06 |
-| Corrida e replay | Lock comum, estados terminais, check-in idempotente quanto ao efeito | A14–A16/A25–A26 |
-| Credenciais demo expostas | Apenas loopback; defaults explicitamente locais, sem segredos reais; .gitignore .env | A04 |
-
-Sessão padrão server-side, cookie HttpOnly/SameSite=Lax, secure somente sob HTTPS (local HTTP deve funcionar), expiração planejada 8h, rotação no login e invalidação logout. Não usar open redirect: next só caminho local validado. Login com mensagens genéricas, validadores de senha do Django; seed usa hasher, não texto puro. Escapar nomes de evento e usuários no HTML. Limite de payload JSON de 16 KiB, campos de formulário com limites, preço/capacidade dentro do tipo persistente. Não incluir stack trace em erro HTTP padrão; DEBUG desativado no modo avaliador. Rate limiting de produção fora do escopo, nunca comprometer teste 30 concorrentes. TLS público e gestão real de segredo fora de escopo; não publicar serviço de demonstração.
+Password validator minimum eight characters for local baseline, framework hash algorithm, no plaintext. Normalize email consistently; database uniqueness protects concurrent signup. Session/partner secret default demo-only; README includes synthetic credentials, never production keys. Compare key constant time; configure key in env override, no accidental print. CSRF error generic. Do not disable framework security globally. Web pages cache-control no-store on authenticated views. No debug trace in demo. Query parameter next must be same-host safe; no open redirect. Use mandatory separate runtime and migration roles: runtime web/worker has only necessary DML, no ownership/DDL/CREATEROLE; bootstrap uses migration credentials for schema and seed; don't expose PostgreSQL host port. Backup/production hardening out of scope. Test code and evidence redact sensitive data; dependency lockfile and review. Residual: local HTTP, no brute-force rate limiting, key grants cross-channel ticket lookup as mandated; no production claim.

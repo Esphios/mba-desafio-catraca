@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant O as Organizer
+    participant D as DB
+    participant W as Worker
+    O->>D: event lock
+    O->>D: cancel event and transition all tickets
+    O->>D: commit
+    W->>D: discover due job, event lock
+    W->>D: reread terminal ticket
+    W->>D: mark ignored and commit

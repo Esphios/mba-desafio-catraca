@@ -1,0 +1,73 @@
+$ python3 --version
+Python 3.13.5
+exit=0; expected=0
+
+$ git --version
+git version 2.47.3
+exit=0; expected=0
+
+$ node --version
+v22.16.0
+exit=0; expected=0
+
+$ python3 scripts/validate_docs.py
+PASS structural: 7 features; 37 local criteria; 16 cross criteria; 6 process criteria
+No runtime, independent evaluation, Mermaid rendering or PR history verified.
+exit=0; expected=0
+
+$ python3 scripts/verify_model.py
+PASS abstract model: 4290 states, 36558 transitions; oversell negative rejected.
+Bounded model assumes serialized transitions; not a database/concurrency or product test.
+exit=0; expected=0
+
+$ python3 scripts/test_baseline.py
+PASS baseline negative tests: CSV mismatch, incomplete release, approved state without report, same session, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.
+exit=0; expected=0
+
+$ python3 scripts/validate_evidence.py
+PASS evidence structure/history for requested phase. No authenticity or GitHub PR overlap inferred.
+exit=0; expected=0
+
+$ python3 scripts/validate_evidence.py --release
+FAIL F01: release incomplete
+FAIL F01: missing merge/PR evidence
+FAIL F02: release incomplete
+FAIL F02: missing merge/PR evidence
+FAIL F03: release incomplete
+FAIL F03: missing merge/PR evidence
+FAIL F04: release incomplete
+FAIL F04: missing merge/PR evidence
+FAIL F05: release incomplete
+FAIL F05: missing merge/PR evidence
+FAIL F06: release incomplete
+FAIL F06: missing merge/PR evidence
+FAIL F07: release incomplete
+FAIL F07: missing merge/PR evidence
+FAIL release state incomplete
+exit=1; expected=1
+
+$ python3 docs/validation/w0-audit/reproduce_mutations.py
+Markdown acceptance altered: DETECTED
+State wave jumps: DETECTED
+State feature wave diverges: DETECTED
+OpenAPI priceCents integer changed to string: DETECTED
+Contract oracle contradicted: DETECTED
+Test catalog oracle contradicted: DETECTED
+PRD acceptance contradicted: DETECTED
+0/7 invalid mutants accepted by structural gate.
+exit=0; expected=0
+
+$ python3 -m compileall -q scripts docs/validation/w0-audit/reproduce_mutations.py
+exit=0; expected=0
+
+$ git diff --check
+exit=0; expected=0
+
+$ git diff --exit-code 30cc99a -- docs/prd/PRD.md requirements-matrix.md requirements-matrix.csv docs/validation/traceability.json docs/interfaces/partner.openapi.json state/project-state.json docs/validation/test-catalog.md docs/validation/release-contract.md docs/features/F06-parceiros/contract.md docs/features/F03-eventos/contract.md docs/features/F07-operacao/contract.md docs/features/F01-fundacao/contract.md docs/features/F02-identidade/contract.md docs/features/F04-transacoes/contract.md docs/features/F05-participante/contract.md
+exit=0; expected=0
+
+$ bash -c command -v docker
+exit=1; expected=1
+
+$ bash -c command -v python3.12
+exit=1; expected=1
