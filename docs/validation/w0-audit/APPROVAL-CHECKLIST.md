@@ -1,6 +1,10 @@
-# W0 | Procedimento de aprovação (pendente)
+# W0 | Procedimento de aprovação e registro
 
-Este procedimento não é aprovação nem registro de resultados. Não iniciar W1 enquanto qualquer item estiver pendente. A revisão corretiva não substitui a aprovação humana.
+O procedimento foi executado sobre o commit ratificado
+`19059603b450981630477dac3732acfdc8fe9d1d`. A aprovação humana explícita ocorreu
+em 2026-11-27; o G0 passou e está registrado em
+`runs/20261127T0931-0300-ratification-g0/`. W1 só começa após revisão independente
+deste registro e commit separado de `state/project-state.json`.
 
 1. Produto: fornecer brief normativo original ou registrar confirmação explícita de que PRD, OpenAPI, matriz e contratos são a fonte autorizada. Validar R01–R13, fluxo 1–18, escopo, mensagens e faixas de tempo. Confirmar as decisões propostas de normalização, cap de corpo, ownership e permissões de banco.
 2. Arquitetura: revisar `AMENDMENT-001.md`, ADRs e `docs/architecture/version-manifest.md`; confirmar patches e hashes/digests de Python 3.12, Django 5.2 LTS, psycopg, PostgreSQL 17, Gunicorn, Ruff, Playwright/browser, ferramenta OpenAPI 3.1 e Mermaid. Guardar versão exata, origem, digest por arquitetura, resolução de dependências e comandos reais. Não usar `latest`. W1 materializa lockfile da aplicação e imagens com esses pins; nenhuma aplicação deve ser criada na W0.

@@ -1,0 +1,86 @@
+timestamp_start=2026-11-27T09:31:56-03:00
+timestamp_end=2026-11-27T09:37:10-03:00
+tested_commit=19059603b450981630477dac3732acfdc8fe9d1d
+worktree=clean
+
+$ python --version
+Python 3.12.10
+
+$ git --version
+git version 2.52.0.windows.1
+
+$ docker version --format ...
+client=29.9.2 server=29.9.2 os=linux arch=amd64
+
+$ docker compose version
+Docker Compose version v5.6.1
+
+$ wsl.exe -e uname -a
+Linux eduar 6.6.87.2-microsoft-standard-WSL2 x86_64 GNU/Linux
+
+$ python scripts/validate_docs.py
+exit=0
+PASS structural: 7 features; 37 local criteria; 16 cross criteria; 6 process criteria
+
+$ python scripts/verify_model.py
+exit=0
+PASS abstract model: 4290 states, 36558 transitions; oversell negative rejected
+
+$ python scripts/test_baseline.py
+exit=0
+PASS baseline negative tests
+
+$ python scripts/validate_evidence.py
+exit=0
+PASS evidence structure/history for requested phase
+
+$ python docs/validation/w0-audit/reproduce_mutations.py
+exit=0
+0/7 invalid mutants accepted by structural gate
+
+$ python scripts/validate_evidence.py --release
+exit=1 (expected in W0)
+F01-F07 incomplete; merge/PR evidence missing; release state incomplete
+
+$ docker run pinned-python python --version
+digest=sha256:1475c4f5b6bcb7d35e57661d6f5d7429ec4041275633c15f2b49350ac898276d
+exit=0
+Python 3.12.16
+
+$ docker run pinned-postgres postgres --version
+digest=sha256:c7a16500f728a9c09731e772f228ee7a29615585e8019772f05b620522f62d03
+exit=0
+postgres (PostgreSQL) 17.12 (Debian 17.12-1.pgdg12+1)
+
+$ docker run pinned-playwright python --version
+digest=sha256:cbd0a36dc6f6b8e8bb23703cf6cbe19ebe29e5a1ba43271a11a6c8e53c8b65d0
+exit=0
+Python 3.12.3
+
+$ docker run pinned-mermaid --entrypoint /bin/sh -lc 'mmdc --version'
+exit=127 (diagnostic invocation failure)
+root_cause=overriding entrypoint removed /home/mermaidcli/node_modules/.bin/mmdc from executable path
+
+$ docker image inspect pinned-mermaid
+Entrypoint=[/home/mermaidcli/node_modules/.bin/mmdc,-p,/puppeteer-config.json]
+
+$ docker run pinned-mermaid --version
+exit=0
+11.12.0
+
+$ openapi-spec-validator==0.7.2 docs/interfaces/partner.openapi.json
+container=python:3.12.16-slim-bookworm pinned amd64 digest
+exit=0
+docs/interfaces/partner.openapi.json: OK
+
+$ compare current Mermaid fences with tracked sources
+exit=0
+architecture=6 design=3 prd=1 total=10 exact_source_matches=10
+
+$ render 10 Mermaid sources to SVG and PNG with pinned image
+digest=sha256:e8edd23a12b7939cabdb7fd9d2c6cbe7d7b8c37f68d62c782fd8e405b61529d6
+exit=0
+svg=10 png=10 byte_identical=16/20
+non_byte_identical=design-02.svg,design-02.png,design-03.svg,design-03.png
+root_cause=randomized rough-curve control points in state diagram renderer
+visual_inspection=tracked and regenerated pairs equivalent and legible; no render error
