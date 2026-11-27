@@ -15,9 +15,26 @@ def main():
         root=Path(tmp)/'baseline'
         shutil.copytree(ROOT,root,ignore=shutil.ignore_patterns('__pycache__','.git'))
         state_path=root/'state/project-state.json';s=json.loads(state_path.read_text())
-        s.update(currentWave=0,baseline='proposed',baselineCommit=None)
+        s.update(
+            currentWave=0,
+            baseline='proposed',
+            baselineCommit=None,
+            releaseStatus='planned',
+        )
+
+        # Isolate the synthetic fixture from real project progress.
+        for feature in s['features']:
+            feature.update(
+                status='planned',
+                branch=None,
+                implementationCommit=None,
+                mergedCommit=None,
+                pr=None,
+                latestEvaluation=None,
+                implementerSession=None,
+            )
         initial=json.dumps(s);state_path.write_text(initial)
-        assert not docs(root)
+        assert not docs(root), docs(root)
         assert not evidence(root)
         assert evidence(root,True)
         path=root/'requirements-matrix.csv'; original=path.read_bytes(); path.write_bytes(original+b'\ninvalid,row\n')
