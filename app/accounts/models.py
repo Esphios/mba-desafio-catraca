@@ -9,7 +9,39 @@ from django.utils import timezone
 from accounts.email_policy import normalize_email
 
 
-class UserManager(BaseUserManager):
+class UserQuerySet(models.QuerySet):
+    _allow_canonical_email_expression = False
+
+    def _clone(self):
+        clone = super()._clone()
+        clone._allow_canonical_email_expression = self._allow_canonical_email_expression
+        return clone
+
+    def update(self, **kwargs):
+        if 'email' in kwargs and not self._allow_canonical_email_expression:
+            kwargs['email'] = normalize_email(kwargs['email'])
+        return super().update(**kwargs)
+
+    def bulk_create(self, objs, **kwargs):
+        objs = list(objs)
+        for user in objs:
+            user.email = normalize_email(user.email)
+        return super().bulk_create(objs, **kwargs)
+
+    def bulk_update(self, objs, fields, **kwargs):
+        objs = list(objs)
+        if 'email' in fields:
+            for user in objs:
+                user.email = normalize_email(user.email)
+            self._allow_canonical_email_expression = True
+            try:
+                return super().bulk_update(objs, fields, **kwargs)
+            finally:
+                self._allow_canonical_email_expression = False
+        return super().bulk_update(objs, fields, **kwargs)
+
+
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
@@ -50,6 +82,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
+
+    def save(self, *args, **kwargs):
+        self.email = normalize_email(self.email)
+        return super().save(*args, **kwargs)
 
     class Meta:
         constraints = [

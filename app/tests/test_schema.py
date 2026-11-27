@@ -1,8 +1,11 @@
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from threading import Barrier
 
 from django.apps import apps
-from django.db import DataError, IntegrityError, connection, transaction
+from django.core.exceptions import ValidationError
+from django.db import DataError, IntegrityError, close_old_connections, connection, transaction
 from django.test import SimpleTestCase, TransactionTestCase
 from django.utils import timezone
 
@@ -107,6 +110,105 @@ class SchemaIntegrityTests(TransactionTestCase):
             )
         )
 
+    def test_TEST_A05_authorized_orm_writes_canonicalize_email(self):
+        created = self.User.objects.create(
+            email='  Case@Test.Example  ', name='Created', role='participant'
+        )
+        self.assertEqual(created.email, 'case@test.example')
+
+        created.email = '  Saved@Test.Example  '
+        created.save(update_fields=['email'])
+        created.refresh_from_db()
+        self.assertEqual(created.email, 'saved@test.example')
+
+        self.User.objects.filter(pk=created.pk).update(email='  Updated@Test.Example  ')
+        created.refresh_from_db()
+        self.assertEqual(created.email, 'updated@test.example')
+
+        bulk_created = self.User(email='  Bulk@Test.Example  ', name='Bulk', role='participant')
+        self.User.objects.bulk_create([bulk_created])
+        bulk_created.refresh_from_db()
+        self.assertEqual(bulk_created.email, 'bulk@test.example')
+
+        bulk_created.email = '  Bulk-Saved@Test.Example  '
+        self.User.objects.bulk_update([bulk_created], ['email'])
+        bulk_created.refresh_from_db()
+        self.assertEqual(bulk_created.email, 'bulk-saved@test.example')
+
+    def test_TEST_A05_bulk_email_writes_preserve_iterable_semantics(self):
+        users = (
+            self.User(email=email, name='Generated', role='participant')
+            for email in (' Generated-A@Test.Example ', ' Generated-B@Test.Example ')
+        )
+        created = self.User.objects.bulk_create(users)
+        self.assertEqual(
+            sorted(user.email for user in created),
+            ['generated-a@test.example', 'generated-b@test.example'],
+        )
+
+        for user in created:
+            user.email = user.email.replace('generated-', ' Updated-').upper()
+        self.User.objects.bulk_update((user for user in created), ['email'])
+        self.assertEqual(
+            sorted(
+                self.User.objects.filter(pk__in=[user.pk for user in created]).values_list(
+                    'email', flat=True
+                )
+            ),
+            ['updated-a@test.example', 'updated-b@test.example'],
+        )
+
+    def test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced(self):
+        expanded = self.User.objects.create(
+            email='  Straße@Example.TEST  ', name='Unicode', role='participant'
+        )
+        self.assertEqual(expanded.email, 'strasse@example.test')
+
+        expands_past_limit = 'a@' + ('ß.' * 84) + 'x'
+        self.assertLess(len(expands_past_limit), 254)
+        self.assertGreater(len(expands_past_limit.casefold()), 254)
+        with self.assertRaises(ValidationError):
+            self.User.objects.create(
+                email=expands_past_limit, name='Too long after casefold', role='participant'
+            )
+
+    def test_TEST_A05_logical_email_duplicates_are_rejected(self):
+        self.User.objects.create(email='  Logical@Test.Example  ', name='First', role='participant')
+        self.assert_integrity_error(
+            lambda: self.User.objects.create(
+                email='logical@test.example', name='Duplicate', role='participant'
+            )
+        )
+
+    def test_TEST_A05_concurrent_logical_email_duplicates_create_one_user(self):
+        barrier = Barrier(2)
+
+        def create_variant(email):
+            close_old_connections()
+            try:
+                barrier.wait()
+                with transaction.atomic():
+                    self.User.objects.create(email=email, name='Concurrent', role='participant')
+                return 'created'
+            except IntegrityError:
+                return 'duplicate'
+            finally:
+                close_old_connections()
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            results = list(
+                executor.map(
+                    create_variant,
+                    (' Concurrent@Test.Example ', 'concurrent@test.example'),
+                )
+            )
+
+        self.assertCountEqual(results, ['created', 'duplicate'])
+        self.assertEqual(
+            self.User.objects.filter(email='concurrent@test.example').count(),
+            1,
+        )
+
     def test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits(self):
         invalid_values = (
             {'owner_id': uuid.uuid4()},
@@ -202,9 +304,29 @@ class SchemaIntegrityTests(TransactionTestCase):
             job_indexes = {
                 tuple(details['columns']) for details in constraints.values() if details['index']
             }
+            cursor.execute(
+                """
+                SELECT pg_get_expr(index_catalog.indpred, index_catalog.indrelid)
+                FROM pg_index AS index_catalog
+                JOIN pg_class AS index_class ON index_class.oid = index_catalog.indexrelid
+                JOIN pg_class AS table_class ON table_class.oid = index_catalog.indrelid
+                WHERE table_class.relname = %s AND index_class.relname = %s
+                """,
+                [self.PaymentJob._meta.db_table, 'cd_job_queued_due_idx'],
+            )
+            queued_job_predicate = cursor.fetchone()[0]
 
         self.assertIn(('owner_id', 'id'), event_indexes)
         self.assertIn(('status', 'starts_at'), event_indexes)
         self.assertIn(('event_id', 'status'), ticket_indexes)
         self.assertIn(('participant_id', 'created_at'), ticket_indexes)
         self.assertIn(('due_at',), job_indexes)
+        self.assertIsNotNone(queued_job_predicate)
+        normalized_predicate = (
+            queued_job_predicate.replace('(', '')
+            .replace(')', '')
+            .replace('::text', '')
+            .replace('"', '')
+            .replace(' ', '')
+        )
+        self.assertEqual(normalized_predicate, "state='queued'")
