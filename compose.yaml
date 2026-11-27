@@ -44,6 +44,7 @@ services:
       CAT_PROFILE: ${CAT_PROFILE:-demo}
       CAT_GATEWAY_SCALE: ${CAT_GATEWAY_SCALE:-1}
       CAT_PARTNER_KEY: ${CAT_PARTNER_KEY:-local-passgate-26}
+      CAT_WORKER_ID: ${CAT_WORKER_ID:-worker-1}
     depends_on:
       bootstrap:
         condition: service_completed_successfully
@@ -65,7 +66,7 @@ services:
       CAT_DB_USER: catraca_runtime
       CAT_DB_PASSWORD: ${CAT_RUNTIME_DB_PASSWORD:-local-runtime-only}
       CAT_SECRET: ${CAT_SECRET:-local-development-secret}
-      CAT_WORKER_ID: worker-1
+      CAT_WORKER_ID: ${CAT_WORKER_ID:-worker-1}
     depends_on:
       bootstrap:
         condition: service_completed_successfully

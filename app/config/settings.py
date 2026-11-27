@@ -6,6 +6,7 @@ SECRET_KEY = os.environ.get('CAT_SECRET', 'local-development-secret')
 CAT_PROFILE = os.environ.get('CAT_PROFILE', 'demo')
 CAT_GATEWAY_SCALE = os.environ.get('CAT_GATEWAY_SCALE', '1')
 CAT_PARTNER_KEY = os.environ.get('CAT_PARTNER_KEY', 'local-passgate-26')
+CAT_WORKER_ID = os.environ.get('CAT_WORKER_ID', 'worker-1')
 if CAT_PROFILE == 'demo' and CAT_GATEWAY_SCALE != '1':
     raise ImproperlyConfigured('CAT_PROFILE=demo requires CAT_GATEWAY_SCALE=1.')
 DEBUG = False

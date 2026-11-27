@@ -3,6 +3,7 @@ import signal
 import time
 
 import django
+from django.conf import settings
 from django.db import close_old_connections
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -20,12 +21,11 @@ def request_stop(signum, frame):
 
 
 def run():
-    worker_id = os.environ.get('CAT_WORKER_ID', 'worker-1')
     signal.signal(signal.SIGTERM, request_stop)
     signal.signal(signal.SIGINT, request_stop)
     while not STOP_REQUESTED:
         close_old_connections()
-        WorkerHeartbeat.objects.update_or_create(worker_id=worker_id)
+        WorkerHeartbeat.objects.update_or_create(worker_id=settings.CAT_WORKER_ID)
         time.sleep(1)
     close_old_connections()
     return 0

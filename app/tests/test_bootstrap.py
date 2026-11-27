@@ -5,7 +5,9 @@ from unittest.mock import patch
 from django.apps import apps
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TransactionTestCase
+from django.db import connection
+from django.db.migrations.recorder import MigrationRecorder
+from django.test import TransactionTestCase, override_settings
 from django.utils import timezone
 
 
@@ -67,3 +69,48 @@ class ReadinessTests(TransactionTestCase):
             last_seen=timezone.now() - timedelta(seconds=6)
         )
         self.assertEqual(self.client.get('/health/ready').status_code, 503)
+
+    @override_settings(CAT_WORKER_ID='worker-1')
+    def test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker(self):
+        WorkerHeartbeat = apps.get_model('coredata', 'WorkerHeartbeat')
+        expected = WorkerHeartbeat.objects.create(worker_id='worker-1')
+        WorkerHeartbeat.objects.filter(pk=expected.pk).update(
+            last_seen=timezone.now() - timedelta(seconds=6)
+        )
+        WorkerHeartbeat.objects.create(worker_id='rogue-worker')
+
+        self.assertEqual(self.client.get('/health/ready').status_code, 503)
+
+        WorkerHeartbeat.objects.filter(pk=expected.pk).update(last_seen=timezone.now())
+        self.assertEqual(self.client.get('/health/ready').status_code, 200)
+
+    @override_settings(CAT_WORKER_ID='worker-1')
+    def test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker(self):
+        WorkerHeartbeat = apps.get_model('coredata', 'WorkerHeartbeat')
+        expected = WorkerHeartbeat.objects.create(worker_id='worker-1')
+        WorkerHeartbeat.objects.filter(pk=expected.pk).update(
+            last_seen=timezone.now() - timedelta(seconds=6)
+        )
+        WorkerHeartbeat.objects.create(worker_id='rogue-worker')
+
+        with self.assertRaisesRegex(CommandError, 'stale'):
+            call_command('worker_health')
+
+        WorkerHeartbeat.objects.filter(pk=expected.pk).update(last_seen=timezone.now())
+        call_command('worker_health')
+
+    def test_TEST_A01_ready_rejects_pending_migration_without_applying_it(self):
+        WorkerHeartbeat = apps.get_model('coredata', 'WorkerHeartbeat')
+        WorkerHeartbeat.objects.create(worker_id='worker-1')
+        recorder = MigrationRecorder(connection)
+        recorder.record_unapplied('sessions', '0001_initial')
+
+        try:
+            self.assertEqual(self.client.get('/health/ready').status_code, 503)
+            self.assertFalse(
+                recorder.migration_qs.filter(app='sessions', name='0001_initial').exists()
+            )
+        finally:
+            recorder.record_applied('sessions', '0001_initial')
+
+        self.assertEqual(self.client.get('/health/ready').status_code, 200)
