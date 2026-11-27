@@ -1,0 +1,8 @@
+flowchart TB
+    H[Host browser / CLI] --> W[web: Django/Gunicorn]
+    B[bootstrap: migrate + seed] --> D[(PostgreSQL)]
+    B -->|exit 0| W
+    B -->|exit 0| Q[worker]
+    W --> D
+    Q --> D
+    T[test runner isolado] --> W

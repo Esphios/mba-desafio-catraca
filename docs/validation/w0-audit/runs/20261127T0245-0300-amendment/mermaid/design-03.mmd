@@ -1,0 +1,9 @@
+stateDiagram
+    [*] --> pending : reserve
+    pending --> confirmed : approve
+    pending --> declined : decline
+    pending --> cancelled : cancel event
+    confirmed --> refunded : cancel event
+    declined --> [*]
+    cancelled --> [*]
+    refunded --> [*]

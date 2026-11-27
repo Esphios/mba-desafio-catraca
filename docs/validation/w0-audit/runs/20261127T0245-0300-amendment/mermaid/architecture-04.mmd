@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant A as Request A
+    participant B as Request B
+    participant DB as PostgreSQL
+    A->>DB: BEGIN and event lock
+    B->>DB: BEGIN and wait on event lock
+    A->>DB: count 4 of 5, insert ticket and job
+    A->>DB: COMMIT
+    DB-->>B: lock granted
+    B->>DB: fresh count 5 of 5
+    B->>DB: ROLLBACK
+    DB-->>B: sold_out

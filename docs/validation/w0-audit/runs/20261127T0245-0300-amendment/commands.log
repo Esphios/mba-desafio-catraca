@@ -1,0 +1,62 @@
+timestamp=2026-11-27T03:50:00-03:00
+tested_commit=eff1b20cb50ae73313e8245d11a6a068fbda9bd5
+
+$ python scripts/test_validate_docs_parser.py
+exit=0
+Ran 2 tests; OK
+
+$ python scripts/validate_docs.py
+exit=1
+expected_fail_closed=normative drift: PRD, partner OpenAPI and traceability
+
+$ python scripts/verify_model.py
+exit=0
+PASS abstract model: 4290 states, 36558 transitions; oversell negative rejected
+
+$ git diff --check
+exit=0
+
+$ git diff --exit-code -- docs/validation/normative-lock.json state/project-state.json
+exit=0
+
+$ candidate-copy: parser + validate_docs + verify_model + test_baseline + validate_evidence + reproduce_mutations
+container=python:3.12.16-slim-bookworm
+ephemeral_change=only candidate hashes substituted in normative-lock.json
+exit=0
+PASS structural: 7 features; 37 local; 16 cross; 6 process
+PASS baseline negative tests
+PASS evidence structure/history
+0/7 invalid mutants accepted
+
+$ candidate-copy: python scripts/validate_evidence.py --release
+exit=1 (expected)
+F01-F07 incomplete; merge/PR evidence missing; release state incomplete
+
+$ openapi-spec-validator docs/interfaces/partner.openapi.json
+container=python:3.12.16-slim-bookworm
+tool=openapi-spec-validator==0.7.2
+exit=0
+docs/interfaces/partner.openapi.json: OK
+
+$ docker buildx imagetools inspect pinned multi-architecture images
+exit=0
+playwright_amd64=cbd0a36dc6f6b8e8bb23703cf6cbe19ebe29e5a1ba43271a11a6c8e53c8b65d0
+playwright_arm64=ef91d1740c114a119450f11e8edb1af4f6d49e641c04207985f0c65a4aaa34a0
+mermaid_amd64=e8edd23a12b7939cabdb7fd9d2c6cbe7d7b8c37f68d62c782fd8e405b61529d6
+mermaid_arm64=8380c215a0d611465c3062c4c8c294183ca6aac264d479c3b38364272e4ed4a0
+
+$ mermaid-cli render all Markdown fences from eff1b20 to SVG and PNG
+image=ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:11.12.0@sha256:bad64c9d9ad917c8dfbe9d9e9c162b96f6615ff019b37058638d16eb27ce7783
+exit=0
+fences=10
+sources=10
+svg=10
+png=10
+visual_inspection=changed ER legible; no render error
+
+$ independent delta reviews of eff1b20
+product_traceability=PASS
+architecture=PASS
+contracts=PASS
+governance=PASS conditional only on regenerating and committing evidence for eff1b20
+human_approval=NOT_YET_GRANTED

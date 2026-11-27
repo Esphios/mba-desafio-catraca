@@ -1,0 +1,6 @@
+flowchart LR
+    V[Visitante] --> C[Catraca]
+    P[Participante] --> C
+    O[Organizador] --> C
+    S[Sistema parceiro] -->|HTTP local: JSON, chave| C
+    C --> G[Gateway simulado interno]

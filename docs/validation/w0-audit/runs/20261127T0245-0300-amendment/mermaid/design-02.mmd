@@ -1,0 +1,5 @@
+stateDiagram
+    [*] --> draft
+    draft --> published : publish
+    published --> cancelled : cancel
+    cancelled --> [*]
