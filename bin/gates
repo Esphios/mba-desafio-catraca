@@ -22,4 +22,5 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-"${compose[@]}" run --build --rm test
+"${compose[@]}" build test
+"${compose[@]}" run --rm test
