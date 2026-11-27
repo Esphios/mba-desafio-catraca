@@ -8,9 +8,9 @@ Versão 2 proposta. Ambiente: checkout limpo do SHA, Docker/Compose e Git; `bash
 
 Preparação: E publicado cap 2 sem tickets; relógio de teste e worker pausado para conferir commit.
 
-Procedimento: Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; comparar preço/código.
+Procedimento: Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; validar UUID, código por ^[A-Z0-9]{12}$ e preço.
 
-PASS somente se: Um ticket pending e um job por chamada; código distinto; 0 vagas após duas; não aguarda pagamento.
+PASS somente se: Um ticket pending e um job por chamada; IDs UUID e códigos válidos/distintos; 0 vagas após duas; não aguarda pagamento.
 
 Teste: `TEST-A13`. Evidência: Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada.
 
@@ -48,11 +48,11 @@ Teste: `TEST-A16`. Evidência: Testar preço antes/depois, aplicar resultado dua
 
 Preparação: E publicado com vaga; DB e captura sanitizada de log.
 
-Procedimento: Enviar cartão com 15/17 dígitos, letras, Unicode, espaços, tipo numérico; e-mail inválido; procurar número de teste em DB/logs.
+Procedimento: Enviar cartões com 15/17 dígitos, letras, Unicode, espaços e tipo numérico; enviar e-mails com trim/casefold Unicode, inválido e >254 após casefold; inspecionar DB/logs.
 
-PASS somente se: Sem ticket/job para entradas inválidas; PAN não salvo nem refletido.
+PASS somente se: E-mail válido é canônico; entradas inválidas não criam ticket/job; PAN e e-mail inválido não são salvos nem refletidos.
 
-Teste: `TEST-A17`. Evidência: Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs.
+Teste: `TEST-A17`. Evidência: Casos de cartão 15/17 dígitos, letras/Unicode/espaços e e-mails com trim/casefold, inválido e >254 canônicos; assert canonicidade ou contagem zero e inspeção DB/logs.
 
 ### C-F04-A32 (A32)
 

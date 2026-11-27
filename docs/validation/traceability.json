@@ -71,7 +71,7 @@
         "F04"
       ],
       "provides": "As três rotas /api/partner, autenticação por chave, tradução de DTOs e erros do domínio.",
-      "consumes": "F03: catálogo público; F04: compra/consulta.",
+      "consumes": "F03: public_catalog/public_detail; F04: compra/consulta e validação canônica do PartnerBuyer.",
       "name": "Integração comercial por API",
       "scope": "partner API"
     },
@@ -169,13 +169,13 @@
       "contract": "C-F01-A05",
       "test": "TEST-A05",
       "task": "T-F01-02",
-      "acceptance": "Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.",
-      "evidence": "Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas.",
+      "acceptance": "Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis.",
+      "evidence": "Aplicar migração em DB vazio e reexecutar; tentar cada classe de código [A-Z0-9]{12} inválido, status/FK/limites inválidos, dois jobs e combinações state/processed_at inválidas; registrar constraints rejeitadas.",
       "phase": "local",
       "level": "integration",
       "precondition": "Banco PostgreSQL migrado em volume vazio.",
-      "procedure": "Forçar duplicata de código, FK inexistente, status inválido, preço 0, capacidade 0, buyer misto, dois jobs por ticket; migrar de novo.",
-      "oracle": "Todas as escritas inválidas falham; dados válidos persistem; sem migração pendente."
+      "procedure": "Forçar código duplicado, curto, longo, minúsculo ou não alfanumérico, FK inexistente, status inválido, preço 0/>2^53−1, capacidade 0/>2^31−1, buyer misto, dois jobs e queued/processado ou terminal/null; migrar de novo.",
+      "oracle": "Todas as escritas inválidas falham; DB permite ticket sem job apenas fora do serviço, enquanto reserve prova totalidade; dados válidos persistem; sem migração pendente."
     },
     {
       "id": "A06",
@@ -310,13 +310,13 @@
       "contract": "C-F04-A13",
       "test": "TEST-A13",
       "task": "T-F04-02",
-      "acceptance": "Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.",
+      "acceptance": "Uma compra válida retorna ingresso pending com ID UUID e código [A-Z0-9]{12} únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.",
       "evidence": "Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada.",
       "phase": "local",
       "level": "integration",
       "precondition": "E publicado cap 2 sem tickets; relógio de teste e worker pausado para conferir commit.",
-      "procedure": "Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; comparar preço/código.",
-      "oracle": "Um ticket pending e um job por chamada; código distinto; 0 vagas após duas; não aguarda pagamento."
+      "procedure": "Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; validar UUID, código por ^[A-Z0-9]{12}$ e preço.",
+      "oracle": "Um ticket pending e um job por chamada; IDs UUID e códigos válidos/distintos; 0 vagas após duas; não aguarda pagamento."
     },
     {
       "id": "A14",
@@ -379,13 +379,13 @@
       "contract": "C-F04-A17",
       "test": "TEST-A17",
       "task": "T-F04-01",
-      "acceptance": "Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.",
-      "evidence": "Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs.",
+      "acceptance": "Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail parceiro é strip+casefold, validado e limitado a 254 caracteres canônicos; PAN/e-mail inválidos não persistem nem aparecem em logs.",
+      "evidence": "Casos de cartão 15/17 dígitos, letras/Unicode/espaços e e-mails com trim/casefold, inválido e >254 canônicos; assert canonicidade ou contagem zero e inspeção DB/logs.",
       "phase": "local",
       "level": "integration",
       "precondition": "E publicado com vaga; DB e captura sanitizada de log.",
-      "procedure": "Enviar cartão com 15/17 dígitos, letras, Unicode, espaços, tipo numérico; e-mail inválido; procurar número de teste em DB/logs.",
-      "oracle": "Sem ticket/job para entradas inválidas; PAN não salvo nem refletido."
+      "procedure": "Enviar cartões com 15/17 dígitos, letras, Unicode, espaços e tipo numérico; enviar e-mails com trim/casefold Unicode, inválido e >254 após casefold; inspecionar DB/logs.",
+      "oracle": "E-mail válido é canônico; entradas inválidas não criam ticket/job; PAN e e-mail inválido não são salvos nem refletidos."
     },
     {
       "id": "A18",
@@ -454,13 +454,13 @@
       "contract": "C-F06-A21",
       "test": "TEST-A21",
       "task": "T-F06-02",
-      "acceptance": "GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.",
-      "evidence": "HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0.",
+      "acceptance": "GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos.",
+      "evidence": "HTTP GET com fixtures dos estados; validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites; esgotado permanece com 0.",
       "phase": "local",
       "level": "e2e",
       "precondition": "Eventos draft, published, lotado e cancelled; chave válida.",
-      "procedure": "GET /api/partner/events; verificar set de campos, tipos, timestamps e vagas.",
-      "oracle": "200 array; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada."
+      "procedure": "GET /api/partner/events; validar cada item contra o schema OpenAPI, inclusive UUID, timestamp e limites numéricos.",
+      "oracle": "200 array conforme OpenAPI; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada."
     },
     {
       "id": "A22",
@@ -492,13 +492,13 @@
       "contract": "C-F06-A23",
       "test": "TEST-A23",
       "task": "T-F06-02",
-      "acceptance": "GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.",
-      "evidence": "HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato.",
+      "acceptance": "GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized.",
+      "evidence": "HTTP em três rotas × sem/errada; consultar fixtures web/partner, UUID inexistente e malformado; validar respostas 200 contra OpenAPI.",
       "phase": "local",
       "level": "e2e",
       "precondition": "Ticket web fixture e parceiro; ID inexistente; chaves válidas e inválidas.",
-      "procedure": "GET ambos os tickets e ID ausente; executar as três rotas sem chave e com chave inválida.",
-      "oracle": "200 exatamente ticketId/code/eventId/status/checkedIn booleano; 404 ticket_not_found; 401 unauthorized em 6 combinações."
+      "procedure": "GET ambos os tickets, ID UUID ausente e UUID malformado; validar respostas 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida.",
+      "oracle": "200 com IDs UUID, código ^[A-Z0-9]{12}$ e demais campos exatos; ausente/malformado dá 404 ticket_not_found; 401 unauthorized em 6 combinações."
     },
     {
       "id": "A24",
@@ -581,10 +581,10 @@
       "test": "TEST-A28",
       "task": "T-F07-03",
       "acceptance": "Check-in, cancelar e painel ficam na URL de gestão de cada evento; todas as ações exigem dono inclusive requisição direta.",
-      "evidence": "Browser A/B/P/visitante, POST forjado de B, verificar nenhum dado nem alteração; abrir gestão de A e executar ações.",
+      "evidence": "Browser A/B/P/visitante pela URL completa, POST forjado de B e ações de A; registrar overrides dos hooks e diff sem edição de wiring compartilhado.",
       "phase": "local",
       "level": "integration",
-      "precondition": "A, B, P, anônimo; E de A com ticket.",
+      "precondition": "A, B, P, anônimo; E de A com ticket; settings de teste apontam os hooks precriados ao provider, partial e URLconf reais de F07.",
       "procedure": "Acessar URL e enviar check-in/cancelamento em cada sessão; conferir HTML e banco.",
       "oracle": "A tem gestão completa; B, P, anônimo não leem nem alteram; resposta sem dados de A."
     },
@@ -689,13 +689,13 @@
       "contract": "C-F06-A34",
       "test": "TEST-A34",
       "task": "T-F06-03",
-      "acceptance": "Autorização antecede leitura/parse do corpo; JSON inválido, null, array, tipo errado, cartão Unicode e e-mail inválido respondem 422 após chave válida; precedência vale em eventos ausentes e esgotados.",
-      "evidence": "HTTP bruto com corpo malformado, chave ausente/errada/válida; conferir resposta exata e ausência de efeitos.",
+      "acceptance": "Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado.",
+      "evidence": "HTTP bruto registrando multiplicidade da chave e bytes efetivamente lidos para 16.384/16.385; conferir resposta exata, ordem das guardas e ausência de efeitos.",
       "phase": "local",
       "level": "e2e",
       "precondition": "Chave válida/errada, evento ausente e esgotado.",
-      "procedure": "Enviar JSON truncado, null, array, e-mail ruim, cartão Unicode e numérico, content-type incorreto, corpo com chave ausente.",
-      "oracle": "401 antes de parse; 422 para payload inválido autenticado mesmo com evento inexistente/lotado; sem redirect/500."
+      "procedure": "Enviar chave ausente/duplicada/errada com body sentinela; com chave válida enviar JSON válido de exatamente 16.384 bytes, o mesmo com 16.385 bytes, JSON truncado/null/array, e-mail canônico inválido/>254, cartão Unicode/numérico e content-type incorreto.",
+      "oracle": "401 sem ler/parsear body para chave ausente/duplicada/errada; 16.384 bytes alcança o domínio; 16.385 bytes e payload inválido autenticado dão 422 mesmo com evento inexistente/lotado; sem efeito, redirect ou 500."
     },
     {
       "id": "A35",

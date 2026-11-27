@@ -3,8 +3,8 @@ H01,A01,F01,local,C-F01-A01,TEST-A01,T-F01-03,"Clone limpo: ./bin/up constrói, 
 H02,A02,F01,local,C-F01-A02,TEST-A02,T-F01-03,./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.
 H03,A03,F01,local,C-F01-A03,TEST-A03,T-F01-01,"./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos."
 H04,A04,F01,local,C-F01-A04,TEST-A04,T-F01-03,"README e AGENTS.md descrevem os comandos, endpoints, contas e mapa; o padrão local usa somente simulador e não requer configuração de pagamento."
-R05,A05,F01,local,C-F01-A05,TEST-A05,T-F01-02,"Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis."
-R09,A05,F01,local,C-F01-A05,TEST-A05,T-F01-02,"Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis."
+R05,A05,F01,local,C-F01-A05,TEST-A05,T-F01-02,"Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis."
+R09,A05,F01,local,C-F01-A05,TEST-A05,T-F01-02,"Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis."
 R13,A06,F02,local,C-F02-A06,TEST-A06,T-F02-01,"Cadastro público cria somente participante, e-mail normalizado único; senha armazenada como hash; login válido e logout invalidam sessão; erro genérico em credenciais inválidas."
 R13,A07,F02,local,C-F02-A07,TEST-A07,T-F02-02,"Guarda de papel e predicado de dono são aplicados em todos os recursos de gestão; no contrato local, validar com fixtures e endpoints de teste; as rotas reais são validadas em X03 e X11."
 R09,A08,F02,local,C-F02-A08,TEST-A08,T-F02-02,"O serviço de identidade identifica participante por ID de sessão, não por e-mail ou parâmetro; parceiro não é uma identidade web. Titularidade real de ingressos é validada em X06/X16."
@@ -15,14 +15,14 @@ R04,A10,F03,local,C-F03-A10,TEST-A10,T-F03-03,Evento nasce draft; publicar torna
 R03,A11,F03,local,C-F03-A11,TEST-A11,T-F03-02,Editar sob lock do evento; capacidade abaixo de pending+confirmed é rejeitada; igual/acima aceita; preço novo não altera snapshot de ingressos.
 R05,A11,F03,local,C-F03-A11,TEST-A11,T-F03-02,Editar sob lock do evento; capacidade abaixo de pending+confirmed é rejeitada; igual/acima aceita; preço novo não altera snapshot de ingressos.
 R11,A12,F03,local,C-F03-A12,TEST-A12,T-F03-02,Evento cancelled não pode ser alterado/republicado; catálogo e disponibilidade pública o excluem.
-R05,A13,F04,local,C-F04-A13,TEST-A13,T-F04-02,"Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga."
-R06,A13,F04,local,C-F04-A13,TEST-A13,T-F04-02,"Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga."
-R09,A13,F04,local,C-F04-A13,TEST-A13,T-F04-02,"Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga."
+R05,A13,F04,local,C-F04-A13,TEST-A13,T-F04-02,"Uma compra válida retorna ingresso pending com ID UUID e código [A-Z0-9]{12} únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga."
+R06,A13,F04,local,C-F04-A13,TEST-A13,T-F04-02,"Uma compra válida retorna ingresso pending com ID UUID e código [A-Z0-9]{12} únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga."
+R09,A13,F04,local,C-F04-A13,TEST-A13,T-F04-02,"Uma compra válida retorna ingresso pending com ID UUID e código [A-Z0-9]{12} únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga."
 R07,A14,F04,local,C-F04-A14,TEST-A14,T-F04-02,"Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas."
 R08,A15,F04,local,C-F04-A15,TEST-A15,T-F04-03,Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga.
 R03,A16,F04,local,C-F04-A16,TEST-A16,T-F04-03,Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício.
 R11,A16,F04,local,C-F04-A16,TEST-A16,T-F04-03,Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício.
-R06,A17,F04,local,C-F04-A17,TEST-A17,T-F04-01,Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.
+R06,A17,F04,local,C-F04-A17,TEST-A17,T-F04-01,"Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail parceiro é strip+casefold, validado e limitado a 254 caracteres canônicos; PAN/e-mail inválidos não persistem nem aparecem em logs."
 R02,A18,F05,local,C-F05-A18,TEST-A18,T-F05-01,"Vitrine exibe só publicados não cancelados, inclusive esgotados com texto exato Ingressos esgotados; tentativa concorrente recebe mesma mensagem."
 R05,A18,F05,local,C-F05-A18,TEST-A18,T-F05-01,"Vitrine exibe só publicados não cancelados, inclusive esgotados com texto exato Ingressos esgotados; tentativa concorrente recebe mesma mensagem."
 R07,A18,F05,local,C-F05-A18,TEST-A18,T-F05-01,"Vitrine exibe só publicados não cancelados, inclusive esgotados com texto exato Ingressos esgotados; tentativa concorrente recebe mesma mensagem."
@@ -31,15 +31,15 @@ R08,A19,F05,local,C-F05-A19,TEST-A19,T-F05-02,"Participante cria conta, compra p
 R09,A19,F05,local,C-F05-A19,TEST-A19,T-F05-02,"Participante cria conta, compra pela vitrine, vê evento/status/código em Meus ingressos; pending imediato e confirmado em até 5s para 0001."
 R09,A20,F05,local,C-F05-A20,TEST-A20,T-F05-02,"Meus ingressos filtra por participant_id autenticado, não por e-mail, e mostra todos os cinco rótulos; visitante não compra."
 R13,A20,F05,local,C-F05-A20,TEST-A20,T-F05-02,"Meus ingressos filtra por participant_id autenticado, não por e-mail, e mostra todos os cinco rótulos; visitante não compra."
-API,A21,F06,local,C-F06-A21,TEST-A21,T-F06-02,"GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos."
-R02,A21,F06,local,C-F06-A21,TEST-A21,T-F06-02,"GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos."
-R05,A21,F06,local,C-F06-A21,TEST-A21,T-F06-02,"GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos."
+API,A21,F06,local,C-F06-A21,TEST-A21,T-F06-02,"GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos."
+R02,A21,F06,local,C-F06-A21,TEST-A21,T-F06-02,"GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos."
+R05,A21,F06,local,C-F06-A21,TEST-A21,T-F06-02,"GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos."
 API,A22,F06,local,C-F06-A22,TEST-A22,T-F06-02,"POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out."
 R06,A22,F06,local,C-F06-A22,TEST-A22,T-F06-02,"POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out."
 R07,A22,F06,local,C-F06-A22,TEST-A22,T-F06-02,"POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out."
-API,A23,F06,local,C-F06-A23,TEST-A23,T-F06-02,GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.
-R09,A23,F06,local,C-F06-A23,TEST-A23,T-F06-02,GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.
-R13,A23,F06,local,C-F06-A23,TEST-A23,T-F06-02,GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.
+API,A23,F06,local,C-F06-A23,TEST-A23,T-F06-02,"GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized."
+R09,A23,F06,local,C-F06-A23,TEST-A23,T-F06-02,"GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized."
+R13,A23,F06,local,C-F06-A23,TEST-A23,T-F06-02,"GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized."
 R07,A24,F06,local,C-F06-A24,TEST-A24,T-F06-03,"Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados."
 API,A24,F06,local,C-F06-A24,TEST-A24,T-F06-03,"Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados."
 R10,A25,F07,local,C-F07-A25,TEST-A25,T-F07-01,"A decisão de check-in respeita a precedência R10 e somente um pedido concorrente pode marcar entrada; no evento cancelado, a página oculta o formulário, e POST direto mantém precedência."
@@ -58,9 +58,9 @@ R09,A32,F04,local,C-F04-A32,TEST-A32,T-F04-02,Falha ao criar job reverte reserva
 R07,A33,F04,local,C-F04-A33,TEST-A33,T-F04-03,Worker concorrente obedece event→ticket→job e revalida estado/vencimento; nenhuma espera de gateway ou lock global; transação abortada é retomável.
 R08,A33,F04,local,C-F04-A33,TEST-A33,T-F04-03,Worker concorrente obedece event→ticket→job e revalida estado/vencimento; nenhuma espera de gateway ou lock global; transação abortada é retomável.
 R11,A33,F04,local,C-F04-A33,TEST-A33,T-F04-03,Worker concorrente obedece event→ticket→job e revalida estado/vencimento; nenhuma espera de gateway ou lock global; transação abortada é retomável.
-API,A34,F06,local,C-F06-A34,TEST-A34,T-F06-03,"Autorização antecede leitura/parse do corpo; JSON inválido, null, array, tipo errado, cartão Unicode e e-mail inválido respondem 422 após chave válida; precedência vale em eventos ausentes e esgotados."
-R06,A34,F06,local,C-F06-A34,TEST-A34,T-F06-03,"Autorização antecede leitura/parse do corpo; JSON inválido, null, array, tipo errado, cartão Unicode e e-mail inválido respondem 422 após chave válida; precedência vale em eventos ausentes e esgotados."
-R07,A34,F06,local,C-F06-A34,TEST-A34,T-F06-03,"Autorização antecede leitura/parse do corpo; JSON inválido, null, array, tipo errado, cartão Unicode e e-mail inválido respondem 422 após chave válida; precedência vale em eventos ausentes e esgotados."
+API,A34,F06,local,C-F06-A34,TEST-A34,T-F06-03,"Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado."
+R06,A34,F06,local,C-F06-A34,TEST-A34,T-F06-03,"Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado."
+R07,A34,F06,local,C-F06-A34,TEST-A34,T-F06-03,"Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado."
 R05,A35,F07,local,C-F07-A35,TEST-A35,T-F07-03,Leitura de gestão/painel usa snapshot único incluindo capacidade/status/owner e agregados; corridas de edição e cancelamento não produzem combinações impossíveis.
 R11,A35,F07,local,C-F07-A35,TEST-A35,T-F07-03,Leitura de gestão/painel usa snapshot único incluindo capacidade/status/owner e agregados; corridas de edição e cancelamento não produzem combinações impossíveis.
 R12,A35,F07,local,C-F07-A35,TEST-A35,T-F07-03,Leitura de gestão/painel usa snapshot único incluindo capacidade/status/owner e agregados; corridas de edição e cancelamento não produzem combinações impossíveis.

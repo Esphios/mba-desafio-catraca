@@ -6,7 +6,7 @@ Python 3.12 + Django 5.2 LTS + psycopg + PostgreSQL 17; Gunicorn, Ruff, Playwrig
 
 ## Domínio e persistência
 
-- Controllers traduzem entrada/saída; serviços detêm invariantes; DTOs não vazam modelos nem PAN. Não duplicar lógica por canal. Todas as mutações de evento/ingresso usam event_guard e transação curta, READ COMMITTED; nenhuma query de ocupação antes do lock. Ordem Event→Ticket→Job. Não confiar em mutex de processo, count trigger sem lock, clamp de disponibilidade ou query de dashboard em múltiplos snapshots.
+- Controllers traduzem entrada/saída; serviços detêm invariantes; DTOs não vazam modelos nem PAN. Não duplicar lógica por canal. Toda mutação de agregado existente usa event_guard e transação curta, READ COMMITTED; `create_event` é insert atômico sem linha prévia. Nenhuma query de ocupação antes do lock. Ordem Event→Ticket→Job. Não confiar em mutex de processo, count trigger sem lock, clamp de disponibilidade ou query de dashboard em múltiplos snapshots.
 - Models e migrations em coredata, custom User em accounts; após merge, migrations imutáveis, alterações novas. Índices e constraints justificadas; fixtures só em testes. Evitar signals/admin bulk update que contornem serviços. Querysets avaliados dentro de atomic quando bloqueio necessário. Rollback testado. JSON numérico exato, Decimal para moeda, UTC para DB.
 - Input validation server-side, role e ownership em serviço; secrets demo only; CSRF em browser; API guard antes do parser. Escapar HTML; não logar corpo, cookie ou cartão.
 

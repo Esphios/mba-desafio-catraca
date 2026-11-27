@@ -77,7 +77,7 @@ Todos os itens começam abertos. O coordenador é o único escritor do estado gl
 
 - [ ] T-W5-00: congelar interfaces e schema F01–F04. Criar 3 branches/worktrees no mesmo SHA; nomes e portas distintas. Skill `wave-orchestration`; validar worktrees e Compose configs.
 - [ ] T-W5-01: iniciar implementadores F05, F06 e F07 simultaneamente; primeiro commit útil de cada PR antes de finalizar os demais; gravar fatos reais, não manipular datas.
-- [ ] T-W5-02: avaliar cada branch com contrato local e contexto novo. PENDING_INTEGRATION permitido somente para itens integrados. Corrigir FAIL com novo relatório, sem editar o anterior. Integrar um PR por vez e executar regressão; alterações de interfaces exigem reavaliação.
+- [ ] T-W5-02: avaliar cada branch com contrato local e contexto novo. F07 usa overrides dos hooks precriados para A28 sem editar wiring; após seu local PASS/merge, o coordenador troca os defaults em commit separado, repete A28 e registra o SHA antes de X14/X15. PENDING_INTEGRATION permitido somente para itens integrados. Corrigir FAIL com novo relatório, sem editar o anterior. Integrar um PR por vez e executar regressão; alterações de interfaces exigem reavaliação.
 
 ## W6 | integração e entrega
 

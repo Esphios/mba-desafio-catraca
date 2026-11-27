@@ -33,6 +33,7 @@
                     "properties": {
                       "id": {
                         "type": "string",
+                        "format": "uuid",
                         "minLength": 1
                       },
                       "name": {
@@ -45,7 +46,8 @@
                       },
                       "priceCents": {
                         "type": "integer",
-                        "minimum": 1
+                        "minimum": 1,
+                        "maximum": 9007199254740991
                       },
                       "availableSeats": {
                         "type": "integer",
@@ -90,12 +92,14 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "uuid",
               "minLength": 1
             }
           }
         ],
-        "description": "Error precedence: unauthorized, invalid_request, event_not_available, sold_out.",
+        "description": "Error precedence: unauthorized, invalid_request, event_not_available, sold_out. A missing, duplicated or invalid X-Api-Key returns 401 before the request body is read. After authentication, the raw body limit is 16384 bytes inclusive; 16385 bytes or more returns 422 invalid_request before JSON parsing.",
         "requestBody": {
+          "description": "Raw UTF-8 JSON body, at most 16384 bytes. buyerEmail is stripped and Unicode-casefolded by the domain; the canonical value must be a valid email of at most 254 characters.",
           "required": true,
           "content": {
             "application/json": {
@@ -108,7 +112,8 @@
                 "properties": {
                   "buyerEmail": {
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "description": "The canonical value after strip and Unicode casefold must contain at most 254 characters."
                   },
                   "cardNumber": {
                     "type": "string",
@@ -135,11 +140,14 @@
                   "properties": {
                     "ticketId": {
                       "type": "string",
+                      "format": "uuid",
                       "minLength": 1
                     },
                     "code": {
                       "type": "string",
-                      "minLength": 1
+                      "minLength": 12,
+                      "maxLength": 12,
+                      "pattern": "^[A-Z0-9]{12}$"
                     },
                     "status": {
                       "type": "string",
@@ -243,6 +251,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "uuid",
               "minLength": 1
             }
           }
@@ -265,14 +274,18 @@
                   "properties": {
                     "ticketId": {
                       "type": "string",
+                      "format": "uuid",
                       "minLength": 1
                     },
                     "code": {
                       "type": "string",
-                      "minLength": 1
+                      "minLength": 12,
+                      "maxLength": 12,
+                      "pattern": "^[A-Z0-9]{12}$"
                     },
                     "eventId": {
                       "type": "string",
+                      "format": "uuid",
                       "minLength": 1
                     },
                     "status": {
@@ -342,7 +355,8 @@
       "PartnerKey": {
         "type": "apiKey",
         "in": "header",
-        "name": "X-Api-Key"
+        "name": "X-Api-Key",
+        "description": "Exactly one header field is required. Missing, duplicated or invalid values return 401 before any request body read or parsing."
       }
     }
   }

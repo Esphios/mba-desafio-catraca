@@ -11,7 +11,7 @@ Local MVP, synthetic data only. Assets: user identities/sessions, event ownershi
 | input injection/XSS | ORM bind params, autoescape, reject malformed data, no safe untrusted HTML | TEST-A09,A17,A34; adversarial escaped markup |
 | card/secret leakage | simulator uses suffix transiently, logs allowlist; no body logging | TEST-A17 |
 | API enumeration | fixed contract allows lookup across channels with valid key; no PII; opaque UUID | TEST-A23 |
-| unauthorized API request parse | key guard before reading body; 16 KiB body cap after key guard (422), no redirects | TEST-A34 |
+| unauthorized API request parse | absent/duplicate/invalid key rejected before body read; 16 KiB body cap after valid key (422), no redirects | TEST-A34 |
 | overbooking / replay result | DB guard, atomic job, terminal check | TEST-A14,A33,A36 |
 | tampering with reports | append-only files, SHA + Git history, separate context | TEST-A37,P03 |
 

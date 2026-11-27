@@ -48,11 +48,11 @@ Teste: `TEST-A04`. Evidência: Inspeção dos arquivos, ambiente sem .env e sem 
 
 Preparação: Banco PostgreSQL migrado em volume vazio.
 
-Procedimento: Forçar duplicata de código, FK inexistente, status inválido, preço 0, capacidade 0, buyer misto, dois jobs por ticket; migrar de novo.
+Procedimento: Forçar código duplicado, curto, longo, minúsculo ou não alfanumérico, FK inexistente, status inválido, preço 0/>2^53−1, capacidade 0/>2^31−1, buyer misto, dois jobs e queued/processado ou terminal/null; migrar de novo.
 
-PASS somente se: Todas as escritas inválidas falham; dados válidos persistem; sem migração pendente.
+PASS somente se: Todas as escritas inválidas falham; DB permite ticket sem job apenas fora do serviço, enquanto reserve prova totalidade; dados válidos persistem; sem migração pendente.
 
-Teste: `TEST-A05`. Evidência: Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas.
+Teste: `TEST-A05`. Evidência: Aplicar migração em DB vazio e reexecutar; tentar cada classe de código [A-Z0-9]{12} inválido, status/FK/limites inválidos, dois jobs e combinações state/processed_at inválidas; registrar constraints rejeitadas.
 
 ### C-F01-A29 (A29)
 

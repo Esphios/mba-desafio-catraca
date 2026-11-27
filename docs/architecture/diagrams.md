@@ -29,9 +29,11 @@ erDiagram
     USER ||--o{ EVENT : owns
     USER o|--o{ TICKET : purchases_web
     EVENT ||--o{ TICKET : has
-    TICKET ||--|| PAYMENT_JOB : schedules
+    TICKET ||--o| PAYMENT_JOB : schedules
 ```
-Parceiro não é User. Status/constraints e índices no design. Modelagem física na migration F01.
+Parceiro não é User. A cardinalidade física é zero-ou-um job por ticket; o serviço
+canônico `reserve` cria ticket e exatamente um job no mesmo commit. Status,
+constraints e índices estão no design. Modelagem física na migration F01.
 
 ## Reserva concorrente
 ```mermaid

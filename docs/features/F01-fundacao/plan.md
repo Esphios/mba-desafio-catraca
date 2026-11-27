@@ -16,7 +16,7 @@ Entrada: baseline W0 aprovada, dependências nenhuma integradas e aprovadas, bra
 **Entrega:** Criar user custom e models/schema, constraints, índices e migrations; rodar testes de integridade.
 
 **Validação:** lint, checks do framework e testes já implementados; fase 2 não exige endpoints futuros.
-- `TEST-A05` (A05): Forçar duplicata de código, FK inexistente, status inválido, preço 0, capacidade 0, buyer misto, dois jobs por ticket; migrar de novo. Resultado: Todas as escritas inválidas falham; dados válidos persistem; sem migração pendente.
+- `TEST-A05` (A05): Forçar código duplicado/curto/longo/minúsculo/não alfanumérico, FK/status/limites inválidos, buyer misto, dois jobs e pares state/processed_at inválidos; migrar de novo. Resultado: Todas as escritas inválidas falham, inclusive fora de `[A-Z0-9]{12}`; DB permite ticket sem job apenas fora do serviço; dados válidos persistem; sem migração pendente.
 
 **Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
@@ -40,7 +40,7 @@ Entrada: baseline W0 aprovada, dependências nenhuma integradas e aprovadas, bra
 - `TEST-A02` (A02): Executar down; verificar ausência de containers e listener; subir novamente; seed outra vez; comparar IDs e quantidade. Resultado: Nenhum serviço do projeto ativo; dados persistem e seed permanece com 2 organizadores + 1 participante seed, sem duplicação.
 - `TEST-A03` (A03): Rodar gates íntegro; repetir com asserção false e depois restaurar; verificar código de saída e cleanup. Resultado: Suíte íntegra exit 0; versão quebrada exit diferente de 0; relatório lista testes realmente executados.
 - `TEST-A04` (A04): Seguir comandos e verificar nomes, porta, chave local, mapa e defaults. Resultado: Comandos reproduzíveis; sem setup manual; links internos existentes; endereços corretos.
-- `TEST-A05` (A05): Forçar duplicata de código, FK inexistente, status inválido, preço 0, capacidade 0, buyer misto, dois jobs por ticket; migrar de novo. Resultado: Todas as escritas inválidas falham; dados válidos persistem; sem migração pendente.
+- `TEST-A05` (A05): Forçar código duplicado/curto/longo/minúsculo/não alfanumérico, FK/status/limites inválidos, buyer misto, dois jobs e pares state/processed_at inválidos; migrar de novo. Resultado: Todas as escritas inválidas falham, inclusive fora de `[A-Z0-9]{12}`; DB permite ticket sem job apenas fora do serviço; dados válidos persistem; sem migração pendente.
 - `TEST-A29` (A29): Rodar gate positivo e com falha de setup; interromper execução; conferir ps e listener, estado demo. Resultado: Cleanup isolado; nenhum volume demo removido; falha/cleanup não zero; demo responde.
 - `TEST-A37` (A37): Executar verificador; alterar item, remover mapeamento, simular relatório faltante, editar relatório commitado. Resultado: Falha estrutural ou de histórico detectada; baseline sem relatórios é válida, release incompleto falha.
 

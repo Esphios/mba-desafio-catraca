@@ -8,11 +8,11 @@ Versão 2 proposta. Ambiente: checkout limpo do SHA, Docker/Compose e Git; `bash
 
 Preparação: Eventos draft, published, lotado e cancelled; chave válida.
 
-Procedimento: GET /api/partner/events; verificar set de campos, tipos, timestamps e vagas.
+Procedimento: GET /api/partner/events; validar cada item contra o schema OpenAPI, inclusive UUID, timestamp e limites numéricos.
 
-PASS somente se: 200 array; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada.
+PASS somente se: 200 array conforme OpenAPI; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada.
 
-Teste: `TEST-A21`. Evidência: HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0.
+Teste: `TEST-A21`. Evidência: HTTP GET com fixtures dos estados; validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites; esgotado permanece com 0.
 
 ### C-F06-A22 (A22)
 
@@ -28,11 +28,11 @@ Teste: `TEST-A22`. Evidência: Tabela HTTP: JSON inválido e evento inexistente 
 
 Preparação: Ticket web fixture e parceiro; ID inexistente; chaves válidas e inválidas.
 
-Procedimento: GET ambos os tickets e ID ausente; executar as três rotas sem chave e com chave inválida.
+Procedimento: GET ambos os tickets, ID UUID ausente e UUID malformado; validar respostas 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida.
 
-PASS somente se: 200 exatamente ticketId/code/eventId/status/checkedIn booleano; 404 ticket_not_found; 401 unauthorized em 6 combinações.
+PASS somente se: 200 com IDs UUID, código ^[A-Z0-9]{12}$ e demais campos exatos; ausente/malformado dá 404 ticket_not_found; 401 unauthorized em 6 combinações.
 
-Teste: `TEST-A23`. Evidência: HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato.
+Teste: `TEST-A23`. Evidência: HTTP em três rotas × sem/errada; consultar fixtures web/partner, UUID inexistente e malformado; validar respostas 200 contra OpenAPI.
 
 ### C-F06-A24 (A24)
 
@@ -48,11 +48,11 @@ Teste: `TEST-A24`. Evidência: Runner HTTP com barreira, 30 conexões, validar c
 
 Preparação: Chave válida/errada, evento ausente e esgotado.
 
-Procedimento: Enviar JSON truncado, null, array, e-mail ruim, cartão Unicode e numérico, content-type incorreto, corpo com chave ausente.
+Procedimento: Enviar chave ausente/duplicada/errada com body sentinela; com chave válida enviar JSON válido de exatamente 16.384 bytes, o mesmo com 16.385 bytes, JSON truncado/null/array, e-mail canônico inválido/>254, cartão Unicode/numérico e content-type incorreto.
 
-PASS somente se: 401 antes de parse; 422 para payload inválido autenticado mesmo com evento inexistente/lotado; sem redirect/500.
+PASS somente se: 401 sem ler/parsear body para chave ausente/duplicada/errada; 16.384 bytes alcança o domínio; 16.385 bytes e payload inválido autenticado dão 422 mesmo com evento inexistente/lotado; sem efeito, redirect ou 500.
 
-Teste: `TEST-A34`. Evidência: HTTP bruto com corpo malformado, chave ausente/errada/válida; conferir resposta exata e ausência de efeitos.
+Teste: `TEST-A34`. Evidência: HTTP bruto registrando multiplicidade da chave e bytes efetivamente lidos para 16.384/16.385; conferir resposta exata, ordem das guardas e ausência de efeitos.
 
 ### C-F06-X09 (X09)
 

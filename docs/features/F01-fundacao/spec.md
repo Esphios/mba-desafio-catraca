@@ -18,7 +18,7 @@ A fundação fixa o schema compartilhado e fornece um ambiente real, mesmo antes
 
 **Falhas:** rede de registry, porta ocupada, schema inválido, bootstrap abortado, worker indisponível, gate com falha. Em todos, diagnóstico com serviço e saída; sem falso health verde. Seed usa senha hash do Django. Não publicar porta DB. O comando down não remove dados por padrão.
 
-**Handoff:** schema e app label imutáveis sem alteração formal; interfaces de clock, fixture factory e worker command; documentação de bootstrap e teste de volume/portas.
+**Handoff:** schema e app label imutáveis sem alteração formal; portas `normalize_email`, `clock_now`, `fixture_factory` e `worker_command` conforme o registro interno; F04 recebe o entrypoint do worker e consome a normalização para `PartnerBuyer`; documentação de bootstrap e teste de volume/portas.
 
 ## Critérios e limites
 | ID | Fase | Aceite |
@@ -27,7 +27,7 @@ A fundação fixa o schema compartilhado e fornece um ambiente real, mesmo antes
 | A02 | local | ./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas. |
 | A03 | local | ./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos. |
 | A04 | local | README e AGENTS.md descrevem os comandos, endpoints, contas e mapa; o padrão local usa somente simulador e não requer configuração de pagamento. |
-| A05 | local | Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis. |
+| A05 | local | Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis. |
 | A29 | local | Gates rodam em projeto Compose distinto do ambiente de demonstração, sem remover volumes alheios; falha de bootstrap ou cleanup retorna não zero. |
 | A37 | local | Gate documental diferencia baseline, candidato local e release; relatório incompleto, falso PASS, arquivo alterado ou estado inconsistente causam falha na fase apropriada. |
 

@@ -1,6 +1,6 @@
 # Método e governança da documentação
 
-A especificação normativa é o brief Catraca: R01–R13, contrato de API e fluxo de avaliação. Os nomes, mensagens exatas e identificadores que fazem parte do contrato são mantidos para interoperabilidade. Decisões técnicas são propostas novas, sujeitas a W0. Referências técnicas oficiais estão em architecture/research.md.
+A especificação normativa original é o brief Catraca: R01–R13, contrato de API e fluxo de avaliação. O artefato original não pôde ser recuperado; a busca está registrada na auditoria W0. O [AMENDMENT-001](validation/w0-audit/AMENDMENT-001.md) propõe ratificar PRD, OpenAPI, matriz, traceability, contracts, test catalog, HLD/ADRs e interfaces como fonte autorizada substituta, mas isso só produz efeito após aprovação final explícita. Os nomes, mensagens exatas e identificadores do contrato são mantidos para interoperabilidade. Referências técnicas oficiais estão em architecture/research.md.
 
 O módulo Design Docs orienta a classificação de documentos: PRD e proposal (produto), HLD/FDD/LLD e ADRs (design), diagramas C4/Mermaid, Engineering Guidelines (processo), harness/testes/AI design (operação e agentes). Para greenfield, a sequência é brief → PRD → research/alternativas → HLD/ADRs → FDD + contrato/plano → matriz/tasks → implementação → avaliação → auditoria. O fluxo de análise de codebase é adaptado para design pré-código. Não confundir estrutura planejada com estado existente.
 

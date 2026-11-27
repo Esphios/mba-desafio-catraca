@@ -24,7 +24,7 @@ Anonymous GET protected -> login; anonymous protected POST -> 403 without mutati
 ## UI names and selectors
 - Form labels Nome, E-mail, Senha; event Nome, Início, Local, Lotação, Preço; purchase Número do cartão; check-in Código do ingresso.
 - Buttons Criar conta, Entrar, Sair, Criar evento, Salvar, Publicar, Comprar, Validar entrada, Cancelar evento.
-- Ticket rows `ticket-list`, `ticket-status`, `ticket-code`; catalog `event-card`, `sold-out`; management `event-management`, `event-state`, `admission-result`, `metric-confirmed`, `metric-pending`, `metric-checkins`, `metric-available`, `metric-revenue`, `metric-refunded`.
+- Ticket rows `ticket-list`, `ticket-status`, `ticket-code`; catalog/purchase `event-card`, `sold-out`, `purchase-submit`; management `event-management`, `event-state`, `admission-result`, `metric-confirmed`, `metric-pending`, `metric-checkins`, `metric-available`, `metric-revenue`, `metric-refunded`.
 - Exact labels and messages defined in PRD/transaction protocol. Render BRL `R$ 350,00`, decimal input accepts `100,00` or `100.00`, no thousands separators (document helper). Tests should capture actual UI, not only service return.
 
 `event-management` identifica o contêiner autorizado da gestão; erros de criação não incluem esse contêiner. `metric-*` deve conter exclusivamente o valor textual (rótulo separado); `ticket-status` e `ticket-code` contêm valor de um ingresso por elemento. A página pós-compra mostra Meus ingressos diretamente, com a conta de teste recém-criada tendo um único ticket. Após recusar redução da lotação, reabrir gestão mostra valor persistido anterior. Em evento cancelado, o texto exato `Evento cancelado` aparece no lugar do campo. Estes detalhes tornam o probe browser reproduzível sem depender de aparência.

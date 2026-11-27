@@ -22,11 +22,11 @@ Entrada: baseline W0 aprovada, dependências F02, F03, F04 integradas e aprovada
 
 ## T-F07-03
 
-**Entrega:** Construir painel agregado e integrar partial; validar snapshot e números.
+**Entrega:** Construir painel agregado, partial e URLconf no módulo F07; no gate local, ativá-los pelos hooks settings-driven precriados, sem editar wiring compartilhado.
 
 **Validação:** lint, checks do framework e testes já implementados; fase 3 não exige endpoints futuros.
 - `TEST-A27` (A27): Abrir painel, comparar ao oráculo; cancelar; recarregar. Resultado: Antes 3/0/1/0/35000/0 (cap 3), depois 0/0/0/0/0/3; soma por preço congelado.
-- `TEST-A28` (A28): Acessar URL e enviar check-in/cancelamento em cada sessão; conferir HTML e banco. Resultado: A tem gestão completa; B, P, anônimo não leem nem alteram; resposta sem dados de A.
+- `TEST-A28` (A28): Com settings de teste apontando hooks aos componentes reais F07, acessar URL e enviar check-in/cancelamento em cada sessão; conferir HTML e banco. Resultado: A tem gestão completa; B, P, anônimo não leem nem alteram; resposta sem dados de A; nenhum arquivo compartilhado foi editado.
 - `TEST-A35` (A35): Usar barreira para alterar capacity e status durante leituras; comparar cada resultado a snapshots completos. Resultado: Sem mistura de dados de commits distintos, sem clamp escondendo ocupação inválida; painel sempre deriva do mesmo snapshot.
 
 **Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
@@ -49,6 +49,7 @@ Entrada: baseline W0 aprovada, dependências F02, F03, F04 integradas e aprovada
 **Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
 ## Integração posterior
+- Após local PASS e merge, o coordenador troca os defaults do composition root em commit de wiring separado, repete TEST-A28 no checkout integrado e registra o SHA antes de X14/X15.
 - X14 / TEST-X14: Fluxo browser: comprar, confirmar, validar código, cancelar, recarregar ambos.
 - X15 / TEST-X15: HTTP+browser: compra, consultar checkedIn, cancelar, verificar 404 e estorno.
 

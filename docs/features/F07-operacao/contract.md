@@ -36,13 +36,13 @@ Teste: `TEST-A27`. Evidência: Fixture 10000+10000+15000 confirmados, 1 check-in
 
 ### C-F07-A28 (A28)
 
-Preparação: A, B, P, anônimo; E de A com ticket.
+Preparação: A, B, P, anônimo; E de A com ticket; settings de teste apontam os hooks precriados ao provider, partial e URLconf reais de F07.
 
 Procedimento: Acessar URL e enviar check-in/cancelamento em cada sessão; conferir HTML e banco.
 
 PASS somente se: A tem gestão completa; B, P, anônimo não leem nem alteram; resposta sem dados de A.
 
-Teste: `TEST-A28`. Evidência: Browser A/B/P/visitante, POST forjado de B, verificar nenhum dado nem alteração; abrir gestão de A e executar ações.
+Teste: `TEST-A28`. Evidência: Browser A/B/P/visitante pela URL completa, POST forjado de B e ações de A; registrar overrides dos hooks e diff sem edição de wiring compartilhado. Após merge, o coordenador repete A28 com defaults integrados antes de X14/X15.
 
 ### C-F07-A35 (A35)
 

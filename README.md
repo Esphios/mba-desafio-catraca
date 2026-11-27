@@ -31,6 +31,7 @@ X-Api-Key: `local-passgate-26`. Apenas demo local, nunca reutilizar em produçã
 
 - [Proposal](proposal.md), [Design/HLD](design.md), [Matriz](requirements-matrix.md) e [Tasks](tasks.md).
 - [PRD](docs/prd/PRD.md), [ADRs](docs/architecture/adrs/README.md), [interfaces](docs/interfaces/internal.md), [OpenAPI](docs/interfaces/partner.openapi.json), [contrato web](docs/interfaces/web.md).
+- [AMENDMENT-001 candidato](docs/validation/w0-audit/AMENDMENT-001.md) e [manifesto de versões W0](docs/architecture/version-manifest.md); ambos aguardam aprovação final e não autorizam W1.
 - Features, spec/plan/contract/reports: `docs/features/`; cada diretório contém contrato e pasta vazia de relatórios.
 - [Gates](docs/validation/harness.md), [catálogo de testes](docs/validation/test-catalog.md), [fluxo de avaliação](docs/validation/evaluator-flow.md), [release contract](docs/validation/release-contract.md).
 - [AGENTS](AGENTS.md), [skills](.agents/skills/README.md), [workflow](docs/agents/workflow.md), [state](state/project-state.json), [guidelines](docs/engineering-guidelines.md).
@@ -41,7 +42,7 @@ W5 F05/F06/F07; links, SHAs e sobreposição ainda não existem. Coordenador pre
 
 ## Decisões
 
-Django + PostgreSQL para simplificar auth, CSRF, migrations e transações. R07 garantida por lock por evento e count após lock; prova condicional e testes de concorrência. Gateway: job persistido junto com ticket, worker separado, estado terminal protegido. Avaliação: sessão nova distinta do implementador, contrato por item, relatório append-only e integração final. Ver design/ADRs. Versões patch, configuração final e plataformas devem ser aprovadas em W0 e verificadas no harness.
+Django + PostgreSQL para simplificar auth, CSRF, migrations e transações. R07 garantida por lock por evento e count após lock; prova condicional e testes de concorrência. Gateway: job persistido junto com ticket, worker separado, estado terminal protegido. Avaliação: sessão nova distinta do implementador, contrato por item, relatório append-only e integração final. Ver design/ADRs. O manifesto contém pins candidatos; aprovação W0 e materialização no harness continuam obrigatórias.
 
 ## Probes após implementação
 

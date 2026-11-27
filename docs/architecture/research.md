@@ -21,5 +21,9 @@
 - Docker startup order: https://docs.docker.com/compose/how-tos/startup-order/ ; service_healthy and service_completed_successfully. Applied to bootstrap lifecycle.
 - Playwright Python: https://playwright.dev/python/docs/locators and https://playwright.dev/python/docs/test-assertions ; semantic locators and retrying assertions. Applied to browser evidence with explicit deadlines.
 
+As versões e digests candidatos resolvidos para essas decisões estão no
+[manifesto W0](version-manifest.md). O manifesto não substitui o lockfile transitivo
+nem o smoke de W1.
+
 ## Hypotheses to test, not results
 H1: event row lock handles 30 requests across connections with no oversell or 5xx. H2: delay 3/34s plus polling meets 5/40s deadlines in evaluator environment. H3: worker restart recovers durable jobs. H4: compose works from clean clone on Linux/macOS without manual prep. H5: separate branches can integrate without schema changes after freeze. Use gates and record measured values. If disproved, revise ADR and contracts before implementation changes; never weaken brief. No production benchmark performed.

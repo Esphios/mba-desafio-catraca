@@ -16,9 +16,9 @@ Entrada: baseline W0 aprovada, dependências F03, F04 integradas e aprovadas, br
 **Entrega:** Ligar três rotas ao catálogo/ledger; OpenAPI e fixtures.
 
 **Validação:** lint, checks do framework e testes já implementados; fase 2 não exige endpoints futuros.
-- `TEST-A21` (A21): GET /api/partner/events; verificar set de campos, tipos, timestamps e vagas. Resultado: 200 array; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada.
+- `TEST-A21` (A21): GET /api/partner/events e validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites. Resultado: 200 array conforme schema; publicados inclusive esgotados; sem owner/PII; disponibilidade derivada.
 - `TEST-A22` (A22): POST válido; em seguida combinar erro de chave, payload inválido, evento indisponível e falta de vaga. Resultado: 202 pending exato; 401→422→404→409 na precedência; erros sem efeitos.
-- `TEST-A23` (A23): GET ambos os tickets e ID ausente; executar as três rotas sem chave e com chave inválida. Resultado: 200 exatamente ticketId/code/eventId/status/checkedIn booleano; 404 ticket_not_found; 401 unauthorized em 6 combinações.
+- `TEST-A23` (A23): GET ambos os tickets, UUID ausente/malformado e validar 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida. Resultado: IDs UUID/código `[A-Z0-9]{12}` exatos; 404 para ausente/malformado; 401 em 6 combinações.
 
 **Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
@@ -28,7 +28,7 @@ Entrada: baseline W0 aprovada, dependências F03, F04 integradas e aprovadas, br
 
 **Validação:** lint, checks do framework e testes já implementados; fase 3 não exige endpoints futuros.
 - `TEST-A24` (A24): Disparar 30 POSTs com final 0001 por evento usando barreira; verificar payloads, cinco IDs/códigos únicos, disponibilidade e confirmações até 10s. Resultado: Por rodada 5×202, 25×409 sold_out, nenhum outro status; cinco confirmed e 0 vagas.
-- `TEST-A34` (A34): Enviar JSON truncado, null, array, e-mail ruim, cartão Unicode e numérico, content-type incorreto, corpo com chave ausente. Resultado: 401 antes de parse; 422 para payload inválido autenticado mesmo com evento inexistente/lotado; sem redirect/500.
+- `TEST-A34` (A34): Enviar chave ausente/duplicada/errada com body sentinela; com chave válida comparar JSON válido de 16.384/16.385 bytes e demais payloads inválidos. Resultado: 401 sem ler body; 16.384 alcança o domínio; 16.385/payload inválido dá 422 mesmo com evento inexistente/lotado; sem efeito/redirect/500.
 
 **Saída:** commit útil, resultado do gate, limitações e arquivos modificados. Sem evidência de teste não avançar.
 
@@ -37,11 +37,11 @@ Entrada: baseline W0 aprovada, dependências F03, F04 integradas e aprovadas, br
 **Entrega:** Avaliar local e preparar testes de canais mistos para integração.
 
 **Validação:** lint, checks do framework e testes já implementados; fase 4 não exige endpoints futuros.
-- `TEST-A21` (A21): GET /api/partner/events; verificar set de campos, tipos, timestamps e vagas. Resultado: 200 array; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada.
+- `TEST-A21` (A21): GET /api/partner/events e validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites. Resultado: 200 array conforme schema; publicados inclusive esgotados; sem owner/PII; disponibilidade derivada.
 - `TEST-A22` (A22): POST válido; em seguida combinar erro de chave, payload inválido, evento indisponível e falta de vaga. Resultado: 202 pending exato; 401→422→404→409 na precedência; erros sem efeitos.
-- `TEST-A23` (A23): GET ambos os tickets e ID ausente; executar as três rotas sem chave e com chave inválida. Resultado: 200 exatamente ticketId/code/eventId/status/checkedIn booleano; 404 ticket_not_found; 401 unauthorized em 6 combinações.
+- `TEST-A23` (A23): GET ambos os tickets, UUID ausente/malformado e validar 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida. Resultado: IDs UUID/código `[A-Z0-9]{12}` exatos; 404 para ausente/malformado; 401 em 6 combinações.
 - `TEST-A24` (A24): Disparar 30 POSTs com final 0001 por evento usando barreira; verificar payloads, cinco IDs/códigos únicos, disponibilidade e confirmações até 10s. Resultado: Por rodada 5×202, 25×409 sold_out, nenhum outro status; cinco confirmed e 0 vagas.
-- `TEST-A34` (A34): Enviar JSON truncado, null, array, e-mail ruim, cartão Unicode e numérico, content-type incorreto, corpo com chave ausente. Resultado: 401 antes de parse; 422 para payload inválido autenticado mesmo com evento inexistente/lotado; sem redirect/500.
+- `TEST-A34` (A34): Enviar chave ausente/duplicada/errada com body sentinela; com chave válida comparar JSON válido de 16.384/16.385 bytes e demais payloads inválidos. Resultado: 401 sem ler body; 16.384 alcança o domínio; 16.385/payload inválido dá 422 mesmo com evento inexistente/lotado; sem efeito/redirect/500.
 - `TEST-X09` (X09): GET antes/depois publicação, edição e cancelamento fixture. Resultado: A listagem de parceiros reflete publicação, preço e capacidade de F03; fixtures draft/cancelled ficam fora. Cancelamento real será validado em X15.
 - `TEST-X10` (X10): POST simultâneo e GET ticket, comparar dados de ledger. Resultado: API usa mesmo reserve/consulta: carga, códigos e estados, inclusive ticket web fixture.
 

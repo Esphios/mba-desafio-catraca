@@ -29,8 +29,16 @@ def validate(root: Path) -> list[str]:
             errors.append(f'missing {path}')
             return ''
         return p.read_text(encoding='utf-8-sig')
-    required = ['proposal.md','design.md','requirements-matrix.md','tasks.md','README.md','AGENTS.md','CLAUDE.md','docs/prd/PRD.md','docs/interfaces/internal.md','docs/interfaces/web.md','docs/validation/release-contract.md','docs/validation/test-catalog.md','docs/validation/evaluator-flow.md']
+    required = ['.gitattributes','proposal.md','design.md','requirements-matrix.md','tasks.md','README.md','AGENTS.md','CLAUDE.md','docs/prd/PRD.md','docs/interfaces/internal.md','docs/interfaces/web.md','docs/validation/release-contract.md','docs/validation/test-catalog.md','docs/validation/evaluator-flow.md']
     for p in required: read(p)
+    attributes = read('.gitattributes')
+    lf_patterns = {'*.md', '*.json', '*.csv', '*.py'}
+    configured_lf = {
+        line.split()[0]
+        for line in attributes.splitlines()
+        if line.strip() and not line.lstrip().startswith('#') and 'eol=lf' in line.split()[1:]
+    }
+    check(lf_patterns <= configured_lf, 'missing LF line-ending policy')
     try:
         d = json.loads(read('docs/validation/traceability.json'))
         state = json.loads(read('state/project-state.json'))

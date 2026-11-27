@@ -52,7 +52,7 @@ Deploy, pagamento real, notificações, aplicativo móvel, qualidade visual como
 | A02      | H02      | ./bin/down encerra todos os containers e portas iniciados; nova subida conserva dados e seed não duplica contas.                                                            |
 | A03      | H03      | ./bin/gates falha com teste quebrado, executa testes reais e lint, usa DB isolado e passa com testes válidos.                                                               |
 | A04      | H04      | README e AGENTS.md descrevem os comandos, endpoints, contas e mapa; o padrão local usa somente simulador e não requer configuração de pagamento.                            |
-| A05      | R05, R09 | Schema possui FKs, unicidade de código, restrições de status, lotação e preço; migrações reexecutáveis.                                                                     |
+| A05      | R05, R09 | Schema possui FKs, código único no formato [A-Z0-9]{12}, restrições de status, lotação e preço; migrações reexecutáveis.                                                      |
 | A29      | H01, H03 | Gates rodam em projeto Compose distinto do ambiente de demonstração, sem remover volumes alheios; falha de bootstrap ou cleanup retorna não zero.                           |
 | A37      | H03      | Gate documental diferencia baseline, candidato local e release; relatório incompleto, falso PASS, arquivo alterado ou estado inconsistente causam falha na fase apropriada. |
 
@@ -97,11 +97,11 @@ Deploy, pagamento real, notificações, aplicativo móvel, qualidade visual como
 
 | Critério | Regras        | Aceite                                                                                                                                                          |
 | -------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A13      | R05, R06, R09 | Uma compra válida retorna ingresso pending com ID/código únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.                  |
+| A13      | R05, R06, R09 | Uma compra válida retorna ingresso pending com ID UUID e código [A-Z0-9]{12} únicos e job gravado na mesma transação, sem aguardar gateway; reserva já ocupa vaga.   |
 | A14      | R07           | Quando lotação esgota, não cria ingresso/job; 30 reservas concorrentes sobre capacidade 5 dão exatamente 5 sucessos/25 sold_out, em duas rodadas novas.         |
 | A15      | R08           | Gateway padrão confirma 0001 e recusa 0002/outros em 2–5s; confirma 0003 e recusa 0004 em 30–40s; recusa libera uma vaga.                                       |
 | A16      | R03, R11      | Snapshot de preço é capturado sob lock; finalize só altera pending de evento publicado; resultado duplicado/tardio não revive terminal; job sobrevive reinício. |
-| A17      | R06           | Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail malformado na compra de parceiro falha; PAN não persiste nem aparece em logs.        |
+| A17      | R06           | Cartão diferente de 16 dígitos ASCII falha antes de criar ingresso; e-mail parceiro é strip+casefold, validado e limitado a 254 caracteres canônicos; PAN/e-mail inválidos não persistem nem aparecem em logs. |
 | A32      | R06, R09      | Falha ao criar job reverte reserva; colisão de código usa savepoint e retry limitado; conflitos inesperados não viram sold_out.                                 |
 | A33      | R07, R08, R11 | Worker concorrente obedece event→ticket→job e revalida estado/vencimento; nenhuma espera de gateway ou lock global; transação abortada é retomável.             |
 
@@ -123,17 +123,17 @@ Deploy, pagamento real, notificações, aplicativo móvel, qualidade visual como
 
 **Provides:** As três rotas /api/partner, autenticação por chave, tradução de DTOs e erros do domínio.
 
-**Consumes:** F03: catálogo público; F04: compra/consulta.
+**Consumes:** F03: public_catalog/public_detail; F04: compra/consulta e validação canônica do PartnerBuyer.
 
 **Área de escrita:** partner API. [Spec](../features/F06-parceiros/spec.md).
 
 | Critério | Regras        | Aceite                                                                                                                                                                                                    |
 | -------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A21      | API, R02, R05 | GET events com chave retorna array de publicados, id/name/startsAt/priceCents/availableSeats com tipos exatos; cancelados/drafts excluídos.                                                               |
+| A21      | API, R02, R05 | GET events com chave retorna publicados com id UUID e demais campos no tipo/formato OpenAPI exato; cancelados/drafts excluídos.                                                                            |
 | A22      | API, R06, R07 | POST compra responde 202 com ticketId/code/status pending; após chave, precedência 422 invalid_request, 404 event_not_available, 409 sold_out.                                                            |
-| A23      | API, R09, R13 | GET ticket consulta ambos os canais e retorna ticketId/code/eventId/status/checkedIn booleano; desconhecido 404 ticket_not_found; todas as rotas sem chave ou chave errada 401 unauthorized.              |
+| A23      | API, R09, R13 | GET ticket retorna IDs UUID, código [A-Z0-9]{12} e demais campos exatos; ID desconhecido ou UUID malformado dá 404 ticket_not_found; ausência/erro de chave dá 401 unauthorized.                           |
 | A24      | R07, API      | Em duas rodadas HTTP reais, cada evento novo de capacidade 5 recebe 30 POST simultâneos com cartão 0001: 5×202 e 25×409, sem 5xx; depois 5 confirmados.                                                   |
-| A34      | API, R06, R07 | Autorização antecede leitura/parse do corpo; JSON inválido, null, array, tipo errado, cartão Unicode e e-mail inválido respondem 422 após chave válida; precedência vale em eventos ausentes e esgotados. |
+| A34      | API, R06, R07 | Chave ausente, duplicada ou inválida falha antes do body; com chave válida, JSON válido de 16.384 bytes alcança o domínio e 16.385 bytes ou payload inválido responde 422; precedência vale em evento ausente/lotado. |
 
 ### F07 | Operação do evento e apuração
 

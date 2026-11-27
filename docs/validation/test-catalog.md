@@ -42,9 +42,9 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 
 - **Nível / fase:** integration / local.
 - **Preparar:** Banco PostgreSQL migrado em volume vazio.
-- **Executar:** Forçar duplicata de código, FK inexistente, status inválido, preço 0, capacidade 0, buyer misto, dois jobs por ticket; migrar de novo.
-- **Oráculo:** Todas as escritas inválidas falham; dados válidos persistem; sem migração pendente.
-- **Evidência mínima:** Aplicar migração em DB vazio e reexecutar; tentar inserir status inválido, código duplicado, capacidade zero e FK órfã; todas rejeitadas. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
+  - **Executar:** Forçar código duplicado, curto, longo, minúsculo ou não alfanumérico, FK inexistente, status inválido, preço 0/>2^53−1, capacidade 0/>2^31−1, buyer misto, dois jobs e queued/processado ou terminal/null; migrar de novo.
+- **Oráculo:** Todas as escritas inválidas falham; DB permite ticket sem job apenas fora do serviço, enquanto reserve prova totalidade; dados válidos persistem; sem migração pendente.
+  - **Evidência mínima:** Aplicar migração em DB vazio e reexecutar; tentar cada classe de código [A-Z0-9]{12} inválido, status/FK/limites inválidos, dois jobs e combinações state/processed_at inválidas; registrar constraints rejeitadas. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F01-A05 · T-F01-02 · R05, R09.
 
 ## TEST-A06 | A06
@@ -114,8 +114,8 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 
 - **Nível / fase:** integration / local.
 - **Preparar:** E publicado cap 2 sem tickets; relógio de teste e worker pausado para conferir commit.
-- **Executar:** Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; comparar preço/código.
-- **Oráculo:** Um ticket pending e um job por chamada; código distinto; 0 vagas após duas; não aguarda pagamento.
+  - **Executar:** Reservar web e parceiro; capturar DTO imediato, recontar tickets e jobs; validar UUID, código por ^[A-Z0-9]{12}$ e preço.
+  - **Oráculo:** Um ticket pending e um job por chamada; IDs UUID e códigos válidos/distintos; 0 vagas após duas; não aguarda pagamento.
 - **Evidência mínima:** Invocar reserve e consultar DB; medir tempo <2s em ambiente local estável; rollback injetado não deixa ticket/job; colisão de código tratada. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F04-A13 · T-F04-02 · R05, R06, R09.
 
@@ -150,9 +150,9 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 
 - **Nível / fase:** integration / local.
 - **Preparar:** E publicado com vaga; DB e captura sanitizada de log.
-- **Executar:** Enviar cartão com 15/17 dígitos, letras, Unicode, espaços, tipo numérico; e-mail inválido; procurar número de teste em DB/logs.
-- **Oráculo:** Sem ticket/job para entradas inválidas; PAN não salvo nem refletido.
-- **Evidência mínima:** Casos 15/17 dígitos, letras, Unicode, espaços, e-mail inválido; assert contagem zero e inspeção DB/logs. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
+- **Executar:** Enviar cartões com 15/17 dígitos, letras, Unicode, espaços e tipo numérico; enviar e-mails com trim/casefold Unicode, inválido e >254 após casefold; inspecionar DB/logs.
+- **Oráculo:** E-mail válido é canônico; entradas inválidas não criam ticket/job; PAN e e-mail inválido não são salvos nem refletidos.
+- **Evidência mínima:** Casos de cartão 15/17 dígitos, letras/Unicode/espaços e e-mails com trim/casefold, inválido e >254 canônicos; assert canonicidade ou contagem zero e inspeção DB/logs. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F04-A17 · T-F04-01 · R06.
 
 ## TEST-A18 | A18
@@ -186,9 +186,9 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 
 - **Nível / fase:** e2e / local.
 - **Preparar:** Eventos draft, published, lotado e cancelled; chave válida.
-- **Executar:** GET /api/partner/events; verificar set de campos, tipos, timestamps e vagas.
-- **Oráculo:** 200 array; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada.
-- **Evidência mínima:** HTTP GET com fixtures dos estados; comparar shape e valores; esgotado permanece com 0. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
+  - **Executar:** GET /api/partner/events; validar cada item contra o schema OpenAPI, inclusive UUID, timestamp e limites numéricos.
+  - **Oráculo:** 200 array conforme OpenAPI; publicados inclusive esgotados; sem dados de owner/PII; disponibilidade derivada.
+  - **Evidência mínima:** HTTP GET com fixtures dos estados; validar cada item contra o OpenAPI, inclusive UUID/timestamp/limites; esgotado permanece com 0. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F06-A21 · T-F06-02 · API, R02, R05.
 
 ## TEST-A22 | A22
@@ -204,9 +204,9 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 
 - **Nível / fase:** e2e / local.
 - **Preparar:** Ticket web fixture e parceiro; ID inexistente; chaves válidas e inválidas.
-- **Executar:** GET ambos os tickets e ID ausente; executar as três rotas sem chave e com chave inválida.
-- **Oráculo:** 200 exatamente ticketId/code/eventId/status/checkedIn booleano; 404 ticket_not_found; 401 unauthorized em 6 combinações.
-- **Evidência mínima:** HTTP em três rotas × sem/errada e com payload inválido; consulta fixtures web/partner e inexistente; checar JSON exato. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
+  - **Executar:** GET ambos os tickets, ID UUID ausente e UUID malformado; validar respostas 200 contra OpenAPI; executar as três rotas sem chave e com chave inválida.
+  - **Oráculo:** 200 com IDs UUID, código ^[A-Z0-9]{12}$ e demais campos exatos; ausente/malformado dá 404 ticket_not_found; 401 unauthorized em 6 combinações.
+  - **Evidência mínima:** HTTP em três rotas × sem/errada; consultar fixtures web/partner, UUID inexistente e malformado; validar respostas 200 contra OpenAPI. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F06-A23 · T-F06-02 · API, R09, R13.
 
 ## TEST-A24 | A24
@@ -248,10 +248,10 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 ## TEST-A28 | A28
 
 - **Nível / fase:** integration / local.
-- **Preparar:** A, B, P, anônimo; E de A com ticket.
+  - **Preparar:** A, B, P, anônimo; E de A com ticket; settings de teste apontam os hooks precriados ao provider, partial e URLconf reais de F07.
 - **Executar:** Acessar URL e enviar check-in/cancelamento em cada sessão; conferir HTML e banco.
 - **Oráculo:** A tem gestão completa; B, P, anônimo não leem nem alteram; resposta sem dados de A.
-- **Evidência mínima:** Browser A/B/P/visitante, POST forjado de B, verificar nenhum dado nem alteração; abrir gestão de A e executar ações. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
+  - **Evidência mínima:** Browser A/B/P/visitante pela URL completa, POST forjado de B e ações de A; registrar overrides dos hooks e diff sem edição de wiring compartilhado. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F07-A28 · T-F07-03 · R04, R13.
 
 ## TEST-A29 | A29
@@ -303,9 +303,9 @@ Cada seção é um teste ou grupo parametrizado obrigatório, a implementar no r
 
 - **Nível / fase:** e2e / local.
 - **Preparar:** Chave válida/errada, evento ausente e esgotado.
-- **Executar:** Enviar JSON truncado, null, array, e-mail ruim, cartão Unicode e numérico, content-type incorreto, corpo com chave ausente.
-- **Oráculo:** 401 antes de parse; 422 para payload inválido autenticado mesmo com evento inexistente/lotado; sem redirect/500.
-- **Evidência mínima:** HTTP bruto com corpo malformado, chave ausente/errada/válida; conferir resposta exata e ausência de efeitos. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
+  - **Executar:** Enviar chave ausente/duplicada/errada com body sentinela; com chave válida enviar JSON válido de exatamente 16.384 bytes, o mesmo com 16.385 bytes, JSON truncado/null/array, e-mail canônico inválido/>254, cartão Unicode/numérico e content-type incorreto.
+  - **Oráculo:** 401 sem ler/parsear body para chave ausente/duplicada/errada; 16.384 bytes alcança o domínio; 16.385 bytes e payload inválido autenticado dão 422 mesmo com evento inexistente/lotado; sem efeito, redirect ou 500.
+  - **Evidência mínima:** HTTP bruto registrando multiplicidade da chave e bytes efetivamente lidos para 16.384/16.385; conferir resposta exata, ordem das guardas e ausência de efeitos. Salvar comando, resultado, SHA e identificadores sintéticos; falha ou ausência de evidência bloqueia aprovação.
 - **Vínculos:** C-F06-A34 · T-F06-03 · API, R06, R07.
 
 ## TEST-A35 | A35
