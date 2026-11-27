@@ -12,7 +12,7 @@ Planejar e integrar branches paralelas. Leia AGENTS.md e tarefas da feature prim
 PRD graph, state, handoffs. Confirme SHA, fase e ownership.
 
 ## Procedure
-Confirmar provider merged+local PASS; criar worktrees/ports; despachar agentes simultâneos; commits úteis; avaliar por sessão distinta; merge serial com gates; reavaliar após mudanças; coletar GitHub PR overlap real.
+Confirmar provider merged+local PASS e interface congelada; criar worktrees/ports; W1–W4 sequenciais, um implementador por feature; W5 despachar F05/F06/F07 simultaneamente. Reutilizar implementador nas tasks e correções; conferir cada commit material, referência persistente e testes antes de avançar. Avaliar por sessão distinta conforme contrato; merge serial com gates; reavaliar quando exigido; coletar GitHub PR overlap real. Usar Git/scripts diretamente; recuperar checkpoint antes de redespachar.
 
 ## Validation
 TEST-P01,P04,P05; G5/G6.

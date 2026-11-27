@@ -13,7 +13,7 @@ Nao modifique codigo nem testes.
 Nao altere project-state.json.
 Nao delegue tarefas.
 
-Reporte PASS, FAIL ou PENDING_INTEGRATION,
+Reporte por item PASS, FAIL, BLOCKED ou PENDING_INTEGRATION,
 conforme o contrato.
 Identifique defeitos por arquivo e linha.
 Preserve as evidencias obrigatorias.

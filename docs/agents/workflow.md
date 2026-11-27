@@ -10,7 +10,13 @@ Product owner approves W0 and requirement changes. Coordinator owns DAG, shared 
 
 ## Handoff rules
 
-Start consumer only when required provider is merged with local PASS and interface version frozen. Coordinator reads state and PRD, sends immutable base SHA and ownership boundaries to fresh implementer. Worktrees each have separate compose project/port. Start commits useful and early; record actual GitHub timestamps, do not synthesize overlap. Parallel W5 features consume frozen F01–F04, not each other; their real cross-channel/operation behavior is evaluated in W6.
+Start consumer only when required provider is merged with local PASS and interface version frozen. Coordinator reads state and applicable PRD sections, sends immutable base SHA and ownership boundaries to one fresh implementer per feature. Reuse that implementer for sequential tasks and fixes while available. Worktrees each have separate compose project/port. Start commits useful and early; record actual GitHub timestamps, do not synthesize overlap. Parallel W5 features consume frozen F01–F04, not each other; their real cross-channel/operation behavior is evaluated in W6.
+
+## Execution checkpoints
+- For each task, preserve a material commit on the feature branch and a concise handoff with full SHA, changed paths, test commands/exits and next task. The coordinator independently checks the actual Git repository, commit, ancestry, branch reference and material diff before advancing. Do not require a new agent merely to check Git or run deterministic scripts.
+- A missing commit or environment mismatch blocks advancement. Recover existing work first; if the session cannot resume, start a replacement from the last verified checkpoint, preserving actual authorship and session IDs. Do not loop on redispatch or rewrite active history.
+- Formal independent evaluation is per feature plus any additional evaluation required by the contract or concrete critical risk. A failed formal evaluation requires a fresh evaluator on the corrected candidate and a new report. Preserve all existing report, evidence and merge rules. Do not record final candidate or approval before the required evidence exists.
+- Update global state only for relevant transitions and required session metadata; do not generate commits merely to repeat progress messages.
 
 ## Evaluation
 

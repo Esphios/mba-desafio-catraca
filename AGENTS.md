@@ -1,6 +1,15 @@
 # AGENTS.md | contrato de trabalho
 
-Projeto greenfield, documentação pré-implementação. Comece por proposal.md, design.md, docs/prd/PRD.md, requirements-matrix.md, tasks.md e state/project-state.json. Depois leia spec/plan/contract da feature, interfaces consumidas e skills indicadas em tasks. A fonte normativa é o brief e os contratos rastreados. Nenhuma implementação existe neste pacote.
+A fonte normativa é o brief e os contratos rastreados. Consulte state/project-state.json e o trecho aplicável de tasks.md para identificar a fase. W0: leia proposal.md, design.md, PRD e matriz, conforme G0. Após baseline aprovada, não reabra W0 sem contradição normativa concreta ou mudança formalmente autorizada.
+
+## Execução econômica
+- Coordenador: leia estado, dependências e trechos normativos relevantes; use Git e scripts existentes para verificações determinísticas.
+- Implementador: leia spec/plan/contract da feature, interfaces consumidas, requisitos/ADRs e skills aplicáveis. Consulte os demais documentos quando necessários, sem releitura integral por task.
+- Avaliador: nova sessão independente por avaliação formal, SHA limpo, contrato, requisitos e testes aplicáveis; não receba o transcript nem o veredito do implementador.
+- Um implementador por feature (sessão reutilizada enquanto disponível); commits materiais e testes por task, handoff conciso por etapa e completo ao fim da feature. Preserve revisões intermediárias obrigatórias. W1–W4 sequenciais; W5 mantém os três implementadores simultâneos exigidos. Sem delegação recursiva.
+- Use os perfis de .codex/agents; Standard, modelo econômico para tarefas simples e modelo crítico quando a complexidade justificar. Não crie agentes para verificações determinísticas.
+- Antes de avançar uma task, confirme o SHA completo e o diff no Git do projeto, ancestralidade e referência persistente no branch correto, e testes associados ao candidato. Se houver interrupção, preserve os commits e registre o próximo passo. Não aceite somente relatos; não repita despachos sem diagnosticar a causa. Não reescreva histórico durante a implementação.
+- Somente o coordenador atualiza o estado global em transições relevantes. Despacho ou relato não é entrega. Não dispense registros e evidências obrigatórios. Siga docs/agents/workflow.md.
 
 ## Comandos
 Planejamento: `python3 scripts/validate_docs.py`, `python3 scripts/verify_model.py`, `python3 scripts/test_baseline.py`, `python3 docs/validation/w0-audit/reproduce_mutations.py`; host sem Python: `docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/validate_docs.py` (idem verify_model). Após F01: `bash bin/up`, `bash bin/down`, `bash bin/gates`; candidato `bash bin/gates --feature Fxx`; release `bash bin/gates --release`, `bash bin/flow`. `python3 scripts/validate_evidence.py --release` requer Git e histórico real. Não confundir docs check com testes do produto. Default simulator, no payment key.
