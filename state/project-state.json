@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
-  "baseline": "proposed",
-  "baselineCommit": null,
+  "baseline": "approved",
+  "baselineCommit": "19059603b450981630477dac3732acfdc8fe9d1d",
   "releaseStatus": "planned",
-  "currentWave": 0,
+  "currentWave": 1,
   "features": [
     {
       "id": "F01",
-      "status": "planned",
+      "status": "implementing",
       "wave": 1,
-      "branch": null,
+      "branch": "feature/f01-foundation",
       "implementationCommit": null,
       "mergedCommit": null,
       "pr": null,
       "latestEvaluation": null,
-      "implementerSession": null,
+      "implementerSession": "/root/f01_t01_implementer",
       "integratedRequired": false
     },
     {
