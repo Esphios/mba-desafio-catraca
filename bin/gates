@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$root"
+if (($#)); then
+  echo 'Feature and release gates are not implemented in T-F01-01.' >&2
+  exit 2
+fi
+command -v docker >/dev/null
+docker compose version >/dev/null
+project="catraca-gate-$(date +%s)-$$"
+compose=(docker compose --project-name "$project" -f "$root/compose.yaml")
+cleanup() {
+  result=$?
+  trap - EXIT INT TERM
+  if ! "${compose[@]}" down --volumes --remove-orphans; then
+    echo "Cleanup failed for $project" >&2
+    result=1
+  fi
+  exit "$result"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+"${compose[@]}" run --build --rm test

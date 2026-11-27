@@ -1,0 +1,6 @@
+Django==5.2.19
+psycopg[binary]==3.3.9
+gunicorn==27.0.1
+ruff==0.17.6
+playwright==1.65.2
+openapi-spec-validator==0.7.2

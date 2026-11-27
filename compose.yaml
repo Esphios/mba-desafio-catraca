@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:17.12-bookworm@sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7
+    environment:
+      POSTGRES_DB: catraca
+      POSTGRES_USER: catraca_bootstrap
+      POSTGRES_PASSWORD: local-bootstrap-only
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catraca_bootstrap -d catraca"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:${CAT_PORT:-8080}:8000"
+    environment:
+      CAT_SECRET: ${CAT_SECRET:-local-development-secret}
+    depends_on:
+      db:
+        condition: service_healthy
+  test:
+    build: .
+    profiles: [test]
+    environment:
+      CAT_DB_HOST: db
+      CAT_DB_USER: catraca_bootstrap
+      CAT_DB_PASSWORD: local-bootstrap-only
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "ruff check . && ruff format --check . && python manage.py check && python manage.py test tests --verbosity 2"]
+volumes:
+  db_data:
