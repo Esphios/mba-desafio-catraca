@@ -14,12 +14,15 @@ def main():
     with tempfile.TemporaryDirectory() as tmp:
         root=Path(tmp)/'baseline'
         shutil.copytree(ROOT,root,ignore=shutil.ignore_patterns('__pycache__','.git'))
+        state_path=root/'state/project-state.json';s=json.loads(state_path.read_text())
+        s.update(currentWave=0,baseline='proposed',baselineCommit=None)
+        initial=json.dumps(s);state_path.write_text(initial)
         assert not docs(root)
         assert not evidence(root)
         assert evidence(root,True)
         path=root/'requirements-matrix.csv'; original=path.read_bytes(); path.write_bytes(original+b'\ninvalid,row\n')
         assert any('CSV inconsistent' in e for e in docs(root));path.write_bytes(original)
-        state_path=root/'state/project-state.json'; initial=state_path.read_text();s=json.loads(initial);s['features'][0]['status']='local_pass';state_path.write_text(json.dumps(s))
+        s=json.loads(initial);s['features'][0]['status']='local_pass';state_path.write_text(json.dumps(s))
         assert any('approved state without report' in e for e in evidence(root));state_path.write_text(initial)
         def git(*args):
             return subprocess.run(['git','-C',str(root),*args],check=True,capture_output=True,text=True).stdout.strip()
