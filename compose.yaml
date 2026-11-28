@@ -1,0 +1,92 @@
+services:
+  db:
+    image: postgres:17.12-bookworm@sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7
+    environment:
+      POSTGRES_DB: catraca
+      POSTGRES_USER: catraca_bootstrap
+      POSTGRES_PASSWORD: local-bootstrap-only
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catraca_bootstrap -d catraca"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  bootstrap:
+    build: .
+    environment:
+      CAT_DB_HOST: db
+      CAT_DB_USER: catraca_bootstrap
+      CAT_DB_PASSWORD: local-bootstrap-only
+      CAT_PROFILE: ${CAT_PROFILE:-demo}
+      CAT_RUNTIME_DB_PASSWORD: ${CAT_RUNTIME_DB_PASSWORD:-local-runtime-only}
+      CAT_SECRET: ${CAT_SECRET:-local-development-secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - >-
+        python manage.py migrate --noinput &&
+        python manage.py seed_demo &&
+        python manage.py grant_runtime
+    restart: "no"
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:${CAT_PORT:-8080}:8000"
+    environment:
+      CAT_DB_HOST: db
+      CAT_DB_USER: catraca_runtime
+      CAT_DB_PASSWORD: ${CAT_RUNTIME_DB_PASSWORD:-local-runtime-only}
+      CAT_SECRET: ${CAT_SECRET:-local-development-secret}
+      CAT_PROFILE: ${CAT_PROFILE:-demo}
+      CAT_GATEWAY_SCALE: ${CAT_GATEWAY_SCALE:-1}
+      CAT_PARTNER_KEY: ${CAT_PARTNER_KEY:-local-passgate-26}
+      CAT_WORKER_ID: ${CAT_WORKER_ID:-worker-1}
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  worker:
+    build: .
+    environment:
+      CAT_DB_HOST: db
+      CAT_DB_USER: catraca_runtime
+      CAT_DB_PASSWORD: ${CAT_RUNTIME_DB_PASSWORD:-local-runtime-only}
+      CAT_SECRET: ${CAT_SECRET:-local-development-secret}
+      CAT_WORKER_ID: ${CAT_WORKER_ID:-worker-1}
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    command: ["python", "-m", "worker.main"]
+    healthcheck:
+      test: ["CMD", "python", "manage.py", "worker_health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  test:
+    build: .
+    profiles: [test]
+    environment:
+      CAT_DB_HOST: db
+      CAT_DB_USER: catraca_bootstrap
+      CAT_DB_PASSWORD: local-bootstrap-only
+      CAT_PROFILE: test
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "ruff check . && ruff format --check . && python manage.py check && python manage.py test tests --verbosity 2"]
+volumes:
+  db_data:

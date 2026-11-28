@@ -1,23 +1,42 @@
-# Catraca | baseline de design
+# Catraca | desenvolvimento local
 
-Este pacote inicia um repositório novo. Contém documentação, skills e ferramentas auxiliares; não é aplicação pronta. Todos os estados estão planejados. Primeiro W0, depois execução em waves conforme tasks.md.
+Fundação Django/PostgreSQL do MVP Catraca. O ambiente local usa somente o
+simulador de pagamento; nenhuma chave ou integração externa é necessária.
 
-## Como rodar (agora)
+## Como rodar
 
-Docker/Compose e Git no host; Node LTS disponível, Python opcional. Para validar baseline sem Python local:
+Pré-requisitos: Docker/Compose e Git. No Windows, execute dentro do WSL com o
+repositório no filesystem Linux. Não é preciso copiar .env nem instalar Python.
 
-```bash
-docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/validate_docs.py
-docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/verify_model.py
-```
+    bash bin/up
+    bash bin/down
+    bash bin/gates
 
-Com Python 3.12 local, executar diretamente. Para verificar o gate de evidências e seus testes negativos, usar `python scripts/validate_evidence.py` e `python scripts/test_baseline.py` (Git disponível no host). Ver [validação da baseline](docs/validation/baseline-validation.md). O modelo é oráculo independente de regras, não aplicação. O probe HTTP só após API existir. F01 implementará `bash bin/up`, `bash bin/down`, `bash bin/gates` e `bash bin/flow` (último em W6). Nenhum destes comandos de produto existe ainda; substituir esta nota no README de entrega somente após testes reais. Pré-requisitos finais Linux/macOS + Docker Compose + Git; Windows WSL. Não exigir cópia .env ou instalação adicional.
+bin/up constrói a imagem pinada, sobe o banco sem publicar sua porta, executa
+migrations e seed uma vez e espera web/worker prontos. bin/down remove os
+serviços e listeners do projeto, preservando o volume. Uma nova subida conserva
+os dados e não duplica a seed. bin/gates usa projeto e volume descartáveis.
 
-## Endereços planejados
+Para worktrees paralelos, escolha projeto e porta exclusivos:
 
-WEB e API http://127.0.0.1:8080; CAT_PORT pode alterar. API começa em /api/partner; readiness /health/ready. CAT_PROJECT=catraca-demo; CAT_PROFILE=demo; CAT_GATEWAY_SCALE=1. Sem serviço de pagamento externo.
+    CAT_PROJECT=catraca-f01 CAT_PORT=18083 bash bin/up
+    CAT_PROJECT=catraca-f01 CAT_PORT=18083 bash bin/down
 
-## Credenciais de seed propostas (sintéticas, F01 implementará)
+## Endereços e defaults
+
+- WEB e API: http://127.0.0.1:8080
+- Readiness: http://127.0.0.1:8080/health/ready
+- Liveness: http://127.0.0.1:8080/health/live
+- CAT_PROJECT=catraca-demo
+- CAT_PORT=8080
+- CAT_PROFILE=demo
+- CAT_GATEWAY_SCALE=1
+- CAT_PARTNER_KEY=local-passgate-26
+
+CAT_PORT altera a porta. O perfil demo exige escala 1. A API futura começa em
+/api/partner. Não há serviço nem segredo de pagamento externo.
+
+## Credenciais de seed sintéticas
 
 | Papel         | E-mail                | Senha        |
 | ------------- | --------------------- | ------------ |
@@ -25,25 +44,25 @@ WEB e API http://127.0.0.1:8080; CAT_PORT pode alterar. API começa em /api/part
 | Organizador B | gestao.b@example.test | LocalB-2026! |
 | Participante  | pessoa@example.test   | LocalP-2026! |
 
-X-Api-Key: `local-passgate-26`. Apenas demo local, nunca reutilizar em produção. Verificar login e seed repetida quando implementados.
+X-Api-Key: local-passgate-26. Apenas demo local, nunca reutilizar em produção.
+A seed roda somente em perfis demo/test, usa hash Django, é idempotente pelo
+e-mail canônico e preserva contas que não pertencem a ela.
 
 ## Mapa dos artefatos
 
 - [Proposal](proposal.md), [Design/HLD](design.md), [Matriz](requirements-matrix.md) e [Tasks](tasks.md).
-- [PRD](docs/prd/PRD.md), [ADRs](docs/architecture/adrs/README.md), [interfaces](docs/interfaces/internal.md), [OpenAPI](docs/interfaces/partner.openapi.json), [contrato web](docs/interfaces/web.md).
-- [AMENDMENT-001 candidato](docs/validation/w0-audit/AMENDMENT-001.md) e [manifesto de versões W0](docs/architecture/version-manifest.md); ambos aguardam aprovação final e não autorizam W1.
-- Features, spec/plan/contract/reports: `docs/features/`; cada diretório contém contrato e pasta vazia de relatórios.
-- [Gates](docs/validation/harness.md), [catálogo de testes](docs/validation/test-catalog.md), [fluxo de avaliação](docs/validation/evaluator-flow.md), [release contract](docs/validation/release-contract.md).
-- [AGENTS](AGENTS.md), [skills](.agents/skills/README.md), [workflow](docs/agents/workflow.md), [state](state/project-state.json), [guidelines](docs/engineering-guidelines.md).
+- [PRD](docs/prd/PRD.md), [ADRs](docs/architecture/adrs/README.md), [interfaces](docs/interfaces/internal.md), [OpenAPI](docs/interfaces/partner.openapi.json) e [contrato web](docs/interfaces/web.md).
+- [Manifesto de versões W0](docs/architecture/version-manifest.md) e [guidelines](docs/engineering-guidelines.md).
+- Features, spec/plan/contract/reports em docs/features/.
+- [Gates](docs/validation/harness.md), [catálogo de testes](docs/validation/test-catalog.md), [fluxo de avaliação](docs/validation/evaluator-flow.md) e [release contract](docs/validation/release-contract.md).
+- [AGENTS](AGENTS.md), [skills](.agents/skills/README.md), [workflow](docs/agents/workflow.md) e [state](state/project-state.json).
 
-## PRs da wave paralela
+## Estado e próximos contratos
 
-W5 F05/F06/F07; links, SHAs e sobreposição ainda não existem. Coordenador preenche somente com PRs reais mergeados. W6 verifica primeiro commit de cada PR anterior ao último dos demais.
+F01 fornece ambiente, schema, seed, clock e worker de heartbeat. O worker desta
+etapa não consome jobs; F04 preservará o entrypoint e acrescentará liquidação
+durável. F02 implementará login das contas seed. Os probes partner/browser
+dependem das features posteriores e não substituem os gates por feature.
 
-## Decisões
-
-Django + PostgreSQL para simplificar auth, CSRF, migrations e transações. R07 garantida por lock por evento e count após lock; prova condicional e testes de concorrência. Gateway: job persistido junto com ticket, worker separado, estado terminal protegido. Avaliação: sessão nova distinta do implementador, contrato por item, relatório append-only e integração final. Ver design/ADRs. O manifesto contém pins candidatos; aprovação W0 e materialização no harness continuam obrigatórias.
-
-## Probes após implementação
-
-`scripts/partner_probe.py` verifica duas rajadas de carga e contrato HTTP; `scripts/browser_release_probe.py` automatiza passos 2–16 e captura screenshots/JSON. Ambos dependem da aplicação futura; o segundo também de Playwright Python + Chromium no container de testes. Ver o roteiro de avaliação. Scripts auxiliares não substituem testes por feature e fluxo final.
+W5 executa F05/F06/F07 em branches paralelas. Links, SHAs e sobreposição de PRs
+somente serão registrados pelo coordenador quando existirem de fato.
