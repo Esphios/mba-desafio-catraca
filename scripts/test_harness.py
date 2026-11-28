@@ -165,7 +165,7 @@ class ShellHarnessTests(unittest.TestCase):
             env=self.env
             | {
                 'FAKE_DOCKER_SLEEP_MATCH': 'run --rm test',
-                'FAKE_PROJECT_CONTAINERS': 'fake-gate-container',
+                'FAKE_PROJECT_CONTAINERS': 'fake-gate-first\nfake-gate-second',
             },
             text=True,
             stdout=subprocess.PIPE,
@@ -185,7 +185,9 @@ class ShellHarnessTests(unittest.TestCase):
 
         self.assertNotEqual(process.returncode, 0, stderr)
         self.assertTrue(any('down --volumes --remove-orphans' in c for c in self.docker_calls()))
-        self.assertTrue(any('rm --force fake-gate-container' in c for c in self.docker_calls()))
+        self.assertTrue(
+            any('rm --force fake-gate-first fake-gate-second' in c for c in self.docker_calls())
+        )
 
     def test_TEST_A37_release_runs_release_evidence_phase_and_propagates_failure(self):
         result = self.run_script(

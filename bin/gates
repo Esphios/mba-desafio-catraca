@@ -25,8 +25,7 @@ if [[ $(git -C "$root" rev-parse --is-shallow-repository) != false ]]; then
 fi
 git_common=$(git -C "$root" rev-parse --path-format=absolute --git-common-dir)
 
-project="catraca-gate-$(date +%s%N)-$$-$RANDOM"
-project=${project,,}
+project="catraca-gate-$(date +%s)-$$-$RANDOM"
 CAT_PORT=
 for ((candidate_port = 20000 + RANDOM % 30000; candidate_port <= 65535; candidate_port++)); do
   if ! { exec 3<>"/dev/tcp/127.0.0.1/$candidate_port"; } 2>/dev/null; then
@@ -57,9 +56,14 @@ cleanup() {
   if container_output=$(
     docker ps -aq --filter "label=com.docker.compose.project=$project"
   ); then
-    mapfile -t project_containers <<<"$container_output"
-    if [[ -n $container_output ]] && ! docker rm --force "${project_containers[@]}"; then
-      cleanup_failed=1
+    if [[ -n $container_output ]]; then
+      project_containers=()
+      while IFS= read -r container_id; do
+        project_containers+=("$container_id")
+      done <<< "$container_output"
+      if ! docker rm --force "${project_containers[@]}"; then
+        cleanup_failed=1
+      fi
     fi
   else
     cleanup_failed=1
