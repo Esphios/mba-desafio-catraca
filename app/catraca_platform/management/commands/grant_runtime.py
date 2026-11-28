@@ -48,6 +48,10 @@ class Command(BaseCommand):
                 'ALTER ROLE catraca_runtime NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT'
             )
             cursor.execute('REVOKE CREATE ON SCHEMA public FROM PUBLIC')
+            # PostgreSQL gives PUBLIC temporary table creation on new databases.
+            cursor.execute(
+                f'REVOKE TEMPORARY ON DATABASE {quoted_database} FROM PUBLIC, {ROLE_NAME}'
+            )
             cursor.execute(f'GRANT CONNECT ON DATABASE {quoted_database} TO {ROLE_NAME}')
             cursor.execute(f'GRANT USAGE ON SCHEMA public TO {ROLE_NAME}')
             cursor.execute(f'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {ROLE_NAME}')
