@@ -1,0 +1,72 @@
+docker compose exec -T web python manage.py shell --verbosity 0 < evaluator probe
+identity=catraca_runtime PostgreSQL=17.12 (Debian 17.12-1.pgdg12+1) zone=UTC
+seed=gestao.a@example.test id=5a06bef1-19e4-44ab-85d5-c3ba0e782b38 role=organizer hash_algorithm=pbkdf2_sha256 verifies=True
+seed=gestao.b@example.test id=fd2ef78d-a155-4b89-8b80-6d132705d8c3 role=organizer hash_algorithm=pbkdf2_sha256 verifies=True
+seed=pessoa@example.test id=4ed11da1-a33e-4973-ac8c-806c4e93a78b role=participant hash_algorithm=pbkdf2_sha256 verifies=True
+runtime_super_create_db_create_role_create_schema_temp=(False, False, False, False, False)
+reject=runtime CREATE TABLE SQLSTATE=42501 constraint=-
+reject=runtime CREATE TEMP TABLE SQLSTATE=42501 constraint=-
+reject=runtime migration ledger UPDATE SQLSTATE=42501 constraint=-
+runtime_accounts_DML=INSERT/UPDATE/SELECT/DELETE
+reject=event FK SQLSTATE=23503 constraint=coredata_event_owner_id_72132b9f_fk_accounts_user_id
+reject=event status SQLSTATE=23514 constraint=coredata_event_status_valid
+reject=capacity zero SQLSTATE=23514 constraint=coredata_event_capacity_range
+reject=capacity over int32 SQLSTATE=22003 constraint=-
+reject=event price zero SQLSTATE=23514 constraint=coredata_event_price_range
+reject=event price over max SQLSTATE=23514 constraint=coredata_event_price_range
+reject=duplicate code SQLSTATE=23505 constraint=coredata_ticket_code_key
+reject=short code SQLSTATE=23514 constraint=coredata_ticket_code_format
+reject=long code SQLSTATE=22001 constraint=-
+reject=lowercase code SQLSTATE=23514 constraint=coredata_ticket_code_format
+reject=punctuation code SQLSTATE=23514 constraint=coredata_ticket_code_format
+reject=non-ASCII code SQLSTATE=23514 constraint=coredata_ticket_code_format
+reject=ticket event FK SQLSTATE=23503 constraint=coredata_ticket_event_id_cbe124b6_fk_coredata_event_id
+reject=ticket participant FK SQLSTATE=23503 constraint=coredata_ticket_participant_id_2f127093_fk_accounts_user_id
+reject=ticket status SQLSTATE=23514 constraint=coredata_ticket_status_valid
+reject=ticket price zero SQLSTATE=23514 constraint=coredata_ticket_price_range
+reject=ticket price over max SQLSTATE=23514 constraint=coredata_ticket_price_range
+reject=partner with participant SQLSTATE=23514 constraint=coredata_ticket_buyer_xor
+reject=web without participant SQLSTATE=23514 constraint=coredata_ticket_buyer_xor
+reject=invalid channel SQLSTATE=23514 constraint=coredata_ticket_buyer_xor
+reject=second job SQLSTATE=23505 constraint=coredata_paymentjob_ticket_id_key
+reject=queued with processed_at SQLSTATE=23514 constraint=coredata_payment_job_state_processed
+reject=done without processed_at SQLSTATE=23514 constraint=coredata_payment_job_state_processed
+reject=ignored without processed_at SQLSTATE=23514 constraint=coredata_payment_job_state_processed
+reject=invalid job state SQLSTATE=23514 constraint=coredata_payment_job_state_processed
+reject=invalid outcome SQLSTATE=23514 constraint=coredata_payment_job_outcome_valid
+sentinel_owner=b80432d6-0a98-40b4-a0ad-b9f26d464492 event=f5216321-02aa-42f7-a92a-40aab39e30ef ticket=fd899dcc-ff05-43c6-a630-2b99e5371a98 job=b9f7e3e6-32ff-4dd8-914e-25f863ecb221 no_job_ticket=3c8ca796-d9ad-417f-8814-8d5e3bd30502
+counts users=4 events=1 tickets=2 jobs=1
+runtime_probe_exit=0
+
+Restart, seed, bootstrap and stale-worker controls
+docker compose run --rm --no-deps -e PROBE_PHASE=bootstrap bootstrap python manage.py shell --verbosity 0
+identity=catraca_bootstrap PostgreSQL=17.12 (Debian 17.12-1.pgdg12+1) zone=UTC
+seed=gestao.a@example.test id=5a06bef1-19e4-44ab-85d5-c3ba0e782b38 role=organizer hash_algorithm=pbkdf2_sha256 verifies=True
+seed=gestao.b@example.test id=fd2ef78d-a155-4b89-8b80-6d132705d8c3 role=organizer hash_algorithm=pbkdf2_sha256 verifies=True
+seed=pessoa@example.test id=4ed11da1-a33e-4973-ac8c-806c4e93a78b role=participant hash_algorithm=pbkdf2_sha256 verifies=True
+bootstrap_CREATE_TABLE=success bootstrap_CREATE_TEMP_TABLE=success changes=rolled_back
+sentinel_owner=b80432d6-0a98-40b4-a0ad-b9f26d464492 event=f5216321-02aa-42f7-a92a-40aab39e30ef ticket=fd899dcc-ff05-43c6-a630-2b99e5371a98 job=b9f7e3e6-32ff-4dd8-914e-25f863ecb221 no_job_ticket=3c8ca796-d9ad-417f-8814-8d5e3bd30502
+counts users=4 events=1 tickets=2 jobs=1
+docker compose run --rm --no-deps bootstrap python manage.py seed_demo (twice)
+Seed ready: 3 identities (0 created).
+Seed ready: 3 identities (0 created).
+Catraca project catraca-f01-local-reassessment stopped; data volume preserved.
+project_containers_after_down=0
+listener_18087_after_down=closed
+preserved_volume=catraca-f01-local-reassessment_db_data created=2026-11-28T04:33:27Z
+bootstrap-1  |   No migrations to apply.
+Catraca ready at http://127.0.0.1:18087 (project catraca-f01-local-reassessment).
+  No migrations to apply.
+migration_check_exit=0
+No changes detected
+same_ids_roles_counts_after_restart=yes
+identity=catraca_runtime PostgreSQL=17.12 (Debian 17.12-1.pgdg12+1) zone=UTC
+seed=gestao.a@example.test id=5a06bef1-19e4-44ab-85d5-c3ba0e782b38 role=organizer hash_algorithm=pbkdf2_sha256 verifies=True
+seed=gestao.b@example.test id=fd2ef78d-a155-4b89-8b80-6d132705d8c3 role=organizer hash_algorithm=pbkdf2_sha256 verifies=True
+seed=pessoa@example.test id=4ed11da1-a33e-4973-ac8c-806c4e93a78b role=participant hash_algorithm=pbkdf2_sha256 verifies=True
+sentinel_owner=b80432d6-0a98-40b4-a0ad-b9f26d464492 event=f5216321-02aa-42f7-a92a-40aab39e30ef ticket=fd899dcc-ff05-43c6-a630-2b99e5371a98 job=b9f7e3e6-32ff-4dd8-914e-25f863ecb221 no_job_ticket=3c8ca796-d9ad-417f-8814-8d5e3bd30502
+counts users=4 events=1 tickets=2 jobs=1
+live_http=200
+worker_stopped_http=503 body=worker heartbeat stale
+worker_recovered_http=200
+persistence_probe_exit=0

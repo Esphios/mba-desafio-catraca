@@ -1,0 +1,7 @@
+README internal links=19 all_resolve=True
+README and AGENTS command/port/health/account/map tokens inspected
+dotenv_absent=True
+defaults loopback=127.0.0.1:8080->8000 profile=demo scale=1 partner_key_matches_README=True database_port_published=False separate_roles=True
+CAT_PROFILE=demo requires CAT_GATEWAY_SCALE=1.
+nondefault_demo_scale_exit=2
+docs_probe_exit=0
