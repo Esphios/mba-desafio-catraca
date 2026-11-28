@@ -12,6 +12,9 @@ if CAT_PROFILE == 'demo' and CAT_GATEWAY_SCALE != '1':
 DEBUG = False
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 ROOT_URLCONF = 'config.urls'
+MANAGEMENT_PROVIDER = 'catalog.management.basic_management_snapshot'
+MANAGEMENT_PARTIAL = None
+MANAGEMENT_OPERATIONS_URLCONF = None
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',

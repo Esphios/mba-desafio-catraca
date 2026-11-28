@@ -1,26 +1,123 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$root"
-if (($#)); then
-  echo 'Feature and release gates are not implemented in T-F01-01.' >&2
-  exit 2
-fi
+
+mode=candidate
+case $#:${1:-}:${2:-} in
+  0::) ;;
+  2:--feature:F01) mode=feature ;;
+  1:--release:) mode=release ;;
+  *)
+    echo 'Usage: bash bin/gates [--feature F01|--release]' >&2
+    exit 2
+    ;;
+esac
+
 command -v docker >/dev/null
+command -v git >/dev/null
+docker info >/dev/null
 docker compose version >/dev/null
-project="catraca-gate-$(date +%s)-$$"
+if [[ $(git -C "$root" rev-parse --is-shallow-repository) != false ]]; then
+  echo 'Gate requires a repository with complete Git history.' >&2
+  exit 1
+fi
+git_common=$(git -C "$root" rev-parse --path-format=absolute --git-common-dir)
+
+project="catraca-gate-$(date +%s%N)-$$-$RANDOM"
+project=${project,,}
+CAT_PORT=
+for ((candidate_port = 20000 + RANDOM % 30000; candidate_port <= 65535; candidate_port++)); do
+  if ! { exec 3<>"/dev/tcp/127.0.0.1/$candidate_port"; } 2>/dev/null; then
+    CAT_PORT=$candidate_port
+    break
+  fi
+  exec 3<&-
+  exec 3>&-
+done
+[[ -n ${CAT_PORT:-} ]] || {
+  echo 'No free loopback port found for isolated gate.' >&2
+  exit 1
+}
+export CAT_PORT CAT_PROFILE=test CAT_GATEWAY_SCALE=1
+
 compose=(docker compose --project-name "$project" -f "$root/compose.yaml")
+active_pid=
+
 cleanup() {
   result=$?
   trap - EXIT INT TERM
+  cleanup_failed=0
+  if [[ -n $active_pid ]]; then
+    kill -TERM "$active_pid" 2>/dev/null || true
+    wait "$active_pid" 2>/dev/null || true
+    active_pid=
+  fi
+  if container_output=$(
+    docker ps -aq --filter "label=com.docker.compose.project=$project"
+  ); then
+    mapfile -t project_containers <<<"$container_output"
+    if [[ -n $container_output ]] && ! docker rm --force "${project_containers[@]}"; then
+      cleanup_failed=1
+    fi
+  else
+    cleanup_failed=1
+  fi
   if ! "${compose[@]}" down --volumes --remove-orphans; then
+    cleanup_failed=1
+  fi
+  if ((cleanup_failed)); then
     echo "Cleanup failed for $project" >&2
-    result=1
+    ((result != 0)) || result=1
   fi
   exit "$result"
 }
+
+interrupt() {
+  signal_code=$1
+  trap - INT TERM
+  if [[ -n $active_pid ]]; then
+    kill -TERM "$active_pid" 2>/dev/null || true
+    wait "$active_pid" 2>/dev/null || true
+    active_pid=
+  fi
+  exit "$signal_code"
+}
+
+run_step() {
+  "$@" &
+  active_pid=$!
+  set +e
+  wait "$active_pid"
+  result=$?
+  set -e
+  active_pid=
+  return "$result"
+}
+
 trap cleanup EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
-"${compose[@]}" build test
-"${compose[@]}" run --rm test
+trap 'interrupt 130' INT
+trap 'interrupt 143' TERM
+
+printf 'Gate project=%s port=%s\n' "$project" "$CAT_PORT"
+run_step "${compose[@]}" build test
+run_step "${compose[@]}" run --rm test
+validator=(
+  "${compose[@]}" run --rm --no-deps
+  -v "$root:$root:ro"
+  -v "$git_common:$git_common:ro"
+  -e GIT_CONFIG_COUNT=1
+  -e GIT_CONFIG_KEY_0=safe.directory
+  -e "GIT_CONFIG_VALUE_0=$root"
+  -w "$root"
+  test
+)
+run_step "${validator[@]}" python scripts/validate_docs.py
+run_step "${validator[@]}" python scripts/test_harness.py
+run_step "${validator[@]}" python scripts/test_baseline.py
+if [[ $mode == feature ]]; then
+  run_step "${validator[@]}" python scripts/validate_evidence.py
+elif [[ $mode == release ]]; then
+  run_step "${validator[@]}" python scripts/validate_evidence.py --release
+fi

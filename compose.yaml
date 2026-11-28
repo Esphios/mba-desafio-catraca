@@ -77,7 +77,9 @@ services:
       timeout: 3s
       retries: 30
   test:
-    build: .
+    build:
+      context: .
+      target: test
     profiles: [test]
     environment:
       CAT_DB_HOST: db
@@ -87,6 +89,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["sh", "-c", "ruff check . && ruff format --check . && python manage.py check && python manage.py test tests --verbosity 2"]
+    command:
+      - sh
+      - -ec
+      - >-
+        ruff check . &&
+        ruff format --check . &&
+        python -m pip check &&
+        python manage.py check &&
+        python manage.py migrate --noinput &&
+        python manage.py migrate --check &&
+        python manage.py makemigrations --check --dry-run &&
+        python manage.py test tests --verbosity 2
 volumes:
   db_data:

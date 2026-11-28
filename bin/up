@@ -12,7 +12,7 @@ compose=(docker compose --project-name "$project" -f "$root/compose.yaml")
 started_empty=0
 
 diagnose() {
-  result=$?
+  local result=$1
   trap - ERR
   echo "Startup failed for project $project (exit $result)." >&2
   "${compose[@]}" ps -a >&2 || true
@@ -22,7 +22,7 @@ diagnose() {
   fi
   exit "$result"
 }
-trap diagnose ERR
+trap 'diagnose "$?"' ERR
 
 command -v docker >/dev/null
 docker info >/dev/null
@@ -53,7 +53,7 @@ status=
 while ((SECONDS < deadline)); do
   if { exec 3<>"/dev/tcp/127.0.0.1/$port"; } 2>/dev/null; then
     printf 'GET /health/ready HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n' >&3
-    IFS= read -r status <&3 || true
+    IFS= read -r -t 1 status <&3 || status=
     exec 3<&-
     exec 3>&-
     [[ $status == *" 200 "* ]] && break
@@ -62,7 +62,7 @@ while ((SECONDS < deadline)); do
 done
 [[ $status == *" 200 "* ]] || {
   echo "Host readiness did not return HTTP 200 on port $port." >&2
-  exit 1
+  diagnose 1
 }
 
 trap - ERR

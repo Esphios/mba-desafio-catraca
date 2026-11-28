@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from catraca_platform.clock import clock_now
 from coredata.models import WorkerHeartbeat
 from django.conf import settings
 from django.db import DatabaseError, connection
@@ -7,7 +8,6 @@ from django.db.migrations.exceptions import InconsistentMigrationHistory
 from django.db.migrations.executor import MigrationExecutor
 from django.http import HttpResponse
 from django.urls import path
-from django.utils import timezone
 
 
 def live(request):
@@ -21,7 +21,7 @@ def ready(request):
         targets = executor.loader.graph.leaf_nodes()
         if executor.migration_plan(targets):
             return HttpResponse('migrations pending', status=503, content_type='text/plain')
-        cutoff = timezone.now() - timedelta(seconds=5)
+        cutoff = clock_now() - timedelta(seconds=5)
         if not WorkerHeartbeat.objects.filter(
             worker_id=settings.CAT_WORKER_ID,
             last_seen__gte=cutoff,
