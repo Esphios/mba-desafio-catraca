@@ -1,0 +1,72 @@
+$ bash -c true
+
+exit=0 expected=0
+$ seed_once
+ Container catraca-f01-local-eval-bootstrap-run-66f3e0286364 Creating 
+ Container catraca-f01-local-eval-bootstrap-run-66f3e0286364 Created 
+Seed ready: 3 identities (0 created).
+
+exit=0 expected=0
+$ seed_once
+ Container catraca-f01-local-eval-bootstrap-run-dc8073998b26 Creating 
+ Container catraca-f01-local-eval-bootstrap-run-dc8073998b26 Created 
+Seed ready: 3 identities (0 created).
+
+exit=0 expected=0
+$ docker volume inspect --format \{\{.Name\}\}\ \{\{.CreatedAt\}\}\ \{\{index\ .Labels\ \"com.docker.compose.project\"\}\} catraca-f01-local-eval_db_data
+catraca-f01-local-eval_db_data 2026-11-28T04:22:22Z catraca-f01-local-eval
+
+exit=0 expected=0
+$ bash bin/down
+ Container catraca-f01-local-eval-worker-1 Stopping 
+ Container catraca-f01-local-eval-web-1 Stopping 
+ Container catraca-f01-local-eval-worker-1 Stopped 
+ Container catraca-f01-local-eval-worker-1 Removing 
+ Container catraca-f01-local-eval-worker-1 Removed 
+ Container catraca-f01-local-eval-web-1 Stopped 
+ Container catraca-f01-local-eval-web-1 Removing 
+ Container catraca-f01-local-eval-web-1 Removed 
+ Container catraca-f01-local-eval-bootstrap-1 Stopping 
+ Container catraca-f01-local-eval-bootstrap-1 Stopped 
+ Container catraca-f01-local-eval-bootstrap-1 Removing 
+ Container catraca-f01-local-eval-bootstrap-1 Removed 
+ Container catraca-f01-local-eval-db-1 Stopping 
+ Container catraca-f01-local-eval-db-1 Stopped 
+ Container catraca-f01-local-eval-db-1 Removing 
+ Container catraca-f01-local-eval-db-1 Removed 
+ Network catraca-f01-local-eval_default Removing 
+ Network catraca-f01-local-eval_default Removed 
+Catraca project catraca-f01-local-eval stopped; data volume preserved.
+
+exit=0 expected=0
+$ dc ps -a
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+
+exit=0 expected=0
+$ check_port 18086
+loopback port 18086 refused connection
+
+exit=0 expected=0
+$ docker volume inspect --format \{\{.Name\}\}\ \{\{.CreatedAt\}\}\ \{\{index\ .Labels\ \"com.docker.compose.project\"\}\} catraca-f01-local-eval_db_data
+catraca-f01-local-eval_db_data 2026-11-28T04:22:22Z catraca-f01-local-eval
+
+exit=0 expected=0
+$ seed_once
+ Container catraca-f01-local-eval-bootstrap-run-ad48299ed58e Creating 
+ Container catraca-f01-local-eval-bootstrap-run-ad48299ed58e Created 
+Seed ready: 3 identities (0 created).
+
+exit=0 expected=0
+$ curl -isS --fail-with-body http://127.0.0.1:18086/health/ready
+HTTP/1.1 200 OK
+Server: gunicorn
+Date: Sat, 28 Nov 2026 04:23:15 GMT
+Connection: keep-alive
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+ready
+exit=0 expected=0
+$ cmp /home/eduar/work/catraca/f01-local-eval-evidence/A02-before.tsv /home/eduar/work/catraca/f01-local-eval-evidence/A02-after.tsv
+
+exit=0 expected=0

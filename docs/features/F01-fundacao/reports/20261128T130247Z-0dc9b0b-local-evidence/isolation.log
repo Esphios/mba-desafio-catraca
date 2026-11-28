@@ -1,0 +1,50 @@
+bash bin/gates --feature F01 run under a signal controller; setup made the real test service point at its own loopback for DB; cleanup called real Compose with a deliberately invalid option.
+sentinel_before=(['4d765adfa1a7a8f1b77874f06769cd2015dc1c13e2abcaf456b72de5453e552c healthy', '8fac83f932339c05925651dee2a6469aa9125d1a019cd642f25e461d97af2ebd healthy', 'a531802500728fcde1a40b25b079341e17cb70b2d50e5b4d49560bdc08b4d697 healthy'], 'catraca-f01-local-reassessment_db_data 2026-11-28T04:33:27Z', 'b80432d6-0a98-40b4-a0ad-b9f26d464492|f5216321-02aa-42f7-a92a-40aab39e30ef|F01 sentinel|F01 sentinel event|4', 'ready HTTP=200')
+INT measured before signal: resources=('5f9dde811842\nfc15ce435b68', '8729db9590f5', 'catraca-gate-1795870615-5528-553_db_data') port_open=False
+INT project=catraca-gate-1795870615-5528-553 port=39853 signal_sent=True exit=130 after=('', '', '') listener_open=False
+INT: sentinel unchanged and HTTP 200
+TERM measured before signal: resources=('c57bfb5a9223\ncc65107d570a', '9ff962bc59e9', 'catraca-gate-1795870627-6086-28494_db_data') port_open=False
+TERM project=catraca-gate-1795870627-6086-28494 port=35474 signal_sent=True exit=143 after=('', '', '') listener_open=False
+TERM: sentinel unchanged and HTTP 200
+setup project=catraca-gate-1795870640-6865-15228 port=49089 signal_sent=False exit=1 after=('', '', '') listener_open=False
+setup: sentinel unchanged and HTTP 200
+cleanup project=catraca-gate-1795870648-7308-17049 port=35998 signal_sent=False exit=1 after=('', '8cb7d70050da', 'catraca-gate-1795870648-7308-17049_db_data') listener_open=False
+cleanup: claimed project manual recovery exit=0 after=('', '', '')
+cleanup: sentinel unchanged and HTTP 200
+mutation-assertion.log: project=catraca-gate-1795870568-5142-15127 port=21873 resources_after=('', '', '') listener_open=False
+gates.log: project=catraca-gate-1795840421-86510-20591 port=20051 resources_after=('', '', '') listener_open=False
+sentinel_after=(['4d765adfa1a7a8f1b77874f06769cd2015dc1c13e2abcaf456b72de5453e552c healthy', '8fac83f932339c05925651dee2a6469aa9125d1a019cd642f25e461d97af2ebd healthy', 'a531802500728fcde1a40b25b079341e17cb70b2d50e5b4d49560bdc08b4d697 healthy'], 'catraca-f01-local-reassessment_db_data 2026-11-28T04:33:27Z', 'b80432d6-0a98-40b4-a0ad-b9f26d464492|f5216321-02aa-42f7-a92a-40aab39e30ef|F01 sentinel|F01 sentinel event|4', 'ready HTTP=200')
+controls_exit=0
+
+Setup diagnostic:
+control=setup inject unreachable loopback DB inside actual test service
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+django.db.utils.OperationalError: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+
+Cleanup diagnostic after positive tests:
+PASS evidence structure/history for requested phase. No authenticity or GitHub PR overlap inferred.
+control=cleanup inject rejected option to actual Compose teardown
+unknown flag: --f01-evaluator-invalid-option
+Cleanup failed for catraca-gate-1795870648-7308-17049
+
+Real bootstrap failure:
+CAT_PROFILE=outside-demo-test CAT_PROJECT=catraca-f01-reassessment-bad-bootstrap CAT_PORT=18088 bash bin/up
+bootstrap-1  | CommandError: Seed is allowed only in demo or test profiles.
+Startup failed for project catraca-f01-reassessment-bad-bootstrap (exit 1).
+bootstrap-1  | CommandError: Seed is allowed only in demo or test profiles.
+bad_bootstrap_up_exit=1
+bad_bootstrap_project_containers=0
+bad_bootstrap_listener=closed
+own_volume_after_failed_up=catraca-f01-reassessment-bad-bootstrap_db_data
+sentinel_http=200
+bootstrap_control_exit=0
+
+Final cleanup:
+bash bin/down (end of evaluation)
+Catraca project catraca-f01-local-reassessment stopped; data volume preserved.
+final_down_exit=0
+isolated_synthetic_volume_after_down=catraca-f01-local-reassessment_db_data
+owned_resources=0 listener_18087=closed
+positive_gate_project=catraca-gate-1795870688-8534-9809 port=38412 resources_after=0 listener=closed
+candidate_clean_after_tests=yes
+0dc9b0b1c7eaad6196aa220a6b9d16a4198f536d

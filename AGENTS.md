@@ -14,6 +14,11 @@ A fonte normativa é o brief e os contratos rastreados. Consulte state/project-s
 ## Comandos
 Planejamento: `python3 scripts/validate_docs.py`, `python3 scripts/verify_model.py`, `python3 scripts/test_baseline.py`, `python3 docs/validation/w0-audit/reproduce_mutations.py`; host sem Python: `docker run --rm -v "$PWD:/work:ro" -w /work python:3.12-slim python scripts/validate_docs.py` (idem verify_model). Após F01: `bash bin/up`, `bash bin/down`, `bash bin/gates`; candidato `bash bin/gates --feature Fxx`; release `bash bin/gates --release`, `bash bin/flow`. `python3 scripts/validate_evidence.py --release` requer Git e histórico real. Não confundir docs check com testes do produto. Default simulator, no payment key.
 
+Runtime local usa CAT_PROJECT=catraca-demo, CAT_PORT=8080, CAT_PROFILE=demo e
+CAT_GATEWAY_SCALE=1. Readiness em /health/ready. Contas sintéticas
+gestao.a@example.test, gestao.b@example.test e pessoa@example.test têm senhas
+no README. O banco não publica porta e bin/down preserva o volume.
+
 ## Invioláveis
 - R01–R13 e API fixa; web/API partilham ledger. Todos os writes de evento sob event→ticket→job; preço histórico; nenhum status terminal revive; read snapshot único. Não modificar modelos, contratos ou código compartilhado fora de ownership.
 - Auth server-side/owner em todas as rotas; CSRF no web; key antes de parse na API; não logar dados sensíveis.

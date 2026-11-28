@@ -1,0 +1,59 @@
+{
+  "feature": "F01",
+  "phase": "local",
+  "date": "2026-11-28T13:02:47Z",
+  "commit": "0dc9b0b1c7eaad6196aa220a6b9d16a4198f536d",
+  "tool": "Codex",
+  "model": "gpt-6.2-sol",
+  "evaluatorSession": "/root/f01_local_reassessment",
+  "implementerSession": "/root/f01_implementer",
+  "clean": true,
+  "verdict": "PASS",
+  "items": [
+    {
+      "id": "C-F01-A01",
+      "verdict": "PASS",
+      "evidence": "Executei bash bin/up fora da raiz, docker compose ps -a, HTTP pelo host e probes Django/SQL. O projeto novo subiu com exit 0 em WSL/amd64. O bootstrap saiu 0, criou 3 contas com pbkdf2_sha256 e as três senhas sintéticas do README passaram em check_password. DB, web e worker ficaram healthy e o host recebeu HTTP 200. Parar o worker produziu 503 por heartbeat vencido e reiniciar restaurou o 200. A role runtime fez INSERT/SELECT/UPDATE/DELETE e recebeu SQLSTATE 42501 para CREATE TABLE, CREATE TEMP TABLE e UPDATE na tabela de migrações. A role de bootstrap pôde criar tabelas e a transação foi revertida. Build adicional sem cache e com pull terminou em 0. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/startup.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/postgres.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/checkout.log."
+    },
+    {
+      "id": "C-F01-A02",
+      "verdict": "PASS",
+      "evidence": "Inseri um usuário e um evento sentinela, dois ingressos e um job sintéticos. Executei a seed duas vezes com zero criações. Bash bin/down deixou zero containers e listener fechado em 18087, mantendo o volume. Bash bin/up e a seed subsequente preservaram os IDs, papéis e contagens de 4 usuários, 1 evento, 2 ingressos e 1 job. As 3 identidades da seed seguiram sendo 2 organizadores e 1 participante. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/postgres.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/isolation.log."
+    },
+    {
+      "id": "C-F01-A03",
+      "verdict": "PASS",
+      "evidence": "Executei bash bin/gates --feature F01 duas vezes sobre o SHA original, incluindo uma repetição com a sentinela presente. Cada execução terminou 0 com lint, format, verificações, 39 testes Django sobre PostgreSQL e 9 testes do harness. A mutação em app/tests/test_health.py:7, aplicada só na cópia descartável, passou lint e format e gerou AssertionError no teste nominal, 39 testes executados e uma falha. O gate devolveu exit 1 e limpou seus recursos. A cópia foi restaurada. Uma primeira tentativa descartável foi rejeitada pelo formatter antes de executar Django. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/gates.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/isolation.log."
+    },
+    {
+      "id": "C-F01-A04",
+      "verdict": "PASS",
+      "evidence": "Validei os comandos documentados em WSL e os 19 links internos do README. O Compose confirmou 127.0.0.1:8080, perfil demo, escala 1, chave local de parceiro e porta do banco sem publicação. Escala 2 no perfil demo retornou exit 2. Os HTTP de liveness e readiness e as três contas sintéticas corresponderam à documentação. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/docs.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/startup.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/postgres.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/gates.log."
+    },
+    {
+      "id": "C-F01-A05",
+      "verdict": "PASS",
+      "evidence": "Com PostgreSQL 17.12, os probes registraram SQLSTATE e constraint de FKs, códigos duplicados, curtos, longos, minúsculos e não alfanuméricos, status, limites de capacidade e preço, canais e compradores mistos, segundo job e pares inválidos de state e processed_at. Os máximos válidos persistiram, junto de um ingresso com job e outro sem job inserido diretamente no DB. Migrate --noinput, migrate --check e makemigrations --check --dry-run terminaram com exit 0. A totalidade pelo serviço reserve pertence a F04. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/postgres.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/gates.log."
+    },
+    {
+      "id": "C-F01-A29",
+      "verdict": "PASS",
+      "evidence": "O gate positivo preservou IDs dos containers, volume, dados e HTTP 200 da demo sentinela. SIGINT e SIGTERM foram enviados durante a criação do DB de testes, com containers, rede e volume presentes. Retornaram 130 e 143 e removeram os recursos próprios. Bootstrap real fora de demo/test retornou 1 antes de subir web/worker. Um adaptador externo direcionou o test runner real a um DB indisponível e o gate retornou 1 com cleanup. A falha injetada no Compose down retornou 1 após os testes. A rede e o volume residuais dessa execução foram removidos manualmente. As portas dos gates estavam fechadas e a sentinela preservada. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/isolation.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/gates.log."
+    },
+    {
+      "id": "C-F01-A37",
+      "verdict": "PASS",
+      "evidence": "Executei validate_evidence.py no candidato com exit 0 e validate_evidence.py --release com exit 1 por release incompleto. Na fixture Git descartável de test_baseline.py, baseline sem relatórios passou e as proteções rejeitaram deriva de item e mapeamento, relatório ausente, falso PASS, inconsistência de SHA, sessão e merge, divergência Markdown e hash e edição de relatório commitado. A fixture saiu 0. Evidência em docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/evidence-validator.log, docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/gates.log."
+    }
+  ],
+  "artifacts": {
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/checkout.log": "5dd4d4745fe84af3c0916a6b983b6540e6b50a39b80dd354a3294fe4a46b064c",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/startup.log": "86fa37cc29d0061a532a3e903c975c85379d95410354abfefd393e70d2db8735",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/postgres.log": "555c7731558c382862ded9ef3a5a66da6decc4b188d3c53dfcf60acbda2b10a6",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/gates.log": "cbade10a6afe01dfd5bdb1109b2814dbd409c0e19e148357a860f9bf4a909663",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/isolation.log": "8916a25a4fbe026ef656c7e87f686da312160ed73024af590af7e296ba91cc0c",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/docs.log": "422bb64f9ffb83cb14ce1f526dbaadf43b71b4f9083246dca0b6c0048e7e03bf",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/evidence-validator.log": "bb296a8579cbe2becf2ca759c9c44a0d7cc4ee1bc5483e4de4ffc65367171ccb",
+    "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local-evidence/arm64.log": "48a074973ab93abe04eee89d66b094cfd408a3e31ac62f00634a3f7cbf8d8b17"
+  }
+}

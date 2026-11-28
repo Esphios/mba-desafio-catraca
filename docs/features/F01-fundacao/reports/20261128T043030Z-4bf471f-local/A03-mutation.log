@@ -1,0 +1,412 @@
+$ bash bin/gates --feature F01
+Gate project=catraca-gate-1795839991-80373-2365 port=39787
+ Image catraca-gate-1795839991-80373-2365-test Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 636B done
+#1 DONE 0.0s
+
+#2 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#2 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#2 DONE 0.0s
+
+#3 [base 2/7] WORKDIR /srv/catraca
+#3 CACHED
+
+#4 [base 3/7] COPY requirements.lock ./
+#4 DONE 0.1s
+
+#5 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#5 2.767 Collecting asgiref==3.13.0 (from -r requirements.lock (line 7))
+#5 2.899   Downloading asgiref-3.13.0-py3-none-any.whl (27 kB)
+#5 2.932 Collecting attrs==26.1.0 (from -r requirements.lock (line 11))
+#5 2.939   Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+#5 2.978 Collecting certifi==2026.11.20 (from -r requirements.lock (line 17))
+#5 2.989   Downloading certifi-2026.11.20-py3-none-any.whl (127 kB)
+#5 3.194 Collecting charset-normalizer==3.5.3 (from -r requirements.lock (line 21))
+#5 3.203   Downloading charset_normalizer-3.5.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (257 kB)
+#5 3.325 Collecting django==5.2.19 (from -r requirements.lock (line 195))
+#5 3.335   Downloading django-5.2.19-py3-none-any.whl (8.3 MB)
+#5 3.764      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 19.7 MB/s eta 0:00:00
+#5 4.129 Collecting greenlet==3.5.6 (from -r requirements.lock (line 199))
+#5 4.139   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+#5 4.168      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 22.7 MB/s eta 0:00:00
+#5 4.202 Collecting gunicorn==27.0.1 (from -r requirements.lock (line 280))
+#5 4.216   Downloading gunicorn-27.0.1-py3-none-any.whl (263 kB)
+#5 4.248 Collecting idna==3.20 (from -r requirements.lock (line 284))
+#5 4.255   Downloading idna-3.20-py3-none-any.whl (69 kB)
+#5 4.287 Collecting jsonschema==4.26.0 (from -r requirements.lock (line 288))
+#5 4.296   Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+#5 4.317 Collecting jsonschema-path==0.3.4 (from -r requirements.lock (line 294))
+#5 4.327   Downloading jsonschema_path-0.3.4-py3-none-any.whl (14 kB)
+#5 4.345 Collecting jsonschema-specifications==2025.9.1 (from -r requirements.lock (line 298))
+#5 4.353   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+#5 4.524 Collecting lazy-object-proxy==1.13.0 (from -r requirements.lock (line 304))
+#5 4.532   Downloading lazy_object_proxy-1.13.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (71 kB)
+#5 4.694 Collecting openapi-schema-validator==0.6.3 (from -r requirements.lock (line 370))
+#5 4.703   Downloading openapi_schema_validator-0.6.3-py3-none-any.whl (8.8 kB)
+#5 4.851 Collecting openapi-spec-validator==0.7.2 (from -r requirements.lock (line 374))
+#5 4.859   Downloading openapi_spec_validator-0.7.2-py3-none-any.whl (39 kB)
+#5 4.887 Collecting pathable==0.4.4 (from -r requirements.lock (line 378))
+#5 4.898   Downloading pathable-0.4.4-py3-none-any.whl (9.6 kB)
+#5 4.960 Collecting playwright==1.65.2 (from -r requirements.lock (line 382))
+#5 4.972   Downloading playwright-1.65.2-py3-none-manylinux1_x86_64.whl (53.5 MB)
+#5 7.565      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 53.5/53.5 MB 20.8 MB/s eta 0:00:00
+#5 7.750 Collecting psycopg==3.3.9 (from psycopg[binary]==3.3.9->-r requirements.lock (line 393))
+#5 7.757   Downloading psycopg-3.3.9-py3-none-any.whl (219 kB)
+#5 8.037 Collecting psycopg-binary==3.3.9 (from -r requirements.lock (line 397))
+#5 8.052   Downloading psycopg_binary-3.3.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.9 MB)
+#5 8.228      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.9/3.9 MB 22.7 MB/s eta 0:00:00
+#5 8.297 Collecting pyyaml==6.0.4 (from -r requirements.lock (line 465))
+#5 8.309   Downloading pyyaml-6.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (849 kB)
+#5 8.346      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 849.2/849.2 kB 27.5 MB/s eta 0:00:00
+#5 8.380 Collecting referencing==0.36.2 (from -r requirements.lock (line 542))
+#5 8.387   Downloading referencing-0.36.2-py3-none-any.whl (26 kB)
+#5 8.426 Collecting requests==2.34.2 (from -r requirements.lock (line 549))
+#5 8.444   Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+#5 8.464 Collecting rfc3339-validator==0.1.4 (from -r requirements.lock (line 553))
+#5 8.471   Downloading rfc3339_validator-0.1.4-py2.py3-none-any.whl (3.5 kB)
+#5 8.839 Collecting rpds-py==2026.9.1 (from -r requirements.lock (line 557))
+#5 8.847   Downloading rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (371 kB)
+#5 9.267 Collecting ruff==0.17.6 (from -r requirements.lock (line 689))
+#5 9.275   Downloading ruff-0.17.6-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.6 MB)
+#5 9.651      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.6/10.6 MB 28.7 MB/s eta 0:00:00
+#5 9.694 Collecting six==1.17.0 (from -r requirements.lock (line 709))
+#5 9.700   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#5 9.718 Collecting sqlparse==0.6.1 (from -r requirements.lock (line 713))
+#5 9.724   Downloading sqlparse-0.6.1-py3-none-any.whl (51 kB)
+#5 9.744 Collecting typing-extensions==4.16.0 (from -r requirements.lock (line 717))
+#5 9.753   Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#5 9.779 Collecting urllib3==2.8.0 (from -r requirements.lock (line 723))
+#5 9.789   Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+#5 10.07 Installing collected packages: urllib3, typing-extensions, sqlparse, six, ruff, rpds-py, pyyaml, psycopg-binary, pathable, lazy-object-proxy, idna, gunicorn, greenlet, charset-normalizer, certifi, attrs, asgiref, rfc3339-validator, requests, referencing, psycopg, playwright, django, jsonschema-specifications, jsonschema-path, jsonschema, openapi-schema-validator, openapi-spec-validator
+#5 15.95 Successfully installed asgiref-3.13.0 attrs-26.1.0 certifi-2026.11.20 charset-normalizer-3.5.3 django-5.2.19 greenlet-3.5.6 gunicorn-27.0.1 idna-3.20 jsonschema-4.26.0 jsonschema-path-0.3.4 jsonschema-specifications-2025.9.1 lazy-object-proxy-1.13.0 openapi-schema-validator-0.6.3 openapi-spec-validator-0.7.2 pathable-0.4.4 playwright-1.65.2 psycopg-3.3.9 psycopg-binary-3.3.9 pyyaml-6.0.4 referencing-0.36.2 requests-2.34.2 rfc3339-validator-0.1.4 rpds-py-2026.9.1 ruff-0.17.6 six-1.17.0 sqlparse-0.6.1 typing-extensions-4.16.0 urllib3-2.8.0
+#5 15.95 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#5 16.09 
+#5 16.09 [notice] A new release of pip is available: 25.0.1 -> 26.3
+#5 16.09 [notice] To update, run: pip install --upgrade pip
+#5 DONE 16.7s
+
+#6 [internal] load build definition from Dockerfile
+#6 transferring dockerfile: 694B done
+#6 DONE 0.0s
+
+#7 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#7 DONE 0.0s
+
+#8 [internal] load .dockerignore
+#8 transferring context: 76B done
+#8 DONE 0.0s
+
+#9 [internal] load build context
+#9 transferring context: 3.27kB done
+#9 DONE 0.0s
+
+#10 [base 3/7] COPY requirements.lock ./
+#10 CACHED
+
+#11 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#11 CACHED
+
+#12 [base 5/7] COPY app/ ./app/
+#12 DONE 0.1s
+
+#13 [base 6/7] COPY pyproject.toml ./
+#13 DONE 0.1s
+
+#14 [base 7/7] WORKDIR /srv/catraca/app
+#14 DONE 0.1s
+
+#15 [test 1/1] RUN apt-get update     && apt-get install --yes --no-install-recommends git=1:2.39.5-0+deb12u3     && rm -rf /var/lib/apt/lists/*
+#15 0.407 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+#15 0.431 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#15 0.433 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+#15 0.554 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+#15 0.873 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+#15 0.874 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [383 kB]
+#15 2.023 Fetched 9422 kB in 2s (5696 kB/s)
+#15 2.023 Reading package lists...
+#15 2.683 Reading package lists...
+#15 3.300 Building dependency tree...
+#15 3.479 Reading state information...
+#15 3.901 The following additional packages will be installed:
+#15 3.902   git-man libbrotli1 libcurl3-gnutls liberror-perl libexpat1 libgdbm-compat4
+#15 3.903   libldap-2.5-0 libnghttp2-14 libperl5.36 libpsl5 librtmp1 libsasl2-2
+#15 3.905   libsasl2-modules-db libssh2-1 perl perl-modules-5.36
+#15 3.909 Suggested packages:
+#15 3.909   gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-email git-gui
+#15 3.909   gitk gitweb git-cvs git-mediawiki git-svn sensible-utils perl-doc
+#15 3.909   libterm-readline-gnu-perl | libterm-readline-perl-perl make
+#15 3.909   libtap-harness-archive-perl
+#15 3.909 Recommended packages:
+#15 3.909   patch less ssh-client libldap-common publicsuffix libsasl2-modules
+#15 4.045 The following NEW packages will be installed:
+#15 4.045   git git-man libbrotli1 libcurl3-gnutls liberror-perl libexpat1
+#15 4.045   libgdbm-compat4 libldap-2.5-0 libnghttp2-14 libperl5.36 libpsl5 librtmp1
+#15 4.045   libsasl2-2 libsasl2-modules-db libssh2-1 perl perl-modules-5.36
+#15 4.115 0 upgraded, 17 newly installed, 0 to remove and 5 not upgraded.
+#15 4.115 Need to get 18.1 MB of archives.
+#15 4.115 After this operation, 100 MB of additional disk space will be used.
+#15 4.115 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 perl-modules-5.36 all 5.36.0-7+deb12u4 [2817 kB]
+#15 4.284 Get:2 http://deb.debian.org/debian bookworm/main amd64 libgdbm-compat4 amd64 1.23-3 [48.2 kB]
+#15 4.291 Get:3 http://deb.debian.org/debian-security bookworm-security/main amd64 libperl5.36 amd64 5.36.0-7+deb12u4 [4208 kB]
+#15 4.565 Get:4 http://deb.debian.org/debian-security bookworm-security/main amd64 perl amd64 5.36.0-7+deb12u4 [239 kB]
+#15 4.585 Get:5 http://deb.debian.org/debian-security bookworm-security/main amd64 libbrotli1 amd64 1.0.9-2+deb12u1 [275 kB]
+#15 4.591 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg-10+deb12u1 [20.5 kB]
+#15 4.600 Get:7 http://deb.debian.org/debian-security bookworm-security/main amd64 libsasl2-2 amd64 2.1.28+dfsg-10+deb12u1 [59.9 kB]
+#15 4.600 Get:8 http://deb.debian.org/debian bookworm/main amd64 libldap-2.5-0 amd64 2.5.13+dfsg-5 [183 kB]
+#15 4.615 Get:9 http://deb.debian.org/debian bookworm/main amd64 libnghttp2-14 amd64 1.52.0-1+deb12u3 [72.4 kB]
+#15 4.619 Get:10 http://deb.debian.org/debian bookworm/main amd64 libpsl5 amd64 0.21.2-1 [58.7 kB]
+#15 4.620 Get:11 http://deb.debian.org/debian bookworm/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2+b2 [60.8 kB]
+#15 4.627 Get:12 http://deb.debian.org/debian-security bookworm-security/main amd64 libssh2-1 amd64 1.10.0-3+deb12u1 [176 kB]
+#15 4.641 Get:13 http://deb.debian.org/debian bookworm/main amd64 libcurl3-gnutls amd64 7.88.1-10+deb12u15 [386 kB]
+#15 4.669 Get:14 http://deb.debian.org/debian-security bookworm-security/main amd64 libexpat1 amd64 2.5.0-1+deb12u5 [108 kB]
+#15 4.678 Get:15 http://deb.debian.org/debian bookworm/main amd64 liberror-perl all 0.17029-2 [29.0 kB]
+#15 4.679 Get:16 http://deb.debian.org/debian bookworm/main amd64 git-man all 1:2.39.5-0+deb12u3 [2053 kB]
+#15 4.892 Get:17 http://deb.debian.org/debian bookworm/main amd64 git amd64 1:2.39.5-0+deb12u3 [7264 kB]
+#15 5.397 debconf: delaying package configuration, since apt-utils is not installed
+#15 5.437 Fetched 18.1 MB in 1s (15.6 MB/s)
+#15 5.466 Selecting previously unselected package perl-modules-5.36.
+#15 5.466 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6701 files and directories currently installed.)
+#15 5.476 Preparing to unpack .../00-perl-modules-5.36_5.36.0-7+deb12u4_all.deb ...
+#15 5.481 Unpacking perl-modules-5.36 (5.36.0-7+deb12u4) ...
+#15 5.909 Selecting previously unselected package libgdbm-compat4:amd64.
+#15 5.911 Preparing to unpack .../01-libgdbm-compat4_1.23-3_amd64.deb ...
+#15 5.923 Unpacking libgdbm-compat4:amd64 (1.23-3) ...
+#15 5.985 Selecting previously unselected package libperl5.36:amd64.
+#15 5.986 Preparing to unpack .../02-libperl5.36_5.36.0-7+deb12u4_amd64.deb ...
+#15 5.992 Unpacking libperl5.36:amd64 (5.36.0-7+deb12u4) ...
+#15 6.383 Selecting previously unselected package perl.
+#15 6.384 Preparing to unpack .../03-perl_5.36.0-7+deb12u4_amd64.deb ...
+#15 6.394 Unpacking perl (5.36.0-7+deb12u4) ...
+#15 6.454 Selecting previously unselected package libbrotli1:amd64.
+#15 6.456 Preparing to unpack .../04-libbrotli1_1.0.9-2+deb12u1_amd64.deb ...
+#15 6.460 Unpacking libbrotli1:amd64 (1.0.9-2+deb12u1) ...
+#15 6.514 Selecting previously unselected package libsasl2-modules-db:amd64.
+#15 6.515 Preparing to unpack .../05-libsasl2-modules-db_2.1.28+dfsg-10+deb12u1_amd64.deb ...
+#15 6.520 Unpacking libsasl2-modules-db:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#15 6.559 Selecting previously unselected package libsasl2-2:amd64.
+#15 6.560 Preparing to unpack .../06-libsasl2-2_2.1.28+dfsg-10+deb12u1_amd64.deb ...
+#15 6.565 Unpacking libsasl2-2:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#15 6.612 Selecting previously unselected package libldap-2.5-0:amd64.
+#15 6.613 Preparing to unpack .../07-libldap-2.5-0_2.5.13+dfsg-5_amd64.deb ...
+#15 6.618 Unpacking libldap-2.5-0:amd64 (2.5.13+dfsg-5) ...
+#15 6.674 Selecting previously unselected package libnghttp2-14:amd64.
+#15 6.675 Preparing to unpack .../08-libnghttp2-14_1.52.0-1+deb12u3_amd64.deb ...
+#15 6.681 Unpacking libnghttp2-14:amd64 (1.52.0-1+deb12u3) ...
+#15 6.725 Selecting previously unselected package libpsl5:amd64.
+#15 6.727 Preparing to unpack .../09-libpsl5_0.21.2-1_amd64.deb ...
+#15 6.732 Unpacking libpsl5:amd64 (0.21.2-1) ...
+#15 6.775 Selecting previously unselected package librtmp1:amd64.
+#15 6.777 Preparing to unpack .../10-librtmp1_2.4+20151223.gitfa8646d.1-2+b2_amd64.deb ...
+#15 6.782 Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+#15 6.834 Selecting previously unselected package libssh2-1:amd64.
+#15 6.835 Preparing to unpack .../11-libssh2-1_1.10.0-3+deb12u1_amd64.deb ...
+#15 6.840 Unpacking libssh2-1:amd64 (1.10.0-3+deb12u1) ...
+#15 6.898 Selecting previously unselected package libcurl3-gnutls:amd64.
+#15 6.899 Preparing to unpack .../12-libcurl3-gnutls_7.88.1-10+deb12u15_amd64.deb ...
+#15 6.908 Unpacking libcurl3-gnutls:amd64 (7.88.1-10+deb12u15) ...
+#15 6.978 Selecting previously unselected package libexpat1:amd64.
+#15 6.979 Preparing to unpack .../13-libexpat1_2.5.0-1+deb12u5_amd64.deb ...
+#15 6.986 Unpacking libexpat1:amd64 (2.5.0-1+deb12u5) ...
+#15 7.030 Selecting previously unselected package liberror-perl.
+#15 7.031 Preparing to unpack .../14-liberror-perl_0.17029-2_all.deb ...
+#15 7.036 Unpacking liberror-perl (0.17029-2) ...
+#15 7.075 Selecting previously unselected package git-man.
+#15 7.076 Preparing to unpack .../15-git-man_1%3a2.39.5-0+deb12u3_all.deb ...
+#15 7.084 Unpacking git-man (1:2.39.5-0+deb12u3) ...
+#15 7.211 Selecting previously unselected package git.
+#15 7.212 Preparing to unpack .../16-git_1%3a2.39.5-0+deb12u3_amd64.deb ...
+#15 7.223 Unpacking git (1:2.39.5-0+deb12u3) ...
+#15 7.742 Setting up libexpat1:amd64 (2.5.0-1+deb12u5) ...
+#15 7.766 Setting up libpsl5:amd64 (0.21.2-1) ...
+#15 7.781 Setting up libbrotli1:amd64 (1.0.9-2+deb12u1) ...
+#15 7.796 Setting up libnghttp2-14:amd64 (1.52.0-1+deb12u3) ...
+#15 7.812 Setting up libsasl2-modules-db:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#15 7.825 Setting up perl-modules-5.36 (5.36.0-7+deb12u4) ...
+#15 7.844 Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+#15 7.857 Setting up libgdbm-compat4:amd64 (1.23-3) ...
+#15 7.945 Setting up libsasl2-2:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#15 7.959 Setting up git-man (1:2.39.5-0+deb12u3) ...
+#15 7.979 Setting up libssh2-1:amd64 (1.10.0-3+deb12u1) ...
+#15 8.067 Setting up libperl5.36:amd64 (5.36.0-7+deb12u4) ...
+#15 8.086 Setting up libldap-2.5-0:amd64 (2.5.13+dfsg-5) ...
+#15 8.106 Setting up perl (5.36.0-7+deb12u4) ...
+#15 8.134 Setting up libcurl3-gnutls:amd64 (7.88.1-10+deb12u15) ...
+#15 8.148 Setting up liberror-perl (0.17029-2) ...
+#15 8.164 Setting up git (1:2.39.5-0+deb12u3) ...
+#15 8.189 Processing triggers for libc-bin (2.36-9+deb12u14) ...
+#15 DONE 8.6s
+
+#16 exporting to image
+#16 exporting layers
+#16 exporting layers 7.4s done
+#16 exporting manifest sha256:370da35a3d2d93f51663eb7ba8ce871b01af6acb2b0a821c3f48319ea3c52b46 0.0s done
+#16 exporting config sha256:5c736a65e45fd260692669f73936ca59674201632218f2b581272a8871fc2814 0.0s done
+#16 exporting attestation manifest sha256:2fb760e905124a0e4dc3c484f0bcf2aa6a44b85ad9f608109454a8bf0bc5dfe2 0.0s done
+#16 exporting manifest list sha256:eca1fc491ea4396b2b80664116214ea168cebf1a906aaa57ab080049d3cae3d8
+#16 exporting manifest list sha256:eca1fc491ea4396b2b80664116214ea168cebf1a906aaa57ab080049d3cae3d8 0.0s done
+#16 naming to docker.io/library/catraca-gate-1795839991-80373-2365-test:latest done
+#16 unpacking to docker.io/library/catraca-gate-1795839991-80373-2365-test:latest
+#16 unpacking to docker.io/library/catraca-gate-1795839991-80373-2365-test:latest 5.5s done
+#16 DONE 13.1s
+
+#17 resolving provenance for metadata file
+#17 DONE 0.0s
+ Image catraca-gate-1795839991-80373-2365-test Built 
+ Network catraca-gate-1795839991-80373-2365_default Creating 
+ Network catraca-gate-1795839991-80373-2365_default Creating 
+ Volume catraca-gate-1795839991-80373-2365_db_data Creating 
+ Volume catraca-gate-1795839991-80373-2365_db_data Creating 
+ Volume catraca-gate-1795839991-80373-2365_db_data Created 
+ Volume catraca-gate-1795839991-80373-2365_db_data Created 
+ Network catraca-gate-1795839991-80373-2365_default Created 
+ Network catraca-gate-1795839991-80373-2365_default Created 
+ Container catraca-gate-1795839991-80373-2365-db-1 Creating 
+ Container catraca-gate-1795839991-80373-2365-db-1 Created 
+ Container catraca-gate-1795839991-80373-2365-db-1 Starting 
+ Container catraca-gate-1795839991-80373-2365-db-1 Started 
+ Container catraca-gate-1795839991-80373-2365-db-1 Waiting 
+ Container catraca-gate-1795839991-80373-2365-db-1 Healthy 
+ Container catraca-gate-1795839991-80373-2365-test-run-ddec647dd115 Creating 
+ Container catraca-gate-1795839991-80373-2365-test-run-ddec647dd115 Created 
+All checks passed!
+38 files already formatted
+No broken requirements found.
+System check identified no issues (0 silenced).
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_enforce_canonical_email... OK
+  Applying accounts.0003_normalize_legacy_emails... OK
+  Applying coredata.0001_initial... OK
+  Applying sessions.0001_initial... OK
+No changes detected
+Creating test database for alias 'default' ('test_catraca')...
+Found 38 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: catraca_platform
+  Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_enforce_canonical_email... OK
+  Applying accounts.0003_normalize_legacy_emails... OK
+  Applying coredata.0001_initial... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_TEST_A05_upgrade_aborts_atomically_on_canonical_email_collision (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_aborts_atomically_on_canonical_email_collision) ... ok
+test_TEST_A05_upgrade_aborts_atomically_on_invalid_legacy_email (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_aborts_atomically_on_invalid_legacy_email) ... ok
+test_TEST_A05_upgrade_canonicalizes_legacy_account_without_replacing_it (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_canonicalizes_legacy_account_without_replacing_it) ... ok
+test_TEST_A01_seed_demo_creates_exact_idempotent_hashed_identities (tests.test_bootstrap.BootstrapSeedTests.test_TEST_A01_seed_demo_creates_exact_idempotent_hashed_identities) ... Seed ready: 3 identities (3 created).
+Seed ready: 3 identities (0 created).
+ok
+test_TEST_A01_seed_demo_rejects_non_demo_or_test_profile (tests.test_bootstrap.BootstrapSeedTests.test_TEST_A01_seed_demo_rejects_non_demo_or_test_profile) ... ok
+test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker) ... ok
+test_TEST_A01_ready_rejects_inconsistent_migration_history (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_rejects_inconsistent_migration_history) ... ok
+test_TEST_A01_ready_rejects_pending_migration_without_applying_it (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_rejects_pending_migration_without_applying_it) ... ok
+test_TEST_A01_ready_requires_a_fresh_worker_database_heartbeat (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_requires_a_fresh_worker_database_heartbeat) ... ok
+test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker (tests.test_bootstrap.ReadinessTests.test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker) ... Worker heartbeat is fresh.
+ok
+test_TEST_A04_clock_now_returns_an_aware_utc_timestamp (tests.test_foundation_ports.ClockTests.test_TEST_A04_clock_now_returns_an_aware_utc_timestamp) ... ok
+test_TEST_A05_fixture_factory_provides_isolated_scenarios_with_overrides (tests.test_foundation_ports.FixtureFactoryTests.test_TEST_A05_fixture_factory_provides_isolated_scenarios_with_overrides) ... ok
+test_TEST_A04_default_operations_slot_and_urlconf_are_empty (tests.test_foundation_ports.ManagementHooksTests.test_TEST_A04_default_operations_slot_and_urlconf_are_empty) ... ok
+test_TEST_A04_management_hooks_resolve_configured_components (tests.test_foundation_ports.ManagementHooksTests.test_TEST_A04_management_hooks_resolve_configured_components) ... ok
+test_TEST_A01_worker_command_updates_heartbeat_and_stops_on_signal (tests.test_foundation_ports.WorkerPortTests.test_TEST_A01_worker_command_updates_heartbeat_and_stops_on_signal) ... ok
+test_TEST_A03_real_postgres_connection (tests.test_health.DatabaseTests.test_TEST_A03_real_postgres_connection) ... ok
+test_TEST_A03_live_reports_process_running (tests.test_health.LivenessTests.test_TEST_A03_live_reports_process_running) ... FAIL
+test_TEST_A03_ready_is_closed_before_bootstrap_and_worker (tests.test_health.ReadinessClosedTests.test_TEST_A03_ready_is_closed_before_bootstrap_and_worker) ... ok
+test_TEST_A03_empty_suite_fails_closed (tests.test_runner.RunnerTests.test_TEST_A03_empty_suite_fails_closed) ... ok
+test_TEST_A03_skipped_test_fails_closed (tests.test_runner.RunnerTests.test_TEST_A03_skipped_test_fails_closed) ... ok
+test_TEST_A05_custom_user_and_business_models_are_installed (tests.test_schema.SchemaInstallationTests.test_TEST_A05_custom_user_and_business_models_are_installed) ... ok
+test_TEST_A05_authorized_orm_writes_canonicalize_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_authorized_orm_writes_canonicalize_email) ... ok
+test_TEST_A05_base_manager_bulk_create_canonicalizes_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_base_manager_bulk_create_canonicalizes_email) ... ok
+test_TEST_A05_base_manager_update_canonicalizes_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_base_manager_update_canonicalizes_email) ... ok
+test_TEST_A05_bulk_email_writes_preserve_iterable_semantics (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_bulk_email_writes_preserve_iterable_semantics) ... ok
+test_TEST_A05_bulk_update_accepts_an_iterable_of_fields (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_bulk_update_accepts_an_iterable_of_fields) ... ok
+test_TEST_A05_concurrent_logical_email_duplicates_create_one_user (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_concurrent_logical_email_duplicates_create_one_user) ... ok
+test_TEST_A05_deserialized_user_is_saved_with_canonical_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_deserialized_user_is_saved_with_canonical_email) ... ok
+test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced) ... ok
+test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits) ... ok
+test_TEST_A05_logical_email_duplicates_are_rejected (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_logical_email_duplicates_are_rejected) ... ok
+test_TEST_A05_partial_save_only_normalizes_email_when_written (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_partial_save_only_normalizes_email_when_written) ... ok
+test_TEST_A05_payment_job_constraints_reject_duplicate_invalid_state_and_outcome (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_payment_job_constraints_reject_duplicate_invalid_state_and_outcome) ... ok
+test_TEST_A05_required_query_indexes_exist (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_required_query_indexes_exist) ... ok
+test_TEST_A05_ticket_code_constraint_and_uniqueness_are_database_enforced (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_ticket_code_constraint_and_uniqueness_are_database_enforced) ... ok
+test_TEST_A05_ticket_constraints_reject_fk_status_channel_price_and_mixed_buyer (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_ticket_constraints_reject_fk_status_channel_price_and_mixed_buyer) ... ok
+test_TEST_A05_user_email_and_role_constraints_reject_invalid_rows (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_user_email_and_role_constraints_reject_invalid_rows) ... ok
+test_TEST_A05_valid_graph_and_ticket_without_job_persist (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_valid_graph_and_ticket_without_job_persist) ... ok
+
+======================================================================
+FAIL: test_TEST_A03_live_reports_process_running (tests.test_health.LivenessTests.test_TEST_A03_live_reports_process_running)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/srv/catraca/app/tests/test_health.py", line 7, in test_TEST_A03_live_reports_process_running
+    assert False, 'F01_EVAL_INTENTIONAL_ASSERTION'
+           ^^^^^
+AssertionError: F01_EVAL_INTENTIONAL_ASSERTION
+
+----------------------------------------------------------------------
+Ran 38 tests in 35.356s
+
+FAILED (failures=1)
+Destroying test database for alias 'default' ('test_catraca')...
+
+200c7c56b35e
+ Volume catraca-gate-1795839991-80373-2365_db_data Removing 
+ Network catraca-gate-1795839991-80373-2365_default Removing 
+ Volume catraca-gate-1795839991-80373-2365_db_data Removed 
+ Network catraca-gate-1795839991-80373-2365_default Removed 
+
+exit=1 expected=1

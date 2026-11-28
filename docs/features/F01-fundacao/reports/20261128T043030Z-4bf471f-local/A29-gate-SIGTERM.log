@@ -1,0 +1,92 @@
+Gate project=catraca-gate-1795839951-78350-635 port=43721
+ Image catraca-gate-1795839951-78350-635-test Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 598B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 76B done
+#4 DONE 0.0s
+
+#5 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#5 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 2.40kB done
+#6 DONE 0.0s
+
+#7 [base 7/7] WORKDIR /srv/catraca/app
+#7 CACHED
+
+#8 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#8 CACHED
+
+#9 [base 5/7] COPY app/ ./app/
+#9 CACHED
+
+#10 [base 2/7] WORKDIR /srv/catraca
+#10 CACHED
+
+#11 [base 3/7] COPY requirements.lock ./
+#11 CACHED
+
+#12 [base 6/7] COPY pyproject.toml ./
+#12 CACHED
+
+#13 [test 1/1] RUN apt-get update     && apt-get install --yes --no-install-recommends git=1:2.39.5-0+deb12u3     && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:07c7b1a7eaf7bbeefb9b8affce17d35279b8bf0385740f34226a09534aa4b053 0.0s done
+#14 exporting config sha256:40f657ec6b7f379aced45c7c417ca16ab37df274e01da5e3ed136b880575e973 0.0s done
+#14 exporting attestation manifest sha256:61fbd5aba9e1ee9ca156b33e75d7b8ae7c0965f73251d653953e512ff190f373 0.0s done
+#14 exporting manifest list sha256:807d865d30b5b8eb8ad05058ed3bc60f5a6f9fba1a4bb03c88abf743d6f4d81e
+#14 exporting manifest list sha256:807d865d30b5b8eb8ad05058ed3bc60f5a6f9fba1a4bb03c88abf743d6f4d81e 0.0s done
+#14 naming to docker.io/library/catraca-gate-1795839951-78350-635-test:latest done
+#14 unpacking to docker.io/library/catraca-gate-1795839951-78350-635-test:latest done
+#14 DONE 0.2s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+ Image catraca-gate-1795839951-78350-635-test Built 
+ Volume catraca-gate-1795839951-78350-635_db_data Creating 
+ Volume catraca-gate-1795839951-78350-635_db_data Creating 
+ Network catraca-gate-1795839951-78350-635_default Creating 
+ Network catraca-gate-1795839951-78350-635_default Creating 
+ Volume catraca-gate-1795839951-78350-635_db_data Created 
+ Volume catraca-gate-1795839951-78350-635_db_data Created 
+ Network catraca-gate-1795839951-78350-635_default Created 
+ Network catraca-gate-1795839951-78350-635_default Created 
+ Container catraca-gate-1795839951-78350-635-db-1 Creating 
+ Container catraca-gate-1795839951-78350-635-db-1 Created 
+ Container catraca-gate-1795839951-78350-635-db-1 Starting 
+ Container catraca-gate-1795839951-78350-635-db-1 Started 
+ Container catraca-gate-1795839951-78350-635-db-1 Waiting 
+ Container catraca-gate-1795839951-78350-635-db-1 Healthy 
+ Container catraca-gate-1795839951-78350-635-test-run-2a459be6bcf9 Creating 
+ Container catraca-gate-1795839951-78350-635-test-run-2a459be6bcf9 Created 
+All checks passed!
+38 files already formatted
+
+d9cc8fec8d2d
+1f4c554eaf84
+ Volume catraca-gate-1795839951-78350-635_db_data Removing 
+ Network catraca-gate-1795839951-78350-635_default Removing 
+ Volume catraca-gate-1795839951-78350-635_db_data Removed 
+ Network catraca-gate-1795839951-78350-635_default Removed 
+
+$ SIGTERM: bash bin/gates --feature F01
+process exit=143 expected=143
+SIGTERM sent to gate PID 78350 after active containers:
+catraca-gate-1795839951-78350-635-test-run-2a459be6bcf9
+catraca-gate-1795839951-78350-635-db-1
+project=catraca-gate-1795839951-78350-635 resources_after=('', '', '') port=43721 closed=True

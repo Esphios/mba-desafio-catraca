@@ -1,0 +1,88 @@
+$ assert_clean
+4bf471f51d44cdf53bf0617f6544144444777353
+4bf471f51d44cdf53bf0617f6544144444777353
+
+exit=0 expected=0
+$ git diff --stat 14b1dbf300678a2c9db1cfb60ac639045b692390..HEAD
+ .dockerignore                                      |   4 +
+ AGENTS.md                                          |   5 +
+ Dockerfile                                         |  17 +
+ README.md                                          | 100 ++-
+ app/accounts/__init__.py                           |   0
+ app/accounts/apps.py                               |   6 +
+ app/accounts/email_policy.py                       |  27 +
+ app/accounts/migrations/0001_initial.py            |  89 +++
+ .../migrations/0002_enforce_canonical_email.py     |  25 +
+ .../migrations/0003_normalize_legacy_emails.py     |  34 +
+ app/accounts/migrations/__init__.py                |   0
+ app/accounts/models.py                             |  86 +++
+ app/catraca_platform/__init__.py                   |   1 +
+ app/catraca_platform/apps.py                       |   6 +
+ app/catraca_platform/clock.py                      |   5 +
+ app/catraca_platform/management/__init__.py        |   1 +
+ .../management/commands/__init__.py                |   1 +
+ .../management/commands/grant_runtime.py           |  63 ++
+ .../management/commands/seed_demo.py               |  54 ++
+ .../management/commands/worker_health.py           |  20 +
+ app/config/__init__.py                             |   0
+ app/config/management_provider.py                  |  18 +
+ app/config/settings.py                             |  42 ++
+ app/config/test_runner.py                          |  11 +
+ app/config/urls.py                                 |  37 ++
+ app/config/wsgi.py                                 |   6 +
+ app/coredata/__init__.py                           |   0
+ app/coredata/apps.py                               |   6 +
+ app/coredata/migrations/0001_initial.py            | 268 ++++++++
+ app/coredata/migrations/__init__.py                |   0
+ app/coredata/models.py                             | 165 +++++
+ app/manage.py                                      |   9 +
+ app/tests/__init__.py                              |   0
+ app/tests/fixtures.py                              |  33 +
+ app/tests/test_account_migrations.py               |  63 ++
+ app/tests/test_bootstrap.py                        | 130 ++++
+ app/tests/test_foundation_ports.py                 | 102 +++
+ app/tests/test_health.py                           |  22 +
+ app/tests/test_runner.py                           |  15 +
+ app/tests/test_schema.py                           | 381 +++++++++++
+ app/worker/__init__.py                             |   1 +
+ app/worker/main.py                                 |  37 ++
+ bin/down                                           |  26 +
+ bin/gates                                          | 127 ++++
+ bin/up                                             |  69 ++
+ compose.yaml                                       | 105 +++
+ pyproject.toml                                     |  11 +
+ requirements.in                                    |   6 +
+ requirements.lock                                  | 726 +++++++++++++++++++++
+ scripts/test_baseline.py                           |  19 +-
+ scripts/test_harness.py                            | 213 ++++++
+ 51 files changed, 3160 insertions(+), 32 deletions(-)
+
+exit=0 expected=0
+$ uname -sir
+Linux 6.6.87.2-microsoft-standard-WSL2 unknown
+
+exit=0 expected=0
+$ docker version --format \{\{.Client.Version\}\}\ /\ \{\{.Server.Version\}\}
+29.9.2 / 29.9.2
+
+exit=0 expected=0
+$ docker compose version
+Docker Compose version v5.6.1
+
+exit=0 expected=0
+$ bash --version
+GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)
+Copyright (C) 2025 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+exit=0 expected=0
+$ git rev-parse --is-shallow-repository
+false
+
+exit=0 expected=0
+$ git status --porcelain=v1 --untracked-files=all
+
+exit=0 expected=0

@@ -1,0 +1,282 @@
+$ empty_project catraca-f01-local-eval-cold-build
+project=catraca-f01-local-eval-cold-build containers= networks= volumes=
+
+exit=0 expected=0
+$ docker compose --project-name catraca-f01-local-eval-cold-build -f /home/eduar/work/catraca/f01-local-eval/compose.yaml build --no-cache test
+ Image catraca-f01-local-eval-cold-build-test Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 622B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 76B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#6 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#6 DONE 0.0s
+
+#7 [base 2/7] WORKDIR /srv/catraca
+#7 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 2.40kB done
+#5 DONE 0.0s
+
+#8 [base 3/7] COPY requirements.lock ./
+#8 DONE 0.1s
+
+#9 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#9 2.767 Collecting asgiref==3.13.0 (from -r requirements.lock (line 7))
+#9 2.899   Downloading asgiref-3.13.0-py3-none-any.whl (27 kB)
+#9 2.932 Collecting attrs==26.1.0 (from -r requirements.lock (line 11))
+#9 2.939   Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+#9 2.978 Collecting certifi==2026.11.20 (from -r requirements.lock (line 17))
+#9 2.989   Downloading certifi-2026.11.20-py3-none-any.whl (127 kB)
+#9 3.194 Collecting charset-normalizer==3.5.3 (from -r requirements.lock (line 21))
+#9 3.203   Downloading charset_normalizer-3.5.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (257 kB)
+#9 3.325 Collecting django==5.2.19 (from -r requirements.lock (line 195))
+#9 3.335   Downloading django-5.2.19-py3-none-any.whl (8.3 MB)
+#9 3.764      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 19.7 MB/s eta 0:00:00
+#9 4.129 Collecting greenlet==3.5.6 (from -r requirements.lock (line 199))
+#9 4.139   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+#9 4.168      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 22.7 MB/s eta 0:00:00
+#9 4.202 Collecting gunicorn==27.0.1 (from -r requirements.lock (line 280))
+#9 4.216   Downloading gunicorn-27.0.1-py3-none-any.whl (263 kB)
+#9 4.248 Collecting idna==3.20 (from -r requirements.lock (line 284))
+#9 4.255   Downloading idna-3.20-py3-none-any.whl (69 kB)
+#9 4.287 Collecting jsonschema==4.26.0 (from -r requirements.lock (line 288))
+#9 4.296   Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+#9 4.317 Collecting jsonschema-path==0.3.4 (from -r requirements.lock (line 294))
+#9 4.327   Downloading jsonschema_path-0.3.4-py3-none-any.whl (14 kB)
+#9 4.345 Collecting jsonschema-specifications==2025.9.1 (from -r requirements.lock (line 298))
+#9 4.353   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+#9 4.524 Collecting lazy-object-proxy==1.13.0 (from -r requirements.lock (line 304))
+#9 4.532   Downloading lazy_object_proxy-1.13.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (71 kB)
+#9 4.694 Collecting openapi-schema-validator==0.6.3 (from -r requirements.lock (line 370))
+#9 4.703   Downloading openapi_schema_validator-0.6.3-py3-none-any.whl (8.8 kB)
+#9 4.851 Collecting openapi-spec-validator==0.7.2 (from -r requirements.lock (line 374))
+#9 4.859   Downloading openapi_spec_validator-0.7.2-py3-none-any.whl (39 kB)
+#9 4.887 Collecting pathable==0.4.4 (from -r requirements.lock (line 378))
+#9 4.898   Downloading pathable-0.4.4-py3-none-any.whl (9.6 kB)
+#9 4.960 Collecting playwright==1.65.2 (from -r requirements.lock (line 382))
+#9 4.972   Downloading playwright-1.65.2-py3-none-manylinux1_x86_64.whl (53.5 MB)
+#9 7.565      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 53.5/53.5 MB 20.8 MB/s eta 0:00:00
+#9 7.750 Collecting psycopg==3.3.9 (from psycopg[binary]==3.3.9->-r requirements.lock (line 393))
+#9 7.757   Downloading psycopg-3.3.9-py3-none-any.whl (219 kB)
+#9 8.037 Collecting psycopg-binary==3.3.9 (from -r requirements.lock (line 397))
+#9 8.052   Downloading psycopg_binary-3.3.9-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.9 MB)
+#9 8.228      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.9/3.9 MB 22.7 MB/s eta 0:00:00
+#9 8.297 Collecting pyyaml==6.0.4 (from -r requirements.lock (line 465))
+#9 8.309   Downloading pyyaml-6.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (849 kB)
+#9 8.346      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 849.2/849.2 kB 27.5 MB/s eta 0:00:00
+#9 8.380 Collecting referencing==0.36.2 (from -r requirements.lock (line 542))
+#9 8.387   Downloading referencing-0.36.2-py3-none-any.whl (26 kB)
+#9 8.426 Collecting requests==2.34.2 (from -r requirements.lock (line 549))
+#9 8.444   Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+#9 8.464 Collecting rfc3339-validator==0.1.4 (from -r requirements.lock (line 553))
+#9 8.471   Downloading rfc3339_validator-0.1.4-py2.py3-none-any.whl (3.5 kB)
+#9 8.839 Collecting rpds-py==2026.9.1 (from -r requirements.lock (line 557))
+#9 8.847   Downloading rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (371 kB)
+#9 9.267 Collecting ruff==0.17.6 (from -r requirements.lock (line 689))
+#9 9.275   Downloading ruff-0.17.6-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.6 MB)
+#9 9.651      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.6/10.6 MB 28.7 MB/s eta 0:00:00
+#9 9.694 Collecting six==1.17.0 (from -r requirements.lock (line 709))
+#9 9.700   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#9 9.718 Collecting sqlparse==0.6.1 (from -r requirements.lock (line 713))
+#9 9.724   Downloading sqlparse-0.6.1-py3-none-any.whl (51 kB)
+#9 9.744 Collecting typing-extensions==4.16.0 (from -r requirements.lock (line 717))
+#9 9.753   Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#9 9.779 Collecting urllib3==2.8.0 (from -r requirements.lock (line 723))
+#9 9.789   Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+#9 10.07 Installing collected packages: urllib3, typing-extensions, sqlparse, six, ruff, rpds-py, pyyaml, psycopg-binary, pathable, lazy-object-proxy, idna, gunicorn, greenlet, charset-normalizer, certifi, attrs, asgiref, rfc3339-validator, requests, referencing, psycopg, playwright, django, jsonschema-specifications, jsonschema-path, jsonschema, openapi-schema-validator, openapi-spec-validator
+#9 15.95 Successfully installed asgiref-3.13.0 attrs-26.1.0 certifi-2026.11.20 charset-normalizer-3.5.3 django-5.2.19 greenlet-3.5.6 gunicorn-27.0.1 idna-3.20 jsonschema-4.26.0 jsonschema-path-0.3.4 jsonschema-specifications-2025.9.1 lazy-object-proxy-1.13.0 openapi-schema-validator-0.6.3 openapi-spec-validator-0.7.2 pathable-0.4.4 playwright-1.65.2 psycopg-3.3.9 psycopg-binary-3.3.9 pyyaml-6.0.4 referencing-0.36.2 requests-2.34.2 rfc3339-validator-0.1.4 rpds-py-2026.9.1 ruff-0.17.6 six-1.17.0 sqlparse-0.6.1 typing-extensions-4.16.0 urllib3-2.8.0
+#9 15.95 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#9 16.09 
+#9 16.09 [notice] A new release of pip is available: 25.0.1 -> 26.3
+#9 16.09 [notice] To update, run: pip install --upgrade pip
+#9 DONE 16.7s
+
+#10 [base 5/7] COPY app/ ./app/
+#10 DONE 0.1s
+
+#11 [base 6/7] COPY pyproject.toml ./
+#11 DONE 0.0s
+
+#12 [base 7/7] WORKDIR /srv/catraca/app
+#12 DONE 0.0s
+
+#13 [test 1/1] RUN apt-get update     && apt-get install --yes --no-install-recommends git=1:2.39.5-0+deb12u3     && rm -rf /var/lib/apt/lists/*
+#13 0.270 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+#13 0.288 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#13 0.294 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+#13 0.355 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+#13 0.742 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+#13 0.747 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [383 kB]
+#13 1.971 Fetched 9422 kB in 2s (5459 kB/s)
+#13 1.971 Reading package lists...
+#13 2.587 Reading package lists...
+#13 3.234 Building dependency tree...
+#13 3.408 Reading state information...
+#13 3.707 The following additional packages will be installed:
+#13 3.709   git-man libbrotli1 libcurl3-gnutls liberror-perl libexpat1 libgdbm-compat4
+#13 3.710   libldap-2.5-0 libnghttp2-14 libperl5.36 libpsl5 librtmp1 libsasl2-2
+#13 3.711   libsasl2-modules-db libssh2-1 perl perl-modules-5.36
+#13 3.715 Suggested packages:
+#13 3.715   gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-email git-gui
+#13 3.715   gitk gitweb git-cvs git-mediawiki git-svn sensible-utils perl-doc
+#13 3.715   libterm-readline-gnu-perl | libterm-readline-perl-perl make
+#13 3.715   libtap-harness-archive-perl
+#13 3.715 Recommended packages:
+#13 3.715   patch less ssh-client libldap-common publicsuffix libsasl2-modules
+#13 3.829 The following NEW packages will be installed:
+#13 3.829   git git-man libbrotli1 libcurl3-gnutls liberror-perl libexpat1
+#13 3.830   libgdbm-compat4 libldap-2.5-0 libnghttp2-14 libperl5.36 libpsl5 librtmp1
+#13 3.831   libsasl2-2 libsasl2-modules-db libssh2-1 perl perl-modules-5.36
+#13 3.871 0 upgraded, 17 newly installed, 0 to remove and 5 not upgraded.
+#13 3.871 Need to get 18.1 MB of archives.
+#13 3.871 After this operation, 100 MB of additional disk space will be used.
+#13 3.871 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 perl-modules-5.36 all 5.36.0-7+deb12u4 [2817 kB]
+#13 4.003 Get:2 http://deb.debian.org/debian bookworm/main amd64 libgdbm-compat4 amd64 1.23-3 [48.2 kB]
+#13 4.006 Get:3 http://deb.debian.org/debian-security bookworm-security/main amd64 libperl5.36 amd64 5.36.0-7+deb12u4 [4208 kB]
+#13 4.160 Get:4 http://deb.debian.org/debian-security bookworm-security/main amd64 perl amd64 5.36.0-7+deb12u4 [239 kB]
+#13 4.167 Get:5 http://deb.debian.org/debian-security bookworm-security/main amd64 libbrotli1 amd64 1.0.9-2+deb12u1 [275 kB]
+#13 4.175 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg-10+deb12u1 [20.5 kB]
+#13 4.175 Get:7 http://deb.debian.org/debian-security bookworm-security/main amd64 libsasl2-2 amd64 2.1.28+dfsg-10+deb12u1 [59.9 kB]
+#13 4.178 Get:8 http://deb.debian.org/debian bookworm/main amd64 libldap-2.5-0 amd64 2.5.13+dfsg-5 [183 kB]
+#13 4.184 Get:9 http://deb.debian.org/debian bookworm/main amd64 libnghttp2-14 amd64 1.52.0-1+deb12u3 [72.4 kB]
+#13 4.187 Get:10 http://deb.debian.org/debian bookworm/main amd64 libpsl5 amd64 0.21.2-1 [58.7 kB]
+#13 4.188 Get:11 http://deb.debian.org/debian bookworm/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2+b2 [60.8 kB]
+#13 4.190 Get:12 http://deb.debian.org/debian-security bookworm-security/main amd64 libssh2-1 amd64 1.10.0-3+deb12u1 [176 kB]
+#13 4.196 Get:13 http://deb.debian.org/debian bookworm/main amd64 libcurl3-gnutls amd64 7.88.1-10+deb12u15 [386 kB]
+#13 4.210 Get:14 http://deb.debian.org/debian-security bookworm-security/main amd64 libexpat1 amd64 2.5.0-1+deb12u5 [108 kB]
+#13 4.213 Get:15 http://deb.debian.org/debian bookworm/main amd64 liberror-perl all 0.17029-2 [29.0 kB]
+#13 4.214 Get:16 http://deb.debian.org/debian bookworm/main amd64 git-man all 1:2.39.5-0+deb12u3 [2053 kB]
+#13 4.278 Get:17 http://deb.debian.org/debian bookworm/main amd64 git amd64 1:2.39.5-0+deb12u3 [7264 kB]
+#13 4.840 debconf: delaying package configuration, since apt-utils is not installed
+#13 4.895 Fetched 18.1 MB in 1s (24.5 MB/s)
+#13 4.928 Selecting previously unselected package perl-modules-5.36.
+#13 4.928 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6701 files and directories currently installed.)
+#13 4.938 Preparing to unpack .../00-perl-modules-5.36_5.36.0-7+deb12u4_all.deb ...
+#13 4.943 Unpacking perl-modules-5.36 (5.36.0-7+deb12u4) ...
+#13 5.386 Selecting previously unselected package libgdbm-compat4:amd64.
+#13 5.387 Preparing to unpack .../01-libgdbm-compat4_1.23-3_amd64.deb ...
+#13 5.397 Unpacking libgdbm-compat4:amd64 (1.23-3) ...
+#13 5.444 Selecting previously unselected package libperl5.36:amd64.
+#13 5.446 Preparing to unpack .../02-libperl5.36_5.36.0-7+deb12u4_amd64.deb ...
+#13 5.457 Unpacking libperl5.36:amd64 (5.36.0-7+deb12u4) ...
+#13 5.876 Selecting previously unselected package perl.
+#13 5.877 Preparing to unpack .../03-perl_5.36.0-7+deb12u4_amd64.deb ...
+#13 5.888 Unpacking perl (5.36.0-7+deb12u4) ...
+#13 5.941 Selecting previously unselected package libbrotli1:amd64.
+#13 5.942 Preparing to unpack .../04-libbrotli1_1.0.9-2+deb12u1_amd64.deb ...
+#13 5.947 Unpacking libbrotli1:amd64 (1.0.9-2+deb12u1) ...
+#13 6.001 Selecting previously unselected package libsasl2-modules-db:amd64.
+#13 6.002 Preparing to unpack .../05-libsasl2-modules-db_2.1.28+dfsg-10+deb12u1_amd64.deb ...
+#13 6.007 Unpacking libsasl2-modules-db:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#13 6.045 Selecting previously unselected package libsasl2-2:amd64.
+#13 6.046 Preparing to unpack .../06-libsasl2-2_2.1.28+dfsg-10+deb12u1_amd64.deb ...
+#13 6.052 Unpacking libsasl2-2:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#13 6.097 Selecting previously unselected package libldap-2.5-0:amd64.
+#13 6.098 Preparing to unpack .../07-libldap-2.5-0_2.5.13+dfsg-5_amd64.deb ...
+#13 6.103 Unpacking libldap-2.5-0:amd64 (2.5.13+dfsg-5) ...
+#13 6.160 Selecting previously unselected package libnghttp2-14:amd64.
+#13 6.161 Preparing to unpack .../08-libnghttp2-14_1.52.0-1+deb12u3_amd64.deb ...
+#13 6.167 Unpacking libnghttp2-14:amd64 (1.52.0-1+deb12u3) ...
+#13 6.224 Selecting previously unselected package libpsl5:amd64.
+#13 6.225 Preparing to unpack .../09-libpsl5_0.21.2-1_amd64.deb ...
+#13 6.231 Unpacking libpsl5:amd64 (0.21.2-1) ...
+#13 6.276 Selecting previously unselected package librtmp1:amd64.
+#13 6.278 Preparing to unpack .../10-librtmp1_2.4+20151223.gitfa8646d.1-2+b2_amd64.deb ...
+#13 6.283 Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+#13 6.325 Selecting previously unselected package libssh2-1:amd64.
+#13 6.326 Preparing to unpack .../11-libssh2-1_1.10.0-3+deb12u1_amd64.deb ...
+#13 6.331 Unpacking libssh2-1:amd64 (1.10.0-3+deb12u1) ...
+#13 6.381 Selecting previously unselected package libcurl3-gnutls:amd64.
+#13 6.382 Preparing to unpack .../12-libcurl3-gnutls_7.88.1-10+deb12u15_amd64.deb ...
+#13 6.387 Unpacking libcurl3-gnutls:amd64 (7.88.1-10+deb12u15) ...
+#13 6.456 Selecting previously unselected package libexpat1:amd64.
+#13 6.457 Preparing to unpack .../13-libexpat1_2.5.0-1+deb12u5_amd64.deb ...
+#13 6.462 Unpacking libexpat1:amd64 (2.5.0-1+deb12u5) ...
+#13 6.502 Selecting previously unselected package liberror-perl.
+#13 6.504 Preparing to unpack .../14-liberror-perl_0.17029-2_all.deb ...
+#13 6.509 Unpacking liberror-perl (0.17029-2) ...
+#13 6.546 Selecting previously unselected package git-man.
+#13 6.547 Preparing to unpack .../15-git-man_1%3a2.39.5-0+deb12u3_all.deb ...
+#13 6.552 Unpacking git-man (1:2.39.5-0+deb12u3) ...
+#13 6.674 Selecting previously unselected package git.
+#13 6.676 Preparing to unpack .../16-git_1%3a2.39.5-0+deb12u3_amd64.deb ...
+#13 6.685 Unpacking git (1:2.39.5-0+deb12u3) ...
+#13 7.108 Setting up libexpat1:amd64 (2.5.0-1+deb12u5) ...
+#13 7.121 Setting up libpsl5:amd64 (0.21.2-1) ...
+#13 7.135 Setting up libbrotli1:amd64 (1.0.9-2+deb12u1) ...
+#13 7.149 Setting up libnghttp2-14:amd64 (1.52.0-1+deb12u3) ...
+#13 7.163 Setting up libsasl2-modules-db:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#13 7.176 Setting up perl-modules-5.36 (5.36.0-7+deb12u4) ...
+#13 7.188 Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+#13 7.200 Setting up libgdbm-compat4:amd64 (1.23-3) ...
+#13 7.213 Setting up libsasl2-2:amd64 (2.1.28+dfsg-10+deb12u1) ...
+#13 7.226 Setting up git-man (1:2.39.5-0+deb12u3) ...
+#13 7.239 Setting up libssh2-1:amd64 (1.10.0-3+deb12u1) ...
+#13 7.254 Setting up libperl5.36:amd64 (5.36.0-7+deb12u4) ...
+#13 7.271 Setting up libldap-2.5-0:amd64 (2.5.13+dfsg-5) ...
+#13 7.285 Setting up perl (5.36.0-7+deb12u4) ...
+#13 7.313 Setting up libcurl3-gnutls:amd64 (7.88.1-10+deb12u15) ...
+#13 7.397 Setting up liberror-perl (0.17029-2) ...
+#13 7.411 Setting up git (1:2.39.5-0+deb12u3) ...
+#13 7.435 Processing triggers for libc-bin (2.36-9+deb12u14) ...
+#13 DONE 7.7s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 12.2s done
+#14 exporting manifest sha256:482f4dd721885da5b829cbc79dbde79c2a0a7911e50b453e356179cedbd13da3 0.0s done
+#14 exporting config sha256:28fd2697d1697a1b66a2f81af0ffc39cf166543e937909901e5de72508675a41 0.0s done
+#14 exporting attestation manifest sha256:b6fbb82a3b77e68ac9fd3f65826f990c45bc6a2a28cebcc548fe19141638f86f 0.0s done
+#14 exporting manifest list sha256:3fdb46d130e72390446e43091f500ae74b671dd7c7b00e772bd43f446255d4db
+#14 exporting manifest list sha256:3fdb46d130e72390446e43091f500ae74b671dd7c7b00e772bd43f446255d4db 0.0s done
+#14 naming to docker.io/library/catraca-f01-local-eval-cold-build-test:latest done
+#14 unpacking to docker.io/library/catraca-f01-local-eval-cold-build-test:latest
+#14 unpacking to docker.io/library/catraca-f01-local-eval-cold-build-test:latest 5.5s done
+#14 DONE 18.0s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+ Image catraca-f01-local-eval-cold-build-test Built 
+
+exit=0 expected=0
+$ empty_project catraca-f01-local-eval-cold-build
+project=catraca-f01-local-eval-cold-build containers= networks= volumes=
+
+exit=0 expected=0

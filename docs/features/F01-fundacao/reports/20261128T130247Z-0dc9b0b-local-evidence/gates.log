@@ -1,0 +1,110 @@
+Clean clone: bash bin/gates --feature F01
+Gate project=catraca-gate-1795840421-86510-20591 port=20051
+All checks passed!
+38 files already formatted
+Found 39 test(s).
+Ran 39 tests in 27.261s
+OK
+PASS structural: 7 features; 37 local criteria; 16 cross criteria; 6 process criteria
+Ran 9 tests in 1.289s
+OK
+PASS baseline negative tests: item/mapping drift, incomplete release, missing report, false PASS, approved state without report, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.
+PASS evidence structure/history for requested phase. No authenticity or GitHub PR overlap inferred.
+gate_exit=0
+
+Disposable clone: formatted assertion mutation, then bash bin/gates --feature F01
+diff --git a/app/tests/test_health.py b/app/tests/test_health.py
+index 38f943d..4a616f2 100644
+--- a/app/tests/test_health.py
++++ b/app/tests/test_health.py
+@@ -4,6 +4,7 @@ from django.test import SimpleTestCase, TransactionTestCase
+ 
+ class LivenessTests(SimpleTestCase):
+     def test_TEST_A03_live_reports_process_running(self):
++        self.assertTrue(False, 'F01 evaluator negative control')
+         response = self.client.get('/health/live')
+         self.assertEqual(response.status_code, 200)
+ 
+Gate project=catraca-gate-1795870568-5142-15127 port=21873
+All checks passed!
+38 files already formatted
+Found 39 test(s).
+test_TEST_A03_live_reports_process_running (tests.test_health.LivenessTests.test_TEST_A03_live_reports_process_running) ... FAIL
+FAIL: test_TEST_A03_live_reports_process_running (tests.test_health.LivenessTests.test_TEST_A03_live_reports_process_running)
+  File "/srv/catraca/app/tests/test_health.py", line 7, in test_TEST_A03_live_reports_process_running
+AssertionError: False is not true : F01 evaluator negative control
+Ran 39 tests in 25.654s
+FAILED (failures=1)
+ Volume catraca-gate-1795870568-5142-15127_db_data Removed
+ Network catraca-gate-1795870568-5142-15127_default Removed
+mutation_gate_exit=1
+restored_disposable_copy_clean=yes
+
+Clean clone after the mutation and with running sentinel: bash bin/gates --feature F01
+Gate project=catraca-gate-1795870688-8534-9809 port=38412
+All checks passed!
+38 files already formatted
+No broken requirements found.
+System check identified no issues (0 silenced).
+No changes detected
+Found 39 test(s).
+Creating test database for alias 'default' ('test_catraca')...
+System check identified no issues (0 silenced).
+test_TEST_A01_bootstrap_keeps_runtime_dml_and_denies_all_table_creation (tests.test_bootstrap.RuntimeRoleTests.test_TEST_A01_bootstrap_keeps_runtime_dml_and_denies_all_table_creation) ... Runtime database role ready with DML-only grants.
+test_TEST_A05_upgrade_aborts_atomically_on_canonical_email_collision (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_aborts_atomically_on_canonical_email_collision) ... ok
+test_TEST_A05_upgrade_aborts_atomically_on_invalid_legacy_email (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_aborts_atomically_on_invalid_legacy_email) ... ok
+test_TEST_A05_upgrade_canonicalizes_legacy_account_without_replacing_it (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_canonicalizes_legacy_account_without_replacing_it) ... ok
+test_TEST_A01_seed_demo_creates_exact_idempotent_hashed_identities (tests.test_bootstrap.BootstrapSeedTests.test_TEST_A01_seed_demo_creates_exact_idempotent_hashed_identities) ... Seed ready: 3 identities (3 created).
+test_TEST_A01_seed_demo_rejects_non_demo_or_test_profile (tests.test_bootstrap.BootstrapSeedTests.test_TEST_A01_seed_demo_rejects_non_demo_or_test_profile) ... ok
+test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker) ... ok
+test_TEST_A01_ready_rejects_inconsistent_migration_history (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_rejects_inconsistent_migration_history) ... ok
+test_TEST_A01_ready_rejects_pending_migration_without_applying_it (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_rejects_pending_migration_without_applying_it) ... ok
+test_TEST_A01_ready_requires_a_fresh_worker_database_heartbeat (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_requires_a_fresh_worker_database_heartbeat) ... ok
+test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker (tests.test_bootstrap.ReadinessTests.test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker) ... Worker heartbeat is fresh.
+test_TEST_A04_clock_now_returns_an_aware_utc_timestamp (tests.test_foundation_ports.ClockTests.test_TEST_A04_clock_now_returns_an_aware_utc_timestamp) ... ok
+test_TEST_A05_fixture_factory_provides_isolated_scenarios_with_overrides (tests.test_foundation_ports.FixtureFactoryTests.test_TEST_A05_fixture_factory_provides_isolated_scenarios_with_overrides) ... ok
+test_TEST_A04_default_operations_slot_and_urlconf_are_empty (tests.test_foundation_ports.ManagementHooksTests.test_TEST_A04_default_operations_slot_and_urlconf_are_empty) ... ok
+test_TEST_A04_management_hooks_resolve_configured_components (tests.test_foundation_ports.ManagementHooksTests.test_TEST_A04_management_hooks_resolve_configured_components) ... ok
+test_TEST_A01_worker_command_updates_heartbeat_and_stops_on_signal (tests.test_foundation_ports.WorkerPortTests.test_TEST_A01_worker_command_updates_heartbeat_and_stops_on_signal) ... ok
+test_TEST_A03_real_postgres_connection (tests.test_health.DatabaseTests.test_TEST_A03_real_postgres_connection) ... ok
+test_TEST_A03_live_reports_process_running (tests.test_health.LivenessTests.test_TEST_A03_live_reports_process_running) ... ok
+test_TEST_A03_ready_is_closed_before_bootstrap_and_worker (tests.test_health.ReadinessClosedTests.test_TEST_A03_ready_is_closed_before_bootstrap_and_worker) ... ok
+test_TEST_A03_empty_suite_fails_closed (tests.test_runner.RunnerTests.test_TEST_A03_empty_suite_fails_closed) ... ok
+test_TEST_A03_skipped_test_fails_closed (tests.test_runner.RunnerTests.test_TEST_A03_skipped_test_fails_closed) ... ok
+test_TEST_A05_custom_user_and_business_models_are_installed (tests.test_schema.SchemaInstallationTests.test_TEST_A05_custom_user_and_business_models_are_installed) ... ok
+test_TEST_A05_authorized_orm_writes_canonicalize_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_authorized_orm_writes_canonicalize_email) ... ok
+test_TEST_A05_base_manager_bulk_create_canonicalizes_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_base_manager_bulk_create_canonicalizes_email) ... ok
+test_TEST_A05_base_manager_update_canonicalizes_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_base_manager_update_canonicalizes_email) ... ok
+test_TEST_A05_bulk_email_writes_preserve_iterable_semantics (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_bulk_email_writes_preserve_iterable_semantics) ... ok
+test_TEST_A05_bulk_update_accepts_an_iterable_of_fields (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_bulk_update_accepts_an_iterable_of_fields) ... ok
+test_TEST_A05_concurrent_logical_email_duplicates_create_one_user (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_concurrent_logical_email_duplicates_create_one_user) ... ok
+test_TEST_A05_deserialized_user_is_saved_with_canonical_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_deserialized_user_is_saved_with_canonical_email) ... ok
+test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced) ... ok
+test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits) ... ok
+test_TEST_A05_logical_email_duplicates_are_rejected (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_logical_email_duplicates_are_rejected) ... ok
+test_TEST_A05_partial_save_only_normalizes_email_when_written (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_partial_save_only_normalizes_email_when_written) ... ok
+test_TEST_A05_payment_job_constraints_reject_duplicate_invalid_state_and_outcome (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_payment_job_constraints_reject_duplicate_invalid_state_and_outcome) ... ok
+test_TEST_A05_required_query_indexes_exist (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_required_query_indexes_exist) ... ok
+test_TEST_A05_ticket_code_constraint_and_uniqueness_are_database_enforced (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_ticket_code_constraint_and_uniqueness_are_database_enforced) ... ok
+test_TEST_A05_ticket_constraints_reject_fk_status_channel_price_and_mixed_buyer (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_ticket_constraints_reject_fk_status_channel_price_and_mixed_buyer) ... ok
+test_TEST_A05_user_email_and_role_constraints_reject_invalid_rows (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_user_email_and_role_constraints_reject_invalid_rows) ... ok
+test_TEST_A05_valid_graph_and_ticket_without_job_persist (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_valid_graph_and_ticket_without_job_persist) ... ok
+Ran 39 tests in 27.352s
+OK
+PASS structural: 7 features; 37 local criteria; 16 cross criteria; 6 process criteria
+test_TEST_A03_feature_gate_runs_real_suite_and_document_checks (__main__.ShellHarnessTests.test_TEST_A03_feature_gate_runs_real_suite_and_document_checks) ... ok
+test_TEST_A03_unknown_feature_and_malformed_arguments_fail_before_docker (__main__.ShellHarnessTests.test_TEST_A03_unknown_feature_and_malformed_arguments_fail_before_docker) ... ok
+test_TEST_A29_bootstrap_failure_propagates_before_web_or_worker_start (__main__.ShellHarnessTests.test_TEST_A29_bootstrap_failure_propagates_before_web_or_worker_start) ... ok
+test_TEST_A29_cleanup_failure_turns_success_into_failure (__main__.ShellHarnessTests.test_TEST_A29_cleanup_failure_turns_success_into_failure) ... ok
+test_TEST_A29_gate_uses_unique_project_and_never_targets_demo (__main__.ShellHarnessTests.test_TEST_A29_gate_uses_unique_project_and_never_targets_demo) ... ok
+test_TEST_A29_host_readiness_timeout_diagnoses_and_cleans_up (__main__.ShellHarnessTests.test_TEST_A29_host_readiness_timeout_diagnoses_and_cleans_up) ... ok
+test_TEST_A29_setup_failure_is_preserved_and_cleanup_runs (__main__.ShellHarnessTests.test_TEST_A29_setup_failure_is_preserved_and_cleanup_runs) ... ok
+test_TEST_A29_term_interrupt_is_nonzero_and_cleans_its_project (__main__.ShellHarnessTests.test_TEST_A29_term_interrupt_is_nonzero_and_cleans_its_project) ... ok
+test_TEST_A37_release_runs_release_evidence_phase_and_propagates_failure (__main__.ShellHarnessTests.test_TEST_A37_release_runs_release_evidence_phase_and_propagates_failure) ... ok
+Ran 9 tests in 1.338s
+OK
+PASS baseline negative tests: item/mapping drift, incomplete release, missing report, false PASS, approved state without report, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.
+PASS evidence structure/history for requested phase. No authenticity or GitHub PR overlap inferred.
+gate_positive_after_restore_exit=0
+http=200
+sentinel_unchanged_through_positive_gate=yes

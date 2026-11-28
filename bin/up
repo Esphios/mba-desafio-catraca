@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$root"
+
+project=${CAT_PROJECT:-catraca-demo}
+port=${CAT_PORT:-8080}
+profile=${CAT_PROFILE:-demo}
+gateway_scale=${CAT_GATEWAY_SCALE:-1}
+compose=(docker compose --project-name "$project" -f "$root/compose.yaml")
+started_empty=0
+
+diagnose() {
+  local result=$1
+  trap - ERR
+  echo "Startup failed for project $project (exit $result)." >&2
+  "${compose[@]}" ps -a >&2 || true
+  "${compose[@]}" logs --tail 80 db bootstrap web worker >&2 || true
+  if ((started_empty)); then
+    "${compose[@]}" down --remove-orphans >/dev/null 2>&1 || true
+  fi
+  exit "$result"
+}
+trap 'diagnose "$?"' ERR
+
+command -v docker >/dev/null
+docker info >/dev/null
+docker compose version >/dev/null
+[[ $project =~ ^[a-z0-9][a-z0-9_-]*$ ]] || {
+  echo 'CAT_PROJECT must contain only lowercase letters, digits, underscores or hyphens.' >&2
+  exit 2
+}
+[[ $port =~ ^[0-9]+$ ]] && ((port >= 1 && port <= 65535)) || {
+  echo 'CAT_PORT must be an integer from 1 to 65535.' >&2
+  exit 2
+}
+if [[ $profile == demo && $gateway_scale != 1 ]]; then
+  echo 'CAT_PROFILE=demo requires CAT_GATEWAY_SCALE=1.' >&2
+  exit 2
+fi
+
+if [[ -z $("${compose[@]}" ps -q 2>/dev/null) ]]; then
+  started_empty=1
+fi
+
+"${compose[@]}" up -d --build --wait --wait-timeout 120 db
+"${compose[@]}" up --build --force-recreate --no-deps --exit-code-from bootstrap bootstrap
+"${compose[@]}" up -d --no-deps --build --force-recreate --wait --wait-timeout 120 web worker
+
+deadline=$((SECONDS + 30))
+status=
+while ((SECONDS < deadline)); do
+  if { exec 3<>"/dev/tcp/127.0.0.1/$port"; } 2>/dev/null; then
+    printf 'GET /health/ready HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n' >&3
+    IFS= read -r -t 1 status <&3 || status=
+    exec 3<&-
+    exec 3>&-
+    [[ $status == *" 200 "* ]] && break
+  fi
+  sleep 1
+done
+[[ $status == *" 200 "* ]] || {
+  echo "Host readiness did not return HTTP 200 on port $port." >&2
+  diagnose 1
+}
+
+trap - ERR
+echo "Catraca ready at http://127.0.0.1:$port (project $project)."

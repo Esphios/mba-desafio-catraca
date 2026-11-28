@@ -1,0 +1,218 @@
+$ assert_clean
+4bf471f51d44cdf53bf0617f6544144444777353
+4bf471f51d44cdf53bf0617f6544144444777353
+
+exit=0 expected=0
+$ bash bin/gates --feature F01
+Gate project=catraca-gate-1795839810-75271-23823 port=48623
+ Image catraca-gate-1795839810-75271-23823-test Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 602B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 76B done
+#4 DONE 0.0s
+
+#5 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#5 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 2.40kB done
+#6 DONE 0.0s
+
+#7 [base 7/7] WORKDIR /srv/catraca/app
+#7 CACHED
+
+#8 [base 2/7] WORKDIR /srv/catraca
+#8 CACHED
+
+#9 [base 3/7] COPY requirements.lock ./
+#9 CACHED
+
+#10 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#10 CACHED
+
+#11 [base 5/7] COPY app/ ./app/
+#11 CACHED
+
+#12 [base 6/7] COPY pyproject.toml ./
+#12 CACHED
+
+#13 [test 1/1] RUN apt-get update     && apt-get install --yes --no-install-recommends git=1:2.39.5-0+deb12u3     && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:3d5a594dd4f5c30d29e5f3448264aa69471350f1297e9cd729d8e0425cf1691a 0.0s done
+#14 exporting config sha256:b3c5d8263d6305d11041bb0e6c5cb27aa9cf9596b0d8903c6cec929c7ac9912b 0.0s done
+#14 exporting attestation manifest sha256:d5e4f378604d5d4a959ada59fec071ef638ea8e320728dcd073b3b62c4a09851 0.0s done
+#14 exporting manifest list sha256:432c5aa634c29a2d3b5dd37e7e319e29efc66df16cb75c64fa32e82a0ff0ce4f 0.0s done
+#14 naming to docker.io/library/catraca-gate-1795839810-75271-23823-test:latest
+#14 naming to docker.io/library/catraca-gate-1795839810-75271-23823-test:latest done
+#14 unpacking to docker.io/library/catraca-gate-1795839810-75271-23823-test:latest done
+#14 DONE 0.1s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+ Image catraca-gate-1795839810-75271-23823-test Built 
+ Volume catraca-gate-1795839810-75271-23823_db_data Creating 
+ Network catraca-gate-1795839810-75271-23823_default Creating 
+ Network catraca-gate-1795839810-75271-23823_default Creating 
+ Volume catraca-gate-1795839810-75271-23823_db_data Creating 
+ Volume catraca-gate-1795839810-75271-23823_db_data Created 
+ Volume catraca-gate-1795839810-75271-23823_db_data Created 
+ Network catraca-gate-1795839810-75271-23823_default Created 
+ Network catraca-gate-1795839810-75271-23823_default Created 
+ Container catraca-gate-1795839810-75271-23823-db-1 Creating 
+ Container catraca-gate-1795839810-75271-23823-db-1 Created 
+ Container catraca-gate-1795839810-75271-23823-db-1 Starting 
+ Container catraca-gate-1795839810-75271-23823-db-1 Started 
+ Container catraca-gate-1795839810-75271-23823-db-1 Waiting 
+ Container catraca-gate-1795839810-75271-23823-db-1 Healthy 
+ Container catraca-gate-1795839810-75271-23823-test-run-bbd905ff6139 Creating 
+ Container catraca-gate-1795839810-75271-23823-test-run-bbd905ff6139 Created 
+All checks passed!
+38 files already formatted
+No broken requirements found.
+System check identified no issues (0 silenced).
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_enforce_canonical_email... OK
+  Applying accounts.0003_normalize_legacy_emails... OK
+  Applying coredata.0001_initial... OK
+  Applying sessions.0001_initial... OK
+No changes detected
+Found 38 test(s).
+Creating test database for alias 'default' ('test_catraca')...
+Operations to perform:
+  Synchronize unmigrated apps: catraca_platform
+  Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_enforce_canonical_email... OK
+  Applying accounts.0003_normalize_legacy_emails... OK
+  Applying coredata.0001_initial... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).
+test_TEST_A05_upgrade_aborts_atomically_on_canonical_email_collision (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_aborts_atomically_on_canonical_email_collision) ... ok
+test_TEST_A05_upgrade_aborts_atomically_on_invalid_legacy_email (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_aborts_atomically_on_invalid_legacy_email) ... ok
+test_TEST_A05_upgrade_canonicalizes_legacy_account_without_replacing_it (tests.test_account_migrations.CanonicalEmailUpgradeTests.test_TEST_A05_upgrade_canonicalizes_legacy_account_without_replacing_it) ... ok
+test_TEST_A01_seed_demo_creates_exact_idempotent_hashed_identities (tests.test_bootstrap.BootstrapSeedTests.test_TEST_A01_seed_demo_creates_exact_idempotent_hashed_identities) ... Seed ready: 3 identities (3 created).
+Seed ready: 3 identities (0 created).
+ok
+test_TEST_A01_seed_demo_rejects_non_demo_or_test_profile (tests.test_bootstrap.BootstrapSeedTests.test_TEST_A01_seed_demo_rejects_non_demo_or_test_profile) ... ok
+test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_ignores_fresh_heartbeat_from_another_worker) ... ok
+test_TEST_A01_ready_rejects_inconsistent_migration_history (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_rejects_inconsistent_migration_history) ... ok
+test_TEST_A01_ready_rejects_pending_migration_without_applying_it (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_rejects_pending_migration_without_applying_it) ... ok
+test_TEST_A01_ready_requires_a_fresh_worker_database_heartbeat (tests.test_bootstrap.ReadinessTests.test_TEST_A01_ready_requires_a_fresh_worker_database_heartbeat) ... ok
+test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker (tests.test_bootstrap.ReadinessTests.test_TEST_A01_worker_health_ignores_fresh_heartbeat_from_another_worker) ... Worker heartbeat is fresh.
+ok
+test_TEST_A04_clock_now_returns_an_aware_utc_timestamp (tests.test_foundation_ports.ClockTests.test_TEST_A04_clock_now_returns_an_aware_utc_timestamp) ... ok
+test_TEST_A05_fixture_factory_provides_isolated_scenarios_with_overrides (tests.test_foundation_ports.FixtureFactoryTests.test_TEST_A05_fixture_factory_provides_isolated_scenarios_with_overrides) ... ok
+test_TEST_A04_default_operations_slot_and_urlconf_are_empty (tests.test_foundation_ports.ManagementHooksTests.test_TEST_A04_default_operations_slot_and_urlconf_are_empty) ... ok
+test_TEST_A04_management_hooks_resolve_configured_components (tests.test_foundation_ports.ManagementHooksTests.test_TEST_A04_management_hooks_resolve_configured_components) ... ok
+test_TEST_A01_worker_command_updates_heartbeat_and_stops_on_signal (tests.test_foundation_ports.WorkerPortTests.test_TEST_A01_worker_command_updates_heartbeat_and_stops_on_signal) ... ok
+test_TEST_A03_real_postgres_connection (tests.test_health.DatabaseTests.test_TEST_A03_real_postgres_connection) ... ok
+test_TEST_A03_live_reports_process_running (tests.test_health.LivenessTests.test_TEST_A03_live_reports_process_running) ... ok
+test_TEST_A03_ready_is_closed_before_bootstrap_and_worker (tests.test_health.ReadinessClosedTests.test_TEST_A03_ready_is_closed_before_bootstrap_and_worker) ... ok
+test_TEST_A03_empty_suite_fails_closed (tests.test_runner.RunnerTests.test_TEST_A03_empty_suite_fails_closed) ... ok
+test_TEST_A03_skipped_test_fails_closed (tests.test_runner.RunnerTests.test_TEST_A03_skipped_test_fails_closed) ... ok
+test_TEST_A05_custom_user_and_business_models_are_installed (tests.test_schema.SchemaInstallationTests.test_TEST_A05_custom_user_and_business_models_are_installed) ... ok
+test_TEST_A05_authorized_orm_writes_canonicalize_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_authorized_orm_writes_canonicalize_email) ... ok
+test_TEST_A05_base_manager_bulk_create_canonicalizes_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_base_manager_bulk_create_canonicalizes_email) ... ok
+test_TEST_A05_base_manager_update_canonicalizes_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_base_manager_update_canonicalizes_email) ... ok
+test_TEST_A05_bulk_email_writes_preserve_iterable_semantics (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_bulk_email_writes_preserve_iterable_semantics) ... ok
+test_TEST_A05_bulk_update_accepts_an_iterable_of_fields (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_bulk_update_accepts_an_iterable_of_fields) ... ok
+test_TEST_A05_concurrent_logical_email_duplicates_create_one_user (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_concurrent_logical_email_duplicates_create_one_user) ... ok
+test_TEST_A05_deserialized_user_is_saved_with_canonical_email (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_deserialized_user_is_saved_with_canonical_email) ... ok
+test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced) ... ok
+test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_event_constraints_reject_fk_status_and_numeric_limits) ... ok
+test_TEST_A05_logical_email_duplicates_are_rejected (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_logical_email_duplicates_are_rejected) ... ok
+test_TEST_A05_partial_save_only_normalizes_email_when_written (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_partial_save_only_normalizes_email_when_written) ... ok
+test_TEST_A05_payment_job_constraints_reject_duplicate_invalid_state_and_outcome (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_payment_job_constraints_reject_duplicate_invalid_state_and_outcome) ... ok
+test_TEST_A05_required_query_indexes_exist (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_required_query_indexes_exist) ... ok
+test_TEST_A05_ticket_code_constraint_and_uniqueness_are_database_enforced (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_ticket_code_constraint_and_uniqueness_are_database_enforced) ... ok
+test_TEST_A05_ticket_constraints_reject_fk_status_channel_price_and_mixed_buyer (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_ticket_constraints_reject_fk_status_channel_price_and_mixed_buyer) ... ok
+test_TEST_A05_user_email_and_role_constraints_reject_invalid_rows (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_user_email_and_role_constraints_reject_invalid_rows) ... ok
+test_TEST_A05_valid_graph_and_ticket_without_job_persist (tests.test_schema.SchemaIntegrityTests.test_TEST_A05_valid_graph_and_ticket_without_job_persist) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 26.732s
+
+OK
+Destroying test database for alias 'default' ('test_catraca')...
+ Container catraca-gate-1795839810-75271-23823-test-run-abcc69d5337f Creating 
+ Container catraca-gate-1795839810-75271-23823-test-run-abcc69d5337f Created 
+PASS structural: 7 features; 37 local criteria; 16 cross criteria; 6 process criteria
+No runtime, independent evaluation, Mermaid rendering or PR history verified.
+ Container catraca-gate-1795839810-75271-23823-test-run-330f5053786c Creating 
+ Container catraca-gate-1795839810-75271-23823-test-run-330f5053786c Created 
+test_TEST_A03_feature_gate_runs_real_suite_and_document_checks (__main__.ShellHarnessTests.test_TEST_A03_feature_gate_runs_real_suite_and_document_checks) ... ok
+test_TEST_A03_unknown_feature_and_malformed_arguments_fail_before_docker (__main__.ShellHarnessTests.test_TEST_A03_unknown_feature_and_malformed_arguments_fail_before_docker) ... ok
+test_TEST_A29_bootstrap_failure_propagates_before_web_or_worker_start (__main__.ShellHarnessTests.test_TEST_A29_bootstrap_failure_propagates_before_web_or_worker_start) ... ok
+test_TEST_A29_cleanup_failure_turns_success_into_failure (__main__.ShellHarnessTests.test_TEST_A29_cleanup_failure_turns_success_into_failure) ... ok
+test_TEST_A29_gate_uses_unique_project_and_never_targets_demo (__main__.ShellHarnessTests.test_TEST_A29_gate_uses_unique_project_and_never_targets_demo) ... ok
+test_TEST_A29_host_readiness_timeout_diagnoses_and_cleans_up (__main__.ShellHarnessTests.test_TEST_A29_host_readiness_timeout_diagnoses_and_cleans_up) ... ok
+test_TEST_A29_setup_failure_is_preserved_and_cleanup_runs (__main__.ShellHarnessTests.test_TEST_A29_setup_failure_is_preserved_and_cleanup_runs) ... ok
+test_TEST_A29_term_interrupt_is_nonzero_and_cleans_its_project (__main__.ShellHarnessTests.test_TEST_A29_term_interrupt_is_nonzero_and_cleans_its_project) ... ok
+test_TEST_A37_release_runs_release_evidence_phase_and_propagates_failure (__main__.ShellHarnessTests.test_TEST_A37_release_runs_release_evidence_phase_and_propagates_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.302s
+
+OK
+ Container catraca-gate-1795839810-75271-23823-test-run-b0d96f9f7b07 Creating 
+ Container catraca-gate-1795839810-75271-23823-test-run-b0d96f9f7b07 Created 
+PASS baseline negative tests: item/mapping drift, incomplete release, missing report, false PASS, approved state without report, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.
+ Container catraca-gate-1795839810-75271-23823-test-run-3949a16e970e Creating 
+ Container catraca-gate-1795839810-75271-23823-test-run-3949a16e970e Created 
+PASS evidence structure/history for requested phase. No authenticity or GitHub PR overlap inferred.
+2c6cc0de33ee
+ Volume catraca-gate-1795839810-75271-23823_db_data Removing 
+ Network catraca-gate-1795839810-75271-23823_default Removing 
+ Volume catraca-gate-1795839810-75271-23823_db_data Removed 
+ Network catraca-gate-1795839810-75271-23823_default Removed 
+
+exit=0 expected=0

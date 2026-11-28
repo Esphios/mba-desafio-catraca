@@ -1,0 +1,47 @@
+Command: CAT_PROJECT=catraca-f01-local-reassessment CAT_PORT=18087 bash <clone>/bin/up, cwd=/tmp
+Inspection: docker compose -p catraca-f01-local-reassessment ps -a and curl --include /health/ready
+ Volume catraca-f01-local-reassessment_db_data Created
+ Volume catraca-f01-local-reassessment_db_data Created
+ Image catraca-f01-local-reassessment-bootstrap Building
+#5 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+bootstrap-1  |   Applying contenttypes.0001_initial... OK
+bootstrap-1  |   Applying contenttypes.0002_remove_content_type_name... OK
+bootstrap-1  |   Applying auth.0001_initial... OK
+bootstrap-1  |   Applying auth.0002_alter_permission_name_max_length... OK
+bootstrap-1  |   Applying auth.0003_alter_user_email_max_length... OK
+bootstrap-1  |   Applying auth.0004_alter_user_username_opts... OK
+bootstrap-1  |   Applying auth.0005_alter_user_last_login_null... OK
+bootstrap-1  |   Applying auth.0006_require_contenttypes_0002... OK
+bootstrap-1  |   Applying auth.0007_alter_validators_add_error_messages... OK
+bootstrap-1  |   Applying auth.0008_alter_user_username_max_length... OK
+bootstrap-1  |   Applying auth.0009_alter_user_last_name_max_length... OK
+bootstrap-1  |   Applying auth.0010_alter_group_name_max_length... OK
+bootstrap-1  |   Applying auth.0011_update_proxy_permissions... OK
+bootstrap-1  |   Applying auth.0012_alter_user_first_name_max_length... OK
+bootstrap-1  |   Applying accounts.0001_initial... OK
+bootstrap-1  |   Applying accounts.0002_enforce_canonical_email... OK
+bootstrap-1  |   Applying accounts.0003_normalize_legacy_emails... OK
+bootstrap-1  |   Applying coredata.0001_initial... OK
+bootstrap-1  |   Applying sessions.0001_initial... OK
+bootstrap-1  | Seed ready: 3 identities (3 created).
+bootstrap-1  | Runtime database role ready with DML-only grants.
+ Image catraca-f01-local-reassessment-web Building
+ Image catraca-f01-local-reassessment-worker Building
+#5 [web base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+Catraca ready at http://127.0.0.1:18087 (project catraca-f01-local-reassessment).
+up_exit=0
+NAME                                         IMAGE                                                                                             COMMAND                  SERVICE     CREATED          STATUS                     PORTS
+catraca-f01-local-reassessment-bootstrap-1   catraca-f01-local-reassessment-bootstrap                                                          "sh -c 'python manag…"   bootstrap   11 seconds ago   Exited (0) 5 seconds ago
+catraca-f01-local-reassessment-db-1          postgres:17.12-bookworm@sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7   "docker-entrypoint.s…"   db          15 seconds ago   Up 14 seconds (healthy)    5432/tcp
+catraca-f01-local-reassessment-web-1         catraca-f01-local-reassessment-web                                                                "gunicorn config.wsg…"   web         4 seconds ago    Up 4 seconds (healthy)     127.0.0.1:18087->8000/tcp
+catraca-f01-local-reassessment-worker-1      catraca-f01-local-reassessment-worker                                                             "python -m worker.ma…"   worker      4 seconds ago    Up 3 seconds (healthy)
+HTTP/1.1 200 OK
+ready
+
+Build check: Docker Compose build with --no-cache --pull against the same clone
+docker compose -p catraca-f01-reassessment-fresh-build build --no-cache --pull test
+#10 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#10 11.87 Successfully installed asgiref-3.13.0 attrs-26.1.0 certifi-2026.11.20 charset-normalizer-3.5.3 django-5.2.19 greenlet-3.5.6 gunicorn-27.0.1 idna-3.20 jsonschema-4.26.0 jsonschema-path-0.3.4 jsonschema-specifications-2025.9.1 lazy-object-proxy-1.13.0 openapi-schema-validator-0.6.3 openapi-spec-validator-0.7.2 pathable-0.4.4 playwright-1.65.2 psycopg-3.3.9 psycopg-binary-3.3.9 pyyaml-6.0.4 referencing-0.36.2 requests-2.34.2 rfc3339-validator-0.1.4 rpds-py-2026.9.1 ruff-0.17.6 six-1.17.0 sqlparse-0.6.1 typing-extensions-4.16.0 urllib3-2.8.0
+#15 naming to docker.io/library/catraca-f01-reassessment-fresh-build-test:latest
+#15 naming to docker.io/library/catraca-f01-reassessment-fresh-build-test:latest done
+no_cache_build_exit=0

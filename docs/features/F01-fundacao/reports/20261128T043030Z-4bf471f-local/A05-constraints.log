@@ -1,0 +1,50 @@
+$ run_schema
+9 objects imported automatically (use -v 2 for details).
+
+runtime current_user, superuser, createdb, createrole, connect, db_create, db_temp, schema_usage, schema_create= ('catraca_runtime', False, False, False, True, False, True, True, False)
+public schema table ownership: [('catraca_bootstrap', 13)]
+runtime explicit table grants: [('accounts_user', 'DELETE,INSERT,SELECT,UPDATE'), ('accounts_user_groups', 'DELETE,INSERT,SELECT,UPDATE'), ('accounts_user_user_permissions', 'DELETE,INSERT,SELECT,UPDATE'), ('auth_group', 'SELECT'), ('auth_group_permissions', 'SELECT'), ('auth_permission', 'SELECT'), ('coredata_event', 'DELETE,INSERT,SELECT,UPDATE'), ('coredata_paymentjob', 'DELETE,INSERT,SELECT,UPDATE'), ('coredata_ticket', 'DELETE,INSERT,SELECT,UPDATE'), ('coredata_workerheartbeat', 'DELETE,INSERT,SELECT,UPDATE'), ('django_content_type', 'SELECT'), ('django_migrations', 'SELECT'), ('django_session', 'DELETE,INSERT,SELECT,UPDATE')]
+runtime INSERT/SELECT succeeded; valid maximum limits and ticket without job persisted inside probe transaction
+runtime INSERT/UPDATE/SELECT succeeded; valid minimum limits and one queued job persisted
+event missing owner: SQLSTATE=23503 constraint=coredata_event_owner_id_72132b9f_fk_accounts_user_id expected=23503
+event invalid status: SQLSTATE=23514 constraint=coredata_event_status_valid expected=23514
+event capacity 0: SQLSTATE=23514 constraint=coredata_event_capacity_range expected=23514
+event capacity 2147483648: SQLSTATE=22003 constraint=None expected=22003
+event price 0: SQLSTATE=23514 constraint=coredata_event_price_range expected=23514
+ticket price 0: SQLSTATE=23514 constraint=coredata_ticket_price_range expected=23514
+event price 9007199254740992: SQLSTATE=23514 constraint=coredata_event_price_range expected=23514
+ticket price 9007199254740992: SQLSTATE=23514 constraint=coredata_ticket_price_range expected=23514
+ticket short: SQLSTATE=23514 constraint=coredata_ticket_code_format expected=23514
+ticket long: SQLSTATE=22001 constraint=None expected=22001
+ticket lowercase: SQLSTATE=23514 constraint=coredata_ticket_code_format expected=23514
+ticket punctuation: SQLSTATE=23514 constraint=coredata_ticket_code_format expected=23514
+ticket non-ascii: SQLSTATE=23514 constraint=coredata_ticket_code_format expected=23514
+ticket duplicate: SQLSTATE=23505 constraint=coredata_ticket_code_key expected=23505
+ticket missing event: SQLSTATE=23503 constraint=coredata_ticket_event_id_cbe124b6_fk_coredata_event_id expected=23503
+ticket missing participant: SQLSTATE=23503 constraint=coredata_ticket_participant_id_2f127093_fk_accounts_user_id expected=23503
+ticket invalid channel: SQLSTATE=23514 constraint=coredata_ticket_buyer_xor expected=23514
+ticket invalid status: SQLSTATE=23514 constraint=coredata_ticket_status_valid expected=23514
+ticket web without participant: SQLSTATE=23514 constraint=coredata_ticket_buyer_xor expected=23514
+ticket partner plus participant: SQLSTATE=23514 constraint=coredata_ticket_buyer_xor expected=23514
+job missing ticket: SQLSTATE=23503 constraint=coredata_paymentjob_ticket_id_1c6ca98d_fk_coredata_ticket_id expected=23503
+job duplicate: SQLSTATE=23505 constraint=coredata_paymentjob_ticket_id_key expected=23505
+job invalid state: SQLSTATE=23514 constraint=coredata_payment_job_state_processed expected=23514
+job invalid outcome: SQLSTATE=23514 constraint=coredata_payment_job_outcome_valid expected=23514
+job queued with processed timestamp: SQLSTATE=23514 constraint=coredata_payment_job_state_processed expected=23514
+job done with no processed timestamp: SQLSTATE=23514 constraint=coredata_payment_job_state_processed expected=23514
+job ignored with no processed timestamp: SQLSTATE=23514 constraint=coredata_payment_job_state_processed expected=23514
+runtime cannot mutate migration ledger: SQLSTATE=42501 constraint=None expected=42501
+runtime permanent table DDL: SQLSTATE=42501 constraint=None expected=42501
+runtime alter business table DDL: SQLSTATE=42501 constraint=None expected=42501
+runtime temporary table DDL: succeeded expected=42501
+runtime job delete and ticket delete: succeeded expected=allowed
+runtime ticket delete: succeeded expected=allowed
+probe transaction rolled back
+unexpected results: ['runtime temporary table DDL']
+
+exit=1 expected=1
+$ stack_db -Atqc select\ count\(\*\)\ from\ coredata_event\ where\ name=\'Probe\'\;\ select\ count\(\*\)\ from\ coredata_ticket\ where\ code=\'PROBETICKET9\'
+0
+0
+
+exit=0 expected=0

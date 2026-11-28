@@ -1,0 +1,16 @@
+Additional W1 portable platform check on current WSL/amd64 engine
+DOCKER_DEFAULT_PLATFORM=linux/arm64 CAT_PROJECT=catraca-f01-reassessment-arm64 CAT_PORT=18089 bash bin/up
+ service:db:1 Error response from daemon: image with reference postgres@sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7 was found but does not provide the specified platform (linux/arm64)
+Error response from daemon: image with reference postgres@sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7 was found but does not provide the specified platform (linux/arm64)
+arm64_up_exit=1
+arm64_cleanup_exit=0
+
+docker pull --platform linux/arm64 <pinned postgres image>
+Digest: sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7
+arm64_postgres_pull_exit=0
+
+Retry:
+DOCKER_DEFAULT_PLATFORM=linux/arm64 CAT_PROJECT=catraca-f01-reassessment-arm64 CAT_PORT=18089 bash bin/up (after docker pull --platform)
+db-1  | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+arm64_up_exit=1
+arm64_cleanup_exit=0

@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         root=Path(tmp)/'baseline'
-        shutil.copytree(ROOT,root,ignore=shutil.ignore_patterns('__pycache__','.git'))
+        shutil.copytree(ROOT,root,ignore=shutil.ignore_patterns('__pycache__','.git','reports'))
         state_path=root/'state/project-state.json';s=json.loads(state_path.read_text())
         s.update(
             currentWave=0,
@@ -39,12 +39,20 @@ def main():
         assert evidence(root,True)
         path=root/'requirements-matrix.csv'; original=path.read_bytes(); path.write_bytes(original+b'\ninvalid,row\n')
         assert any('CSV inconsistent' in e for e in docs(root));path.write_bytes(original)
+        traceability_path=root/'docs/validation/traceability.json';traceability_original=traceability_path.read_text()
+        mutated_traceability=json.loads(traceability_original);mutated_traceability['criteria'][0]['acceptance']='mutated acceptance item'
+        traceability_path.write_text(json.dumps(mutated_traceability))
+        assert any('normative drift' in e for e in docs(root));traceability_path.write_text(traceability_original)
+        matrix_path=root/'requirements-matrix.md';matrix_original=matrix_path.read_text()
+        matrix_path.write_text('\n'.join(line for line in matrix_original.splitlines() if '| H01 | A29 |' not in line)+'\n')
+        assert any('matrix missing H01/A29' in e for e in docs(root));matrix_path.write_text(matrix_original)
         s=json.loads(initial);s['features'][0]['status']='local_pass';state_path.write_text(json.dumps(s))
         assert any('approved state without report' in e for e in evidence(root));state_path.write_text(initial)
         def git(*args):
             return subprocess.run(['git','-C',str(root),*args],check=True,capture_output=True,text=True).stdout.strip()
         git('init','-q');git('config','user.name','Synthetic fixture');git('config','user.email','fixture@example.invalid');git('add','.');git('commit','-qm','Baseline fixture')
         sha=git('rev-parse','HEAD'); data=json.loads((root/'docs/validation/traceability.json').read_text());f=data['features'][0];fid=f['id'];directory=root/f['path']/'reports';report=directory/'fixture.json';md=report.with_suffix('.md')
+        directory.mkdir()
         items=[{'id':c['contract'],'verdict':'PENDING_INTEGRATION' if c['phase']=='integrated' else 'PASS','evidence':'Synthetic fixture, not product evidence'} for c in data['criteria']+data['cross'] if c.get('feature',c.get('consumer'))==fid]
         r={'feature':fid,'phase':'local','date':datetime.datetime.now(datetime.timezone.utc).isoformat(),'commit':sha,'tool':'fixture','model':'fixture','evaluatorSession':'fixture-evaluator','implementerSession':'fixture-builder','clean':True,'verdict':'PASS','items':items}
         artifact=directory/'fixture-output.txt';artifact.write_text('Synthetic artifact, not product evidence')
@@ -53,6 +61,13 @@ def main():
         report.write_text(json.dumps(r));md.write_text('# Synthetic fixture only\n\n```json\n'+json.dumps(r)+'\n```\n');s.update(currentWave=1,baseline='approved',baselineCommit=sha);s['features'][0].update(status='local_pass',latestEvaluation=report.relative_to(root).as_posix(),implementationCommit=sha,implementerSession='fixture-builder');state_path.write_text(json.dumps(s));git('add','.');git('commit','-qm','Synthetic evidence fixture')
         assert not docs(root),docs(root)
         assert not evidence(root),evidence(root)
+        report_json=report.read_text()
+        report.unlink()
+        assert any('invalid report path' in e or 'report JSON absent' in e for e in evidence(root))
+        report.write_text(report_json)
+        false_pass=json.loads(report_json);false_pass['items'][0]['verdict']='FAIL';report.write_text(json.dumps(false_pass))
+        assert any('overall verdict inconsistent' in e for e in evidence(root))
+        report.write_text(report_json)
         original_artifact=artifact.read_text();artifact.write_text('tampered')
         assert any('artifact hash mismatch' in e for e in evidence(root)),evidence(root)
         artifact.write_text(original_artifact)
@@ -70,5 +85,5 @@ def main():
         md.write_text(original_md)
         r['evaluatorSession']=r['implementerSession'];report.write_text(json.dumps(r));errs=evidence(root);assert any('same evaluator' in e for e in errs) and any('report modified' in e for e in errs),errs
         git('add','.');git('commit','-qm','Tamper fixture');assert any('report history must have one commit' in e for e in evidence(root))
-        print('PASS baseline negative tests: CSV mismatch, incomplete release, approved state without report, same session, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.')
+        print('PASS baseline negative tests: item/mapping drift, incomplete release, missing report, false PASS, approved state without report, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.')
 if __name__=='__main__':main()

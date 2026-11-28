@@ -1,0 +1,45 @@
+$ python3 /home/eduar/work/catraca/f01-local-eval-evidence/check-docs.py
+README.md:60 internal_link_exists=proposal.md
+README.md:60 internal_link_exists=design.md
+README.md:60 internal_link_exists=requirements-matrix.md
+README.md:60 internal_link_exists=tasks.md
+README.md:61 internal_link_exists=docs/prd/PRD.md
+README.md:61 internal_link_exists=docs/architecture/adrs/README.md
+README.md:61 internal_link_exists=docs/interfaces/internal.md
+README.md:61 internal_link_exists=docs/interfaces/partner.openapi.json
+README.md:61 internal_link_exists=docs/interfaces/web.md
+README.md:62 internal_link_exists=docs/architecture/version-manifest.md
+README.md:62 internal_link_exists=docs/engineering-guidelines.md
+README.md:64 internal_link_exists=docs/validation/harness.md
+README.md:64 internal_link_exists=docs/validation/test-catalog.md
+README.md:64 internal_link_exists=docs/validation/evaluator-flow.md
+README.md:64 internal_link_exists=docs/validation/release-contract.md
+README.md:65 internal_link_exists=AGENTS.md
+README.md:65 internal_link_exists=.agents/skills/README.md
+README.md:65 internal_link_exists=docs/agents/workflow.md
+README.md:65 internal_link_exists=state/project-state.json
+F01 command exists=bin/up
+F01 command exists=bin/down
+F01 command exists=bin/gates
+No .env. Seed credentials, local key and secret omitted from evidence.
+README.md matches catraca-demo
+README.md matches 8080
+README.md matches /health/ready
+README.md matches /health/live
+README.md matches CAT_GATEWAY_SCALE=1
+README.md matches CAT_PROFILE=demo
+AGENTS.md matches catraca-demo
+AGENTS.md matches 8080
+AGENTS.md matches /health/ready
+AGENTS.md matches CAT_GATEWAY_SCALE=1
+AGENTS.md matches CAT_PROFILE=demo
+compose.yaml matches catraca_bootstrap
+compose.yaml matches 127.0.0.1:
+compose.yaml matches CAT_GATEWAY_SCALE:-1
+compose.yaml matches CAT_PROFILE:-demo
+bin/up matches catraca-demo
+bin/up matches 8080
+bin/up matches /health/ready
+README local X-Api-Key matches Compose default [redacted].
+
+exit=0 expected=0

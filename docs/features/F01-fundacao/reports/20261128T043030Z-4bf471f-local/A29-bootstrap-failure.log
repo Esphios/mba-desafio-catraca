@@ -1,0 +1,254 @@
+$ empty_project catraca-f01-local-eval-bootstrap-fault
+project=catraca-f01-local-eval-bootstrap-fault containers= networks= volumes=
+
+exit=0 expected=0
+$ check_port 18087
+loopback port 18087 refused connection
+
+exit=0 expected=0
+$ bash bin/up
+ Network catraca-f01-local-eval-bootstrap-fault_default Creating 
+ Volume catraca-f01-local-eval-bootstrap-fault_db_data Creating 
+ Volume catraca-f01-local-eval-bootstrap-fault_db_data Creating 
+ Network catraca-f01-local-eval-bootstrap-fault_default Creating 
+ Volume catraca-f01-local-eval-bootstrap-fault_db_data Created 
+ Volume catraca-f01-local-eval-bootstrap-fault_db_data Created 
+ Network catraca-f01-local-eval-bootstrap-fault_default Created 
+ Network catraca-f01-local-eval-bootstrap-fault_default Created 
+ Container catraca-f01-local-eval-bootstrap-fault-db-1 Creating 
+ Container catraca-f01-local-eval-bootstrap-fault-db-1 Created 
+ Container catraca-f01-local-eval-bootstrap-fault-db-1 Starting 
+ Container catraca-f01-local-eval-bootstrap-fault-db-1 Started 
+ Container catraca-f01-local-eval-bootstrap-fault-db-1 Waiting 
+ Container catraca-f01-local-eval-bootstrap-fault-db-1 Healthy 
+ Image catraca-f01-local-eval-bootstrap-fault-bootstrap Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 604B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 76B done
+#4 DONE 0.2s
+
+#5 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#5 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#5 DONE 0.0s
+
+#6 [base 2/7] WORKDIR /srv/catraca
+#6 CACHED
+
+#7 [base 3/7] COPY requirements.lock ./
+#7 DONE 0.1s
+
+#8 [internal] load build context
+#8 transferring context: 127.23kB 0.0s done
+#8 DONE 0.0s
+
+#9 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#9 CACHED
+
+#10 [base 5/7] COPY app/ ./app/
+#10 CACHED
+
+#11 [base 6/7] COPY pyproject.toml ./
+#11 CACHED
+
+#12 [base 3/7] COPY requirements.lock ./
+#12 CACHED
+
+#13 [base 7/7] WORKDIR /srv/catraca/app
+#13 CACHED
+
+#14 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#14 2.767 Collecting asgiref==3.13.0 (from -r requirements.lock (line 7))
+#14 2.899   Downloading asgiref-3.13.0-py3-none-any.whl (27 kB)
+#14 2.932 Collecting attrs==26.1.0 (from -r requirements.lock (line 11))
+#14 2.939   Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+#14 2.978 Collecting certifi==2026.11.20 (from -r requirements.lock (line 17))
+#14 2.989   Downloading certifi-2026.11.20-py3-none-any.whl (127 kB)
+#14 3.194 Collecting charset-normalizer==3.5.3 (from -r requirements.lock (line 21))
+#14 3.203   Downloading charset_normalizer-3.5.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (257 kB)
+#14 3.325 Collecting django==5.2.19 (from -r requirements.lock (line 195))
+#14 3.335   Downloading django-5.2.19-py3-none-any.whl (8.3 MB)
+#14 3.764      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 19.7 MB/s eta 0:00:00
+#14 4.129 Collecting greenlet==3.5.6 (from -r requirements.lock (line 199))
+#14 4.139   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+#14 4.168      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 22.7 MB/s eta 0:00:00
+#14 4.202 Collecting gunicorn==27.0.1 (from -r requirements.lock (line 280))
+#14 4.216   Downloading gunicorn-27.0.1-py3-none-any.whl (263 kB)
+#14 4.248 Collecting idna==3.20 (from -r requirements.lock (line 284))
+#14 4.255   Downloading idna-3.20-py3-none-any.whl (69 kB)
+#14 4.287 Collecting jsonschema==4.26.0 (from -r requirements.lock (line 288))
+#14 4.296   Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+#14 4.317 Collecting jsonschema-path==0.3.4 (from -r requirements.lock (line 294))
+#14 4.327   Downloading jsonschema_path-0.3.4-py3-none-any.whl (14 kB)
+#14 4.345 Collecting jsonschema-specifications==2025.9.1 (from -r requirements.lock (line 298))
+#14 4.353   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+#14 ...
+
+#15 exporting to image
+#15 exporting layers done
+#15 exporting manifest sha256:103e9c0d2e92f441d684f9ce314ff158567f3be175fba81f17635ad67a543b40 0.0s done
+#15 exporting config sha256:83435e91384bdca8e8f4d4957032f0e9c98fc6b83637c79a6f54d8a78e9982f1 0.0s done
+#15 exporting attestation manifest sha256:a051c17b72a2a78b9fad46f6043064d32f7f5df30bf00dff76843d734766d042 0.0s done
+#15 exporting manifest list sha256:6f6dfa13c988563a66b5680a12ea80a194e55acce9f6ac594f2e117ff1400f1b 0.0s done
+#15 naming to docker.io/library/catraca-f01-local-eval-bootstrap-fault-bootstrap:latest done
+#15 unpacking to docker.io/library/catraca-f01-local-eval-bootstrap-fault-bootstrap:latest done
+#15 DONE 0.2s
+
+#14 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#14 4.524 Collecting lazy-object-proxy==1.13.0 (from -r requirements.lock (line 304))
+#14 4.532   Downloading lazy_object_proxy-1.13.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (71 kB)
+#14 CANCELED
+
+#16 resolving provenance for metadata file
+#16 DONE 0.0s
+ Image catraca-f01-local-eval-bootstrap-fault-bootstrap Built 
+ Container catraca-f01-local-eval-bootstrap-fault-bootstrap-1 Creating 
+ Container catraca-f01-local-eval-bootstrap-fault-bootstrap-1 Created 
+Attaching to bootstrap-1
+ Container catraca-f01-local-eval-bootstrap-fault-bootstrap-1 Starting 
+ Container catraca-f01-local-eval-bootstrap-fault-bootstrap-1 Started 
+bootstrap-1  | Operations to perform:
+bootstrap-1  |   Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+bootstrap-1  | Running migrations:
+bootstrap-1  |   Applying contenttypes.0001_initial... OK
+bootstrap-1  |   Applying contenttypes.0002_remove_content_type_name... OK
+bootstrap-1  |   Applying auth.0001_initial... OK
+bootstrap-1  |   Applying auth.0002_alter_permission_name_max_length... OK
+bootstrap-1  |   Applying auth.0003_alter_user_email_max_length... OK
+bootstrap-1  |   Applying auth.0004_alter_user_username_opts... OK
+bootstrap-1  |   Applying auth.0005_alter_user_last_login_null... OK
+bootstrap-1  |   Applying auth.0006_require_contenttypes_0002... OK
+bootstrap-1  |   Applying auth.0007_alter_validators_add_error_messages... OK
+bootstrap-1  |   Applying auth.0008_alter_user_username_max_length... OK
+bootstrap-1  |   Applying auth.0009_alter_user_last_name_max_length... OK
+bootstrap-1  |   Applying auth.0010_alter_group_name_max_length... OK
+bootstrap-1  |   Applying auth.0011_update_proxy_permissions... OK
+bootstrap-1  |   Applying auth.0012_alter_user_first_name_max_length... OK
+bootstrap-1  |   Applying accounts.0001_initial... OK
+bootstrap-1  |   Applying accounts.0002_enforce_canonical_email... OK
+bootstrap-1  |   Applying accounts.0003_normalize_legacy_emails... OK
+bootstrap-1  |   Applying coredata.0001_initial... OK
+bootstrap-1  |   Applying sessions.0001_initial... OK
+bootstrap-1  | CommandError: Seed is allowed only in demo or test profiles.
+
+bootstrap-1 exited with code 1
+ Compose Stopping Aborting on container exit...
+ Container catraca-f01-local-eval-bootstrap-fault-bootstrap-1 Stopping 
+ Container catraca-f01-local-eval-bootstrap-fault-bootstrap-1 Stopped 
+
+Startup failed for project catraca-f01-local-eval-bootstrap-fault (exit 1).
+NAME                                                 IMAGE                                                                                             COMMAND                  SERVICE     CREATED         STATUS                              PORTS
+catraca-f01-local-eval-bootstrap-fault-bootstrap-1   catraca-f01-local-eval-bootstrap-fault-bootstrap                                                  "sh -c 'python manag…"   bootstrap   5 seconds ago   Exited (1) Less than a second ago   
+catraca-f01-local-eval-bootstrap-fault-db-1          postgres:17.12-bookworm@sha256:1eff563f6c868b9b433566e9f3cf6e5c79fbd3b95bf70ec7277d376cdbfc50d7   "docker-entrypoint.s…"   db          9 seconds ago   Up 9 seconds (healthy)              5432/tcp
+db-1  | The files belonging to this database system will be owned by user "postgres".
+db-1  | This user must also own the server process.
+db-1  | 
+db-1  | The database cluster will be initialized with locale "en_US.utf8".
+db-1  | The default database encoding has accordingly been set to "UTF8".
+db-1  | The default text search configuration will be set to "english".
+db-1  | 
+db-1  | Data page checksums are disabled.
+db-1  | 
+db-1  | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+db-1  | creating subdirectories ... ok
+db-1  | selecting dynamic shared memory implementation ... posix
+db-1  | selecting default "max_connections" ... 100
+db-1  | selecting default "shared_buffers" ... 128MB
+db-1  | selecting default time zone ... Etc/UTC
+db-1  | creating configuration files ... ok
+db-1  | running bootstrap script ... ok
+db-1  | performing post-bootstrap initialization ... ok
+db-1  | initdb: warning: enabling "trust" authentication for local connections
+db-1  | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+db-1  | syncing data to disk ... ok
+db-1  | 
+db-1  | 
+db-1  | Success. You can now start the database server using:
+db-1  | 
+db-1  |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+db-1  | 
+db-1  | waiting for server to start....2026-11-28 04:26:13.747 UTC [48] LOG:  starting PostgreSQL 17.12 (Debian 17.12-1.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+db-1  | 2026-11-28 04:26:13.750 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1  | 2026-11-28 04:26:13.758 UTC [51] LOG:  database system was shut down at 2026-11-28 04:26:13 UTC
+db-1  | 2026-11-28 04:26:13.766 UTC [48] LOG:  database system is ready to accept connections
+db-1  |  done
+db-1  | server started
+db-1  | CREATE DATABASE
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+db-1  | 
+db-1  | waiting for server to shut down...2026-11-28 04:26:14.006 UTC [48] LOG:  received fast shutdown request
+db-1  | .2026-11-28 04:26:14.014 UTC [48] LOG:  aborting any active transactions
+db-1  | 2026-11-28 04:26:14.016 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+db-1  | 2026-11-28 04:26:14.016 UTC [49] LOG:  shutting down
+db-1  | 2026-11-28 04:26:14.022 UTC [49] LOG:  checkpoint starting: shutdown immediate
+db-1  | 2026-11-28 04:26:14.184 UTC [49] LOG:  checkpoint complete: wrote 930 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.031 s, sync=0.118 s, total=0.168 s; sync files=301, longest=0.006 s, average=0.001 s; distance=4311 kB, estimate=4311 kB; lsn=0/192EEE8, redo lsn=0/192EEE8
+db-1  | 2026-11-28 04:26:14.193 UTC [48] LOG:  database system is shut down
+db-1  |  done
+db-1  | server stopped
+db-1  | 
+db-1  | PostgreSQL init process complete; ready for start up.
+db-1  | 
+db-1  | 2026-11-28 04:26:14.238 UTC [1] LOG:  starting PostgreSQL 17.12 (Debian 17.12-1.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+db-1  | 2026-11-28 04:26:14.238 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+db-1  | 2026-11-28 04:26:14.238 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+db-1  | 2026-11-28 04:26:14.244 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1  | 2026-11-28 04:26:14.253 UTC [64] LOG:  database system was shut down at 2026-11-28 04:26:14 UTC
+db-1  | 2026-11-28 04:26:14.261 UTC [1] LOG:  database system is ready to accept connections
+bootstrap-1  | Operations to perform:
+bootstrap-1  |   Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+bootstrap-1  | Running migrations:
+bootstrap-1  |   Applying contenttypes.0001_initial... OK
+bootstrap-1  |   Applying contenttypes.0002_remove_content_type_name... OK
+bootstrap-1  |   Applying auth.0001_initial... OK
+bootstrap-1  |   Applying auth.0002_alter_permission_name_max_length... OK
+bootstrap-1  |   Applying auth.0003_alter_user_email_max_length... OK
+bootstrap-1  |   Applying auth.0004_alter_user_username_opts... OK
+bootstrap-1  |   Applying auth.0005_alter_user_last_login_null... OK
+bootstrap-1  |   Applying auth.0006_require_contenttypes_0002... OK
+bootstrap-1  |   Applying auth.0007_alter_validators_add_error_messages... OK
+bootstrap-1  |   Applying auth.0008_alter_user_username_max_length... OK
+bootstrap-1  |   Applying auth.0009_alter_user_last_name_max_length... OK
+bootstrap-1  |   Applying auth.0010_alter_group_name_max_length... OK
+bootstrap-1  |   Applying auth.0011_update_proxy_permissions... OK
+bootstrap-1  |   Applying auth.0012_alter_user_first_name_max_length... OK
+bootstrap-1  |   Applying accounts.0001_initial... OK
+bootstrap-1  |   Applying accounts.0002_enforce_canonical_email... OK
+bootstrap-1  |   Applying accounts.0003_normalize_legacy_emails... OK
+bootstrap-1  |   Applying coredata.0001_initial... OK
+bootstrap-1  |   Applying sessions.0001_initial... OK
+bootstrap-1  | CommandError: Seed is allowed only in demo or test profiles.
+
+exit=1 expected=1
+$ check_port 18087
+loopback port 18087 refused connection
+
+exit=0 expected=0
+$ dc ps -a
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+
+exit=0 expected=0
+$ docker volume inspect --format \{\{.Name\}\}\ \{\{index\ .Labels\ \"com.docker.compose.project\"\}\} catraca-f01-local-eval-bootstrap-fault_db_data
+catraca-f01-local-eval-bootstrap-fault_db_data catraca-f01-local-eval-bootstrap-fault
+
+exit=0 expected=0
+$ dc down --volumes --remove-orphans
+ Volume catraca-f01-local-eval-bootstrap-fault_db_data Removing 
+ Volume catraca-f01-local-eval-bootstrap-fault_db_data Removed 
+
+exit=0 expected=0
+$ empty_project catraca-f01-local-eval-bootstrap-fault
+project=catraca-f01-local-eval-bootstrap-fault containers= networks= volumes=
+
+exit=0 expected=0

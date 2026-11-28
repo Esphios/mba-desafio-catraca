@@ -1,0 +1,30 @@
+$ curl -isS --fail-with-body http://127.0.0.1:18086/health/ready
+HTTP/1.1 200 OK
+Server: gunicorn
+Date: Sat, 28 Nov 2026 04:27:55 GMT
+Connection: keep-alive
+Transfer-Encoding: chunked
+Content-Type: text/plain
+
+ready
+exit=0 expected=0
+$ dc stop worker
+ Container catraca-f01-local-eval-worker-1 Stopping 
+ Container catraca-f01-local-eval-worker-1 Stopped 
+
+exit=0 expected=0
+$ python3 /home/eduar/work/catraca/f01-local-eval-evidence/poll-health.py http://127.0.0.1:18086/health/ready 503 worker\ heartbeat\ stale
+HTTP 503 body='worker heartbeat stale' after 4.465s
+
+exit=0 expected=0
+$ dc up -d --no-deps --wait --wait-timeout 30 worker
+ Container catraca-f01-local-eval-worker-1 Starting 
+ Container catraca-f01-local-eval-worker-1 Started 
+ Container catraca-f01-local-eval-worker-1 Waiting 
+ Container catraca-f01-local-eval-worker-1 Healthy 
+
+exit=0 expected=0
+$ python3 /home/eduar/work/catraca/f01-local-eval-evidence/poll-health.py http://127.0.0.1:18086/health/ready 200 ready
+HTTP 200 body='ready' after 0.034s
+
+exit=0 expected=0

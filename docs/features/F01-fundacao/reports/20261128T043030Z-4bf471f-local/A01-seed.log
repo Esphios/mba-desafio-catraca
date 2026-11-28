@@ -1,0 +1,8 @@
+9 objects imported automatically (use -v 2 for details).
+
+identity=1 role=organizer id=46fa2e1f-c04e-489d-9fbd-194841be0dd2 hasher=pbkdf2_sha256 password_check=PASS
+identity=2 role=organizer id=3a38d2ef-f52c-4a06-a41c-1fb661f16423 hasher=pbkdf2_sha256 password_check=PASS
+identity=3 role=participant id=0b556e99-0b05-4961-921a-567b9033a733 hasher=pbkdf2_sha256 password_check=PASS
+total=3
+
+exit=0
