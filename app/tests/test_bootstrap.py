@@ -5,9 +5,9 @@ from unittest.mock import patch
 from django.apps import apps
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.db import connection
+from django.db import ProgrammingError, connection, transaction
 from django.db.migrations.recorder import MigrationRecorder
-from django.test import TransactionTestCase, override_settings
+from django.test import TestCase, TransactionTestCase, override_settings
 from django.utils import timezone
 
 
@@ -56,6 +56,42 @@ class BootstrapSeedTests(TransactionTestCase):
             self.assertRaisesRegex(CommandError, 'demo or test'),
         ):
             call_command('seed_demo')
+
+
+class RuntimeRoleTests(TestCase):
+    @patch.dict(os.environ, {'CAT_RUNTIME_DB_PASSWORD': 'synthetic-test-password'})
+    def test_TEST_A01_bootstrap_keeps_runtime_dml_and_denies_all_table_creation(self):
+        call_command('grant_runtime')
+        database = connection.ops.quote_name(connection.settings_dict['NAME'])
+        with connection.cursor() as cursor:
+            cursor.execute(f'GRANT TEMPORARY ON DATABASE {database} TO PUBLIC, catraca_runtime')
+
+        call_command('grant_runtime')
+
+        with connection.cursor() as cursor:
+            cursor.execute('SET LOCAL ROLE catraca_runtime')
+            try:
+                for statement in (
+                    'CREATE TABLE runtime_persistent_probe (id int)',
+                    'CREATE TEMP TABLE runtime_temp_probe (id int)',
+                ):
+                    with self.subTest(statement=statement):
+                        with self.assertRaises(ProgrammingError) as denied, transaction.atomic():
+                            cursor.execute(statement)
+                        self.assertEqual(denied.exception.__cause__.sqlstate, '42501')
+
+                cursor.execute(
+                    'INSERT INTO coredata_workerheartbeat (worker_id, last_seen, started_at) '
+                    "VALUES ('runtime-dml-probe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+                )
+                cursor.execute(
+                    'SELECT worker_id FROM coredata_workerheartbeat '
+                    "WHERE worker_id='runtime-dml-probe'"
+                )
+                self.assertEqual(cursor.fetchone(), ('runtime-dml-probe',))
+            finally:
+                cursor.execute('RESET ROLE')
+            cursor.execute('CREATE TEMP TABLE bootstrap_temp_probe (id int) ON COMMIT DROP')
 
 
 class ReadinessTests(TransactionTestCase):
