@@ -1,0 +1,4 @@
+ready
+ae3722c3eecbc7133b3ae7e3e37cb884fdb4aed05e91366176547e9959af43b7 2026-11-28T04:23:01.572025558Z [{"Destination":"/var/lib/postgresql/data","Driver":"local","Mode":"rw","Name":"catraca-f01-local-eval_db_data","Propagation":"","RW":true,"Source":"/var/lib/docker/volumes/catraca-f01-local-eval_db_data/_data","Type":"volume"}]
+catraca-f01-local-eval_db_data 2026-11-28T04:22:22Z
+e5356533-3f7a-4f46-96d5-87edd7b290c7|02f12a43-a4cf-4e3a-8bba-3b8f5b0ccae4|12|1234

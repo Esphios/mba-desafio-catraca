@@ -1,0 +1,21 @@
+$ empty_project catraca-gate-1795839810-75271-23823
+project=catraca-gate-1795839810-75271-23823 containers= networks= volumes=
+
+exit=0 expected=0
+$ check_port 48623
+loopback port 48623 refused connection
+
+exit=0 expected=0
+$ assert_clean
+4bf471f51d44cdf53bf0617f6544144444777353
+4bf471f51d44cdf53bf0617f6544144444777353
+
+exit=0 expected=0
+$ empty_project catraca-gate-1795839991-80373-2365
+project=catraca-gate-1795839991-80373-2365 containers= networks= volumes=
+
+exit=0 expected=0
+$ check_port 39787
+loopback port 39787 refused connection
+
+exit=0 expected=0

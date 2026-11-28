@@ -1,0 +1,71 @@
+$ python3 /home/eduar/work/catraca/f01-local-eval-evidence/trace-baseline.py
+fixture validate_docs flags=('local',) errors=0
+fixture validate_evidence flags=('local',) errors=0
+fixture validate_evidence flags=(True,) errors=16
+  release requires Git history
+  F01: release incomplete
+  F01: missing merge/PR evidence
+  F02: release incomplete
+  F02: missing merge/PR evidence
+  F03: release incomplete
+  F03: missing merge/PR evidence
+  F04: release incomplete
+  F04: missing merge/PR evidence
+  F05: release incomplete
+  F05: missing merge/PR evidence
+  F06: release incomplete
+  F06: missing merge/PR evidence
+  F07: release incomplete
+  F07: missing merge/PR evidence
+  release state incomplete
+fixture validate_docs flags=('local',) errors=1
+  CSV inconsistent
+fixture validate_docs flags=('local',) errors=5
+  normative drift (review/amendment required): docs/validation/traceability.json
+  CSV inconsistent
+  Markdown matrix content inconsistent
+  FDD acceptance mismatch A01
+  PRD acceptance/rules mismatch
+fixture validate_docs flags=('local',) errors=3
+  matrix missing H01/A29
+  Markdown matrix row count mismatch
+  Markdown matrix content inconsistent
+fixture validate_evidence flags=('local',) errors=2
+  future feature started F01
+  F01: approved state without report
+fixture validate_docs flags=('local',) errors=0
+fixture validate_evidence flags=('local',) errors=0
+fixture validate_evidence flags=('local',) errors=4
+  invalid report path F01
+  F01: report JSON absent fixture.md
+  F01: dangling report pointer
+  F01: approved state without report
+fixture validate_evidence flags=('local',) errors=3
+  F01/fixture.json: Markdown JSON mirror mismatch
+  F01/fixture.json: overall verdict inconsistent
+  F01/fixture.json: report modified
+fixture validate_evidence flags=('local',) errors=2
+  F01/fixture.json: artifact hash mismatch docs/features/F01-fundacao/reports/fixture-output.txt
+  F01/fixture.json: report modified
+fixture validate_evidence flags=('local',) errors=1
+  F01: local evaluated SHA differs from implementationCommit
+fixture validate_evidence flags=('local',) errors=1
+  F01: report implementer/candidate mismatch
+fixture validate_evidence flags=('local',) errors=1
+  F01: merge does not contain evaluated implementation
+fixture validate_evidence flags=('local',) errors=2
+  F01/fixture.json: Markdown JSON mirror mismatch
+  F01/fixture.json: report modified
+fixture validate_evidence flags=('local',) errors=4
+  F01/fixture.json: same evaluator/implementer session
+  F01/fixture.json: Markdown JSON mirror mismatch
+  F01/fixture.json: report modified
+  evaluator session also used as implementer
+fixture validate_evidence flags=('local',) errors=4
+  F01/fixture.json: same evaluator/implementer session
+  F01/fixture.json: Markdown JSON mirror mismatch
+  F01/fixture.json: report history must have one commit fixture.json
+  evaluator session also used as implementer
+PASS baseline negative tests: item/mapping drift, incomplete release, missing report, false PASS, approved state without report, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.
+
+exit=0 expected=0

@@ -1,0 +1,22 @@
+$ dc exec -T web python -c import\ os\;\ assert\ os.environ\[\"CAT_DB_USER\"\]\ ==\ \"catraca_runtime\"\;\ assert\ not\ any\(k\ in\ os.environ\ for\ k\ in\ \(\"POSTGRES_PASSWORD\"\,\ \"CAT_RUNTIME_DB_PASSWORD\"\)\)\;\ print\(\"runtime\ DB\ role\ and\ no\ bootstrap\ credential\ variables\"\)
+runtime DB role and no bootstrap credential variables
+
+exit=0 expected=0
+$ dc exec -T worker python -c import\ os\;\ assert\ os.environ\[\"CAT_DB_USER\"\]\ ==\ \"catraca_runtime\"\;\ assert\ not\ any\(k\ in\ os.environ\ for\ k\ in\ \(\"POSTGRES_PASSWORD\"\,\ \"CAT_RUNTIME_DB_PASSWORD\"\)\)\;\ print\(\"runtime\ DB\ role\ and\ no\ bootstrap\ credential\ variables\"\)
+runtime DB role and no bootstrap credential variables
+
+exit=0 expected=0
+$ stack_db -Atqc select\ \'catraca\'\ as\ db\,\ case\ when\ grantee=0\ then\ \'PUBLIC\'\ else\ pg_get_userbyid\(grantee\)\ end\,\ privilege_type\ from\ pg_database\ cross\ join\ lateral\ aclexplode\(coalesce\(datacl\,\ acldefault\(\'d\'\,\ datdba\)\)\)\ where\ datname\ =\ current_database\(\)\ order\ by\ grantee\,\ privilege_type
+catraca|PUBLIC|CONNECT
+catraca|PUBLIC|TEMPORARY
+catraca|catraca_bootstrap|CONNECT
+catraca|catraca_bootstrap|CREATE
+catraca|catraca_bootstrap|TEMPORARY
+catraca|catraca_runtime|CONNECT
+
+exit=0 expected=0
+$ stack_db -Atqc select\ current_user\,\ has_schema_privilege\(current_user\,\ \'public\'\,\ \'CREATE\'\)\;\ begin\;\ create\ table\ public.review_bootstrap_ddl_probe\(id\ int\)\;\ rollback\;\ select\ to_regclass\(\'public.review_bootstrap_ddl_probe\'\)\ is\ null
+catraca_bootstrap|t
+t
+
+exit=0 expected=0

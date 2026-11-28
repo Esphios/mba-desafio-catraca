@@ -1,0 +1,21 @@
+$ git diff -- app/tests/test_health.py
+diff --git a/app/tests/test_health.py b/app/tests/test_health.py
+index 38f943d..137c48f 100644
+--- a/app/tests/test_health.py
++++ b/app/tests/test_health.py
+@@ -4,6 +4,7 @@ from django.test import SimpleTestCase, TransactionTestCase
+ 
+ class LivenessTests(SimpleTestCase):
+     def test_TEST_A03_live_reports_process_running(self):
++        assert False, 'F01_EVAL_INTENTIONAL_ASSERTION'
+         response = self.client.get('/health/live')
+         self.assertEqual(response.status_code, 200)
+ 
+
+exit=0 expected=0
+$ git restore -- app/tests/test_health.py
+
+exit=0 expected=0
+$ git status --porcelain=v1 --untracked-files=all
+
+exit=0 expected=0

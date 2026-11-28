@@ -1,0 +1,26 @@
+$ python3 scripts/validate_evidence.py
+PASS evidence structure/history for requested phase. No authenticity or GitHub PR overlap inferred.
+
+exit=0 expected=0
+$ python3 scripts/validate_evidence.py --release
+FAIL F01: release incomplete
+FAIL F01: missing merge/PR evidence
+FAIL F02: release incomplete
+FAIL F02: missing merge/PR evidence
+FAIL F03: release incomplete
+FAIL F03: missing merge/PR evidence
+FAIL F04: release incomplete
+FAIL F04: missing merge/PR evidence
+FAIL F05: release incomplete
+FAIL F05: missing merge/PR evidence
+FAIL F06: release incomplete
+FAIL F06: missing merge/PR evidence
+FAIL F07: release incomplete
+FAIL F07: missing merge/PR evidence
+FAIL release state incomplete
+
+exit=1 expected=1
+$ python3 scripts/test_baseline.py
+PASS baseline negative tests: item/mapping drift, incomplete release, missing report, false PASS, approved state without report, SHA/session/merge mismatch, Markdown/artifact mismatch, dirty and committed report tampering.
+
+exit=0 expected=0

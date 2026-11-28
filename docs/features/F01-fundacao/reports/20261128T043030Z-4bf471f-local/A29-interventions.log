@@ -1,0 +1,10 @@
+$ python3 /home/eduar/work/catraca/f01-local-eval-evidence/gate-interventions.py
+setup exit=1; resources cleared; port 31944 closed
+SIGINT exit=130; resources cleared; port 31965 closed
+SIGTERM exit=143; resources cleared; port 43721 closed
+cleanup exit=1; resources cleared; port 33264 closed
+
+exit=0 expected=0
+$ cmp /home/eduar/work/catraca/f01-local-eval-evidence/A29-sentinel-before.log /home/eduar/work/catraca/f01-local-eval-evidence/A29-sentinel-after.log
+
+exit=0 expected=0

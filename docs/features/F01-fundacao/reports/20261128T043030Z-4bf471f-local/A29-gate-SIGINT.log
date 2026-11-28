@@ -1,0 +1,96 @@
+Gate project=catraca-gate-1795839942-77273-1901 port=31965
+ Image catraca-gate-1795839942-77273-1901-test Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 600B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile:
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#3 DONE 0.0s
+
+#4 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#5 DONE 0.0s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 76B done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 2.40kB done
+#7 DONE 0.0s
+
+#8 [base 6/7] COPY pyproject.toml ./
+#8 CACHED
+
+#9 [base 7/7] WORKDIR /srv/catraca/app
+#9 CACHED
+
+#10 [base 3/7] COPY requirements.lock ./
+#10 CACHED
+
+#11 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#11 CACHED
+
+#12 [base 5/7] COPY app/ ./app/
+#12 CACHED
+
+#13 [base 2/7] WORKDIR /srv/catraca
+#13 CACHED
+
+#14 [test 1/1] RUN apt-get update     && apt-get install --yes --no-install-recommends git=1:2.39.5-0+deb12u3     && rm -rf /var/lib/apt/lists/*
+#14 CACHED
+
+#15 exporting to image
+#15 exporting layers done
+#15 exporting manifest sha256:3064f316b2a2c29435add898192fe08db0dd987e45a8b6cd417a01eb0c0cd9a1 0.0s done
+#15 exporting config sha256:a9ec6936964388e9a02bcb2dd4061e4b2a8101d0f024a615090fa4a489233dd4
+#15 exporting config sha256:a9ec6936964388e9a02bcb2dd4061e4b2a8101d0f024a615090fa4a489233dd4 0.0s done
+#15 exporting attestation manifest sha256:9852a1914b3176c7557f9e784b748d8f84199d267669e7b037b1aea4883322c5 0.0s done
+#15 exporting manifest list sha256:4a388667def8fa98dd5edaac6d28b9fd0bdcdfae152a2c4726c294f50eb558a8 0.0s done
+#15 naming to docker.io/library/catraca-gate-1795839942-77273-1901-test:latest done
+#15 unpacking to docker.io/library/catraca-gate-1795839942-77273-1901-test:latest done
+#15 DONE 0.1s
+
+#16 resolving provenance for metadata file
+#16 DONE 0.0s
+ Image catraca-gate-1795839942-77273-1901-test Built 
+ Network catraca-gate-1795839942-77273-1901_default Creating 
+ Network catraca-gate-1795839942-77273-1901_default Creating 
+ Volume catraca-gate-1795839942-77273-1901_db_data Creating 
+ Volume catraca-gate-1795839942-77273-1901_db_data Creating 
+ Volume catraca-gate-1795839942-77273-1901_db_data Created 
+ Volume catraca-gate-1795839942-77273-1901_db_data Created 
+ Network catraca-gate-1795839942-77273-1901_default Created 
+ Network catraca-gate-1795839942-77273-1901_default Created 
+ Container catraca-gate-1795839942-77273-1901-db-1 Creating 
+ Container catraca-gate-1795839942-77273-1901-db-1 Created 
+ Container catraca-gate-1795839942-77273-1901-db-1 Starting 
+ Container catraca-gate-1795839942-77273-1901-db-1 Started 
+ Container catraca-gate-1795839942-77273-1901-db-1 Waiting 
+ Container catraca-gate-1795839942-77273-1901-db-1 Healthy 
+ Container catraca-gate-1795839942-77273-1901-test-run-e7de1829f891 Creating 
+ Container catraca-gate-1795839942-77273-1901-test-run-e7de1829f891 Created 
+All checks passed!
+38 files already formatted
+
+36439e647f15
+92fec5fecd83
+ Volume catraca-gate-1795839942-77273-1901_db_data Removing 
+ Network catraca-gate-1795839942-77273-1901_default Removing 
+ Volume catraca-gate-1795839942-77273-1901_db_data Removed 
+ Network catraca-gate-1795839942-77273-1901_default Removed 
+
+$ SIGINT: bash bin/gates --feature F01
+process exit=130 expected=130
+SIGINT sent to gate PID 77273 after active containers:
+catraca-gate-1795839942-77273-1901-test-run-e7de1829f891
+catraca-gate-1795839942-77273-1901-db-1
+project=catraca-gate-1795839942-77273-1901 resources_after=('', '', '') port=31965 closed=True

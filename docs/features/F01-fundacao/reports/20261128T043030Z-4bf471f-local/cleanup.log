@@ -1,0 +1,39 @@
+$ bash bin/down
+ Container catraca-f01-local-eval-worker-1 Stopping 
+ Container catraca-f01-local-eval-web-1 Stopping 
+ Container catraca-f01-local-eval-worker-1 Stopped 
+ Container catraca-f01-local-eval-worker-1 Removing 
+ Container catraca-f01-local-eval-worker-1 Removed 
+ Container catraca-f01-local-eval-web-1 Stopped 
+ Container catraca-f01-local-eval-web-1 Removing 
+ Container catraca-f01-local-eval-web-1 Removed 
+ Container catraca-f01-local-eval-bootstrap-1 Stopping 
+ Container catraca-f01-local-eval-bootstrap-1 Stopped 
+ Container catraca-f01-local-eval-bootstrap-1 Removing 
+ Container catraca-f01-local-eval-bootstrap-1 Removed 
+ Container catraca-f01-local-eval-db-1 Stopping 
+ Container catraca-f01-local-eval-db-1 Stopped 
+ Container catraca-f01-local-eval-db-1 Removing 
+ Container catraca-f01-local-eval-db-1 Removed 
+ Network catraca-f01-local-eval_default Removing 
+ Network catraca-f01-local-eval_default Removed 
+Catraca project catraca-f01-local-eval stopped; data volume preserved.
+
+exit=0 expected=0
+$ dc ps -a
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+
+exit=0 expected=0
+$ check_port 18086
+loopback port 18086 refused connection
+
+exit=0 expected=0
+$ docker volume inspect --format \{\{.Name\}\}\ \{\{.CreatedAt\}\}\ \{\{index\ .Labels\ \"com.docker.compose.project\"\}\} catraca-f01-local-eval_db_data
+catraca-f01-local-eval_db_data 2026-11-28T04:22:22Z catraca-f01-local-eval
+
+exit=0 expected=0
+$ assert_clean
+4bf471f51d44cdf53bf0617f6544144444777353
+4bf471f51d44cdf53bf0617f6544144444777353
+
+exit=0 expected=0

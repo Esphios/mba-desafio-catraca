@@ -1,0 +1,201 @@
+$ empty_project catraca-f01-local-eval
+project=catraca-f01-local-eval containers= networks= volumes=
+
+exit=0 expected=0
+$ check_port 18086
+loopback port 18086 refused connection
+
+exit=0 expected=0
+$ bash f01-local-eval/bin/up
+ Network catraca-f01-local-eval_default Creating 
+ Network catraca-f01-local-eval_default Creating 
+ Volume catraca-f01-local-eval_db_data Creating 
+ Volume catraca-f01-local-eval_db_data Creating 
+ Volume catraca-f01-local-eval_db_data Created 
+ Volume catraca-f01-local-eval_db_data Created 
+ Network catraca-f01-local-eval_default Created 
+ Network catraca-f01-local-eval_default Created 
+ Container catraca-f01-local-eval-db-1 Creating 
+ Container catraca-f01-local-eval-db-1 Created 
+ Container catraca-f01-local-eval-db-1 Starting 
+ Container catraca-f01-local-eval-db-1 Started 
+ Container catraca-f01-local-eval-db-1 Waiting 
+ Container catraca-f01-local-eval-db-1 Healthy 
+ Image catraca-f01-local-eval-bootstrap Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 572B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 76B done
+#4 DONE 0.0s
+
+#5 [base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#5 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 2.40kB done
+#6 DONE 0.0s
+
+#7 [base 2/7] WORKDIR /srv/catraca
+#7 CACHED
+
+#8 [base 3/7] COPY requirements.lock ./
+#8 CACHED
+
+#9 [base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#9 CACHED
+
+#10 [base 5/7] COPY app/ ./app/
+#10 CACHED
+
+#11 [base 6/7] COPY pyproject.toml ./
+#11 CACHED
+
+#12 [base 7/7] WORKDIR /srv/catraca/app
+#12 CACHED
+
+#13 exporting to image
+#13 exporting layers done
+#13 exporting manifest sha256:f5907f895be879af2fa638095386eca0568c44cb37c3c944f33f89576a0ada0f done
+#13 exporting config sha256:78adb33cab8a48f1d11ebc79a0251731dc47a51e2b95ab280f34f5fae3515ff9 done
+#13 exporting attestation manifest sha256:de1ee7fe1a749a937f1a3c920d3f80475ac1b661c7a5af665beec932621531d7 0.0s done
+#13 exporting manifest list sha256:0fe7e908a57935c01f8ea71b664d34c221cc754a66d4e70a8132a78d34e263bd 0.0s done
+#13 naming to docker.io/library/catraca-f01-local-eval-bootstrap:latest done
+#13 unpacking to docker.io/library/catraca-f01-local-eval-bootstrap:latest done
+#13 DONE 0.1s
+
+#14 resolving provenance for metadata file
+#14 DONE 0.0s
+ Image catraca-f01-local-eval-bootstrap Built 
+ Container catraca-f01-local-eval-bootstrap-1 Creating 
+ Container catraca-f01-local-eval-bootstrap-1 Created 
+Attaching to bootstrap-1
+ Container catraca-f01-local-eval-bootstrap-1 Starting 
+ Container catraca-f01-local-eval-bootstrap-1 Started 
+bootstrap-1  | Operations to perform:
+bootstrap-1  |   Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+bootstrap-1  | Running migrations:
+bootstrap-1  |   Applying contenttypes.0001_initial... OK
+bootstrap-1  |   Applying contenttypes.0002_remove_content_type_name... OK
+bootstrap-1  |   Applying auth.0001_initial... OK
+bootstrap-1  |   Applying auth.0002_alter_permission_name_max_length... OK
+bootstrap-1  |   Applying auth.0003_alter_user_email_max_length... OK
+bootstrap-1  |   Applying auth.0004_alter_user_username_opts... OK
+bootstrap-1  |   Applying auth.0005_alter_user_last_login_null... OK
+bootstrap-1  |   Applying auth.0006_require_contenttypes_0002... OK
+bootstrap-1  |   Applying auth.0007_alter_validators_add_error_messages... OK
+bootstrap-1  |   Applying auth.0008_alter_user_username_max_length... OK
+bootstrap-1  |   Applying auth.0009_alter_user_last_name_max_length... OK
+bootstrap-1  |   Applying auth.0010_alter_group_name_max_length... OK
+bootstrap-1  |   Applying auth.0011_update_proxy_permissions... OK
+bootstrap-1  |   Applying auth.0012_alter_user_first_name_max_length... OK
+bootstrap-1  |   Applying accounts.0001_initial... OK
+bootstrap-1  |   Applying accounts.0002_enforce_canonical_email... OK
+bootstrap-1  |   Applying accounts.0003_normalize_legacy_emails... OK
+bootstrap-1  |   Applying coredata.0001_initial... OK
+bootstrap-1  |   Applying sessions.0001_initial... OK
+bootstrap-1  | Seed ready: 3 identities (3 created).
+bootstrap-1  | Runtime database role ready with DML-only grants.
+
+bootstrap-1 exited with code 0
+ Compose Stopping Aborting on container exit...
+ Container catraca-f01-local-eval-bootstrap-1 Stopping 
+ Container catraca-f01-local-eval-bootstrap-1 Stopped 
+ Image catraca-f01-local-eval-web Building 
+ Image catraca-f01-local-eval-worker Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.02kB done
+#1 DONE 0.0s
+
+#2 [worker internal] load build definition from Dockerfile
+#2 transferring dockerfile: 694B done
+#2 DONE 0.0s
+
+#3 [worker internal] load metadata for docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#3 DONE 0.0s
+
+#4 [web internal] load .dockerignore
+#4 transferring context: 76B done
+#4 DONE 0.0s
+
+#5 [web base 1/7] FROM docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64
+#5 resolve docker.io/library/python:3.12.16-slim-bookworm@sha256:44cf1793efa7c7a476bb0f2cff81443f4a072c90c1cb127e2924933daa3e8c64 0.0s done
+#5 DONE 0.0s
+
+#6 [worker internal] load build context
+#6 transferring context: 2.40kB done
+#6 DONE 0.0s
+
+#7 [web base 3/7] COPY requirements.lock ./
+#7 CACHED
+
+#8 [web base 4/7] RUN pip install --no-cache-dir --require-hashes -r requirements.lock
+#8 CACHED
+
+#9 [web base 5/7] COPY app/ ./app/
+#9 CACHED
+
+#10 [web base 2/7] WORKDIR /srv/catraca
+#10 CACHED
+
+#11 [web base 6/7] COPY pyproject.toml ./
+#11 CACHED
+
+#12 [web base 7/7] WORKDIR /srv/catraca/app
+#12 CACHED
+
+#13 [worker] exporting to image
+#13 exporting layers
+#13 ...
+
+#14 [web] exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:00025108a18d7b7a0682c44a1b4f6d28be30f73a9a8d4c7eb867847a4f6bf1ec done
+#14 exporting config sha256:64b4ef644edd671713e2f4e677d3188f4e15092a4b255e813a9a6e210eebe864 done
+#14 exporting attestation manifest sha256:ae2c9be13ae67c6cc1ac0ad698b72a6404c99e9614b2a92b11f7c56033f71d0d 0.0s done
+#14 exporting manifest list sha256:ef5dce637e3908c11643f4d7a9b806d78cbca032c98d564902d96f8d538f0b05 0.0s done
+#14 naming to docker.io/library/catraca-f01-local-eval-web:latest done
+#14 unpacking to docker.io/library/catraca-f01-local-eval-web:latest done
+#14 DONE 0.1s
+
+#13 [worker] exporting to image
+#13 exporting layers done
+#13 exporting manifest sha256:90bcdb2d9b0d5c04562f23408bc2bd914cdc6891d24f1b198bb469090e7e9ae2 done
+#13 exporting config sha256:d0b412dfb4b2dfbd2e439540e4e2a459e1be4726c6d46c32807072dab176ee5c done
+#13 exporting attestation manifest sha256:82c08a70d2b4025b6f912ec53a412922fd82bd3df27ef81109f16e9e62984c4b 0.0s done
+#13 exporting manifest list sha256:05977fdf06d186bacbeb5990d406ffec069fcd53ab390b7d04c0798b1cf21269 0.0s done
+#13 naming to docker.io/library/catraca-f01-local-eval-worker:latest done
+#13 unpacking to docker.io/library/catraca-f01-local-eval-worker:latest done
+#13 DONE 0.1s
+
+#15 [web] resolving provenance for metadata file
+#15 DONE 0.0s
+
+#16 [worker] resolving provenance for metadata file
+#16 DONE 0.0s
+ Image catraca-f01-local-eval-web Built 
+ Image catraca-f01-local-eval-worker Built 
+ Container catraca-f01-local-eval-worker-1 Creating 
+ Container catraca-f01-local-eval-web-1 Creating 
+ Container catraca-f01-local-eval-web-1 Created 
+ Container catraca-f01-local-eval-worker-1 Created 
+ Container catraca-f01-local-eval-worker-1 Starting 
+ Container catraca-f01-local-eval-web-1 Starting 
+ Container catraca-f01-local-eval-worker-1 Started 
+ Container catraca-f01-local-eval-web-1 Started 
+ Container catraca-f01-local-eval-worker-1 Waiting 
+ Container catraca-f01-local-eval-web-1 Waiting 
+ Container catraca-f01-local-eval-web-1 Healthy 
+ Container catraca-f01-local-eval-worker-1 Healthy 
+Catraca ready at http://127.0.0.1:18086 (project catraca-f01-local-eval).
+
+exit=0 expected=0

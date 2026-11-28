@@ -1,0 +1,20 @@
+$ dc run --rm --no-deps bootstrap python manage.py migrate --noinput
+ Container catraca-f01-local-eval-bootstrap-run-c038846765e4 Creating 
+ Container catraca-f01-local-eval-bootstrap-run-c038846765e4 Created 
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, coredata, sessions
+Running migrations:
+  No migrations to apply.
+
+exit=0 expected=0
+$ dc run --rm --no-deps bootstrap python manage.py migrate --check
+ Container catraca-f01-local-eval-bootstrap-run-6d61a8cae29c Creating 
+ Container catraca-f01-local-eval-bootstrap-run-6d61a8cae29c Created 
+
+exit=0 expected=0
+$ dc run --rm --no-deps bootstrap python manage.py makemigrations --check --dry-run
+ Container catraca-f01-local-eval-bootstrap-run-aa7d2af638d2 Creating 
+ Container catraca-f01-local-eval-bootstrap-run-aa7d2af638d2 Created 
+No changes detected
+
+exit=0 expected=0
