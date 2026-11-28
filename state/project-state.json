@@ -7,14 +7,14 @@
   "features": [
     {
       "id": "F01",
-      "status": "implementing",
+      "status": "ready_for_review",
       "wave": 1,
       "branch": "feature/f01-foundation",
-      "implementationCommit": null,
+      "implementationCommit": "4bf471f51d44cdf53bf0617f6544144444777353",
       "mergedCommit": null,
       "pr": null,
       "latestEvaluation": null,
-      "implementerSession": "/root/f01_t04_implementer",
+      "implementerSession": "/root/f01_implementer",
       "integratedRequired": false
     },
     {
