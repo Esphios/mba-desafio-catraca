@@ -3,15 +3,15 @@
   "baseline": "approved",
   "baselineCommit": "9d549edf1956b5846f49510568b3e339e89eda80",
   "releaseStatus": "planned",
-  "currentWave": 1,
+  "currentWave": 2,
   "features": [
     {
       "id": "F01",
-      "status": "local_pass",
+      "status": "completed",
       "wave": 1,
       "branch": "feature/f01-foundation",
       "implementationCommit": "0dc9b0b1c7eaad6196aa220a6b9d16a4198f536d",
-      "mergedCommit": null,
+      "mergedCommit": "4aff2c2141528caad511c12100720fb395252a91",
       "pr": "https://github.com/Esphios/mba-desafio-catraca/pull/1",
       "latestEvaluation": "docs/features/F01-fundacao/reports/20261128T130247Z-0dc9b0b-local.json",
       "implementerSession": "/root/f01_implementer",
