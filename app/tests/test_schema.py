@@ -1,9 +1,11 @@
+import json
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from threading import Barrier
 
 from django.apps import apps
+from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError, close_old_connections, connection, transaction
 from django.test import SimpleTestCase, TransactionTestCase
@@ -157,6 +159,53 @@ class SchemaIntegrityTests(TransactionTestCase):
             ),
             ['updated-a@test.example', 'updated-b@test.example'],
         )
+
+    def test_TEST_A05_base_manager_bulk_create_canonicalizes_email(self):
+        user = self.User(email=' Base-Create@Example.TEST ', name='Base', role='participant')
+
+        self.User._base_manager.bulk_create([user])
+
+        user.refresh_from_db()
+        self.assertEqual(user.email, 'base-create@example.test')
+
+    def test_TEST_A05_base_manager_update_canonicalizes_email(self):
+        self.User._base_manager.filter(pk=self.participant.pk).update(
+            email=' Base-Update@Example.TEST '
+        )
+
+        self.participant.refresh_from_db()
+        self.assertEqual(self.participant.email, 'base-update@example.test')
+
+    def test_TEST_A05_bulk_update_accepts_an_iterable_of_fields(self):
+        self.participant.email = ' Iterator@Example.TEST '
+        self.participant.name = 'Iterator'
+
+        self.User.objects.bulk_update([self.participant], iter(('email', 'name')))
+
+        self.participant.refresh_from_db()
+        self.assertEqual(self.participant.email, 'iterator@example.test')
+        self.assertEqual(self.participant.name, 'Iterator')
+
+    def test_TEST_A05_deserialized_user_is_saved_with_canonical_email(self):
+        payload = json.loads(serializers.serialize('json', [self.participant]))
+        payload[0]['fields']['email'] = ' Deserialized@Example.TEST '
+
+        for deserialized in serializers.deserialize('json', json.dumps(payload)):
+            deserialized.save()
+
+        self.participant.refresh_from_db()
+        self.assertEqual(self.participant.email, 'deserialized@example.test')
+
+    def test_TEST_A05_partial_save_only_normalizes_email_when_written(self):
+        self.participant.email = 'invalid email'
+        self.participant.name = 'Renamed'
+
+        self.participant.save(update_fields=iter(('name',)))
+
+        self.assertEqual(self.participant.email, 'invalid email')
+        self.participant.refresh_from_db()
+        self.assertEqual(self.participant.email, 'participant@example.test')
+        self.assertEqual(self.participant.name, 'Renamed')
 
     def test_TEST_A05_email_casefold_expansion_and_canonical_length_are_enforced(self):
         expanded = self.User.objects.create(

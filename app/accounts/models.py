@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
-from accounts.email_policy import normalize_email
+from accounts.email_policy import CanonicalEmailField, normalize_email
 
 
 class UserQuerySet(models.QuerySet):
@@ -22,23 +22,16 @@ class UserQuerySet(models.QuerySet):
             kwargs['email'] = normalize_email(kwargs['email'])
         return super().update(**kwargs)
 
-    def bulk_create(self, objs, **kwargs):
-        objs = list(objs)
-        for user in objs:
-            user.email = normalize_email(user.email)
-        return super().bulk_create(objs, **kwargs)
-
-    def bulk_update(self, objs, fields, **kwargs):
-        objs = list(objs)
+    def bulk_update(self, objs, fields, batch_size=None):
+        fields = tuple(fields)
         if 'email' in fields:
+            objs = tuple(objs)
             for user in objs:
                 user.email = normalize_email(user.email)
-            self._allow_canonical_email_expression = True
-            try:
-                return super().bulk_update(objs, fields, **kwargs)
-            finally:
-                self._allow_canonical_email_expression = False
-        return super().bulk_update(objs, fields, **kwargs)
+            queryset = self._chain()
+            queryset._allow_canonical_email_expression = True
+            return super(UserQuerySet, queryset).bulk_update(objs, fields, batch_size)
+        return super().bulk_update(objs, fields, batch_size)
 
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
@@ -70,7 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ORGANIZER = 'organizer', 'Organizer'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(max_length=254, unique=True, db_collation='C')
+    email = CanonicalEmailField(max_length=254, unique=True, db_collation='C')
     name = models.CharField(max_length=200)
     role = models.CharField(max_length=11, choices=Role.choices)
     is_active = models.BooleanField(default=True)
@@ -83,11 +76,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
 
-    def save(self, *args, **kwargs):
-        self.email = normalize_email(self.email)
-        return super().save(*args, **kwargs)
-
     class Meta:
+        base_manager_name = 'objects'
         constraints = [
             models.CheckConstraint(
                 condition=Q(role__in=['participant', 'organizer']),
