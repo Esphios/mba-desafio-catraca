@@ -99,6 +99,20 @@ class ReadinessTests(TransactionTestCase):
         WorkerHeartbeat.objects.filter(pk=expected.pk).update(last_seen=timezone.now())
         call_command('worker_health')
 
+    def test_TEST_A01_ready_rejects_inconsistent_migration_history(self):
+        WorkerHeartbeat = apps.get_model('coredata', 'WorkerHeartbeat')
+        WorkerHeartbeat.objects.create(worker_id='worker-1')
+        recorder = MigrationRecorder(connection)
+        recorder.record_unapplied('auth', '0001_initial')
+
+        try:
+            self.assertEqual(self.client.get('/health/ready').status_code, 503)
+            self.assertFalse(recorder.migration_qs.filter(app='auth', name='0001_initial').exists())
+        finally:
+            recorder.record_applied('auth', '0001_initial')
+
+        self.assertEqual(self.client.get('/health/ready').status_code, 200)
+
     def test_TEST_A01_ready_rejects_pending_migration_without_applying_it(self):
         WorkerHeartbeat = apps.get_model('coredata', 'WorkerHeartbeat')
         WorkerHeartbeat.objects.create(worker_id='worker-1')

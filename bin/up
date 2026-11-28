@@ -45,7 +45,7 @@ if [[ -z $("${compose[@]}" ps -q 2>/dev/null) ]]; then
 fi
 
 "${compose[@]}" up -d --build --wait --wait-timeout 120 db
-"${compose[@]}" up --build --force-recreate --no-deps bootstrap
+"${compose[@]}" up --build --force-recreate --no-deps --exit-code-from bootstrap bootstrap
 "${compose[@]}" up -d --no-deps --build --force-recreate --wait --wait-timeout 120 web worker
 
 deadline=$((SECONDS + 30))
